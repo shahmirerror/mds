@@ -30,13 +30,13 @@ export default function Login({ status, canResetPassword }) {
         <GuestLayout>
             <Head title="Log in" />
             <div className="page page-center">
-                <div className="container container-normal py-4">
+                <div className="container container-normal mt-6 p-4">
                     <div className="row align-items-center g-4">
                     <div className="col-lg">
                         <div className="container-tight">
                         <div className="text-center mb-4">
                             <a href="." className="navbar-brand navbar-brand-autodark">
-                                <img src="./assets/static/logomls.svg" height="100" alt="" /></a>
+                                <img src="./assets/static/logo-mds.svg" height="100" alt="" /></a>
                         </div>
                         <div className="card card-md">
                             <div className="card-body">
@@ -85,8 +85,8 @@ export default function Login({ status, canResetPassword }) {
                         </div>
                         </div>
                     </div>
-                    <div className="col-lg d-none d-lg-block">
-                        <img src="./assets/static/illustrations/undraw_secure_login_pdn4.svg" height="300" className="d-block mx-auto" alt="" />
+                    <div className="col-lg mt-8">
+                        <img src="./assets/static/illustrations/undraw_mds.svg" height="300" className="d-block mx-auto" alt="" />
                     </div>
                     </div>
                 </div>

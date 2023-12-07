@@ -62,7 +62,7 @@ export default function Authenticated({ user, header, children }) {
         }
         else
         {
-            const importedImage = await import(`@/../../assets/static/logomls.svg`);
+            const importedImage = await import(`@/../../assets/static/logo-mds.svg`);
             setLogo(importedImage.default);
         }
     };
@@ -90,7 +90,7 @@ export default function Authenticated({ user, header, children }) {
                                 <ul className="list-inline list-inline-dots mb-0">
                                     <li className="list-inline-item">
                                         Copyright &copy; 2023
-                                        <a href="." className="link-secondary"> Medical Laboratory System</a>.
+                                        <a href="." className="link-secondary"> Medical Diagnostic System</a>.
                                         All rights reserved.
                                     </li>
                                     <li className="list-inline-item">
