@@ -6,6 +6,8 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link } from '@inertiajs/react';
 import Header1 from '@/Components/Header1';
 import Header2 from '@/Components/Header2'
+import backGroundImg from "@/../../assets/static/photos/panel-background.png";
+
 
 export default function Authenticated({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
@@ -76,10 +78,10 @@ export default function Authenticated({ user, header, children }) {
     return (
         <>
         <div className="page">
-            <Header1 user={user} logo={logoImg}/>
+            <Header1 user={user} logo={logoImg} bgImg={backGroundImg} />
 
             <Header2 modules={modules}/>
-            <div className="page-wrapper">
+            <div className="page-wrapper" style={{backgroundImage: `url(${backGroundImg})`, height: "100vh"}}>
 
                 <main>{children}</main>
                 <footer className="footer footer-transparent d-print-none">

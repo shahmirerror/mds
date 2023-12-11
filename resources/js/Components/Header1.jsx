@@ -1,6 +1,6 @@
 
 import {useForm} from "@inertiajs/react";
-export default function Header1({user, logo}) {
+export default function Header1({user, logo, bgImg}) {
     const {post} = useForm();
     const handleDelete = (e) =>
     {
@@ -10,7 +10,7 @@ export default function Header1({user, logo}) {
     }
     return (
         <>
-            <header className="navbar navbar-expand-md d-print-none" >
+            <header className="navbar navbar-expand-md d-print-none" style={{backgroundImage: `url(${bgImg})`}}>
                 <div className="container-xl">
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>

@@ -29,7 +29,7 @@ export default function Login({ status, canResetPassword }) {
     return (
         <GuestLayout>
             <Head title="Log in" />
-            <div className="page page-center">
+            <div className="page page-center" style={{backgroundImage: 'url(./assets/static/photos/mdsbackground.png)', height: '100vh', blur: "10%"}}>
                 <div className="container container-normal mt-6 p-4">
                     <div className="row align-items-center g-4">
                     <div className="col-lg">
@@ -86,7 +86,7 @@ export default function Login({ status, canResetPassword }) {
                         </div>
                     </div>
                     <div className="col-lg mt-8">
-                        <img src="./assets/static/illustrations/undraw_mds.svg" height="300" className="d-block mx-auto" alt="" />
+                        {/* <img src="./assets/static/illustrations/undraw_mds.svg" height="300" className="d-block mx-auto" alt="" /> */}
                     </div>
                     </div>
                 </div>
