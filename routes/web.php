@@ -57,6 +57,16 @@ Route::middleware('auth')->group(function () {
         Route::resource('centre-settings', App\Http\Controllers\CentreAdmin\CentreManagementController::class);
 
     });
+
+    Route::group(['prefix' => 'centre'], function () {
+
+        Route::get('/registration-desk', function () {
+            return Inertia::render('LabModules/Registration');
+        })->name('centre.regdesk');
+
+        Route::resource('centre-settings', App\Http\Controllers\CentreAdmin\CentreManagementController::class);
+
+    });
 });
 
 require __DIR__.'/auth.php';

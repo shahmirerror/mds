@@ -13,7 +13,7 @@ class ImportController extends Controller
     public function fetch_regs()
     {
         // Define the URL to be accessed
-        $url = "http://localhost:81/old_mls/reliance/candidates.php";
+        $url = "http://localhost:81/old_mls/frontier/candidates.php";
 
         // Initialize a cURL session
         $curl = curl_init($url);
@@ -47,33 +47,38 @@ class ImportController extends Controller
 
                     if($check)
                     {
-                        $new = new Registrations;
-                        $new->id = $d['reg_id'];
-                        $new->candidate_id = $check->id;
-                        $new->place_of_issue = $d['place_of_issue'];
-                        $new->reg_date = date('Y-m-d', strtotime($d['reg_date']));
-                        $new->serial_no = $d['serial_no'];
-                        $new->relation_type = $d['relation_type'];
-                        $new->relative_name = $d['son_of'];
-                        $new->phone_1 = $d['phone_1'];
-                        $new->phone_2 = $d['phone_2'];
-                        $new->nationality = $d['nationality'];
-                        $new->marital_status = $d['marital_status'];
-                        $new->barcode_no = $d['barcode_no'];
-                        $new->biometric_fingerprint = $d['biometric_fingerprint'];
-                        $new->fee_charged = $d['fee_charged'];
-                        $new->discount = $d['discount'];
-                        $new->remarks = $d['remarks'];
-                        $new->pregnancy_test = $d['pregnancy_test'];
-                        // $new->created_by = $d->id;
-                        // $new->updated_by = $d->id;
-                        $new->status_remarks = $d['status_remarks'];
-                        $new->slip_issue_date = date('Y-m-d', strtotime($d['slip_issue_date']));
-                        $new->slip_expiry_date = date('Y-m-d', strtotime($d['slip_expiry_date']));
-                        $new->token_no = $d['token_no'];
-                        $new->center_id = '1';
-                        $new->print_report_portion = $d['print_report_portion'];
-                        $new->save();
+                        $check2 = Registrations::where('reg_id',$d['reg_id'])->where('center_id',6)->first();
+
+                        if(!$check2)
+                        {
+                            $new = new Registrations;
+                            $new->reg_id = $d['reg_id'];
+                            $new->candidate_id = $check->id;
+                            $new->place_of_issue = $d['place_of_issue'];
+                            $new->reg_date = date('Y-m-d', strtotime($d['reg_date']));
+                            $new->serial_no = $d['serial_no'];
+                            $new->relation_type = $d['relation_type'];
+                            $new->relative_name = $d['son_of'];
+                            $new->phone_1 = $d['phone_1'];
+                            $new->phone_2 = $d['phone_2'];
+                            $new->nationality = $d['nationality'];
+                            $new->marital_status = $d['marital_status'];
+                            $new->barcode_no = $d['barcode_no'];
+                            $new->biometric_fingerprint = $d['biometric_fingerprint'];
+                            $new->fee_charged = $d['fee_charged'];
+                            $new->discount = $d['discount'];
+                            $new->remarks = $d['remarks'];
+                            $new->pregnancy_test = $d['pregnancy_test'];
+                            // $new->created_by = $d->id;
+                            // $new->updated_by = $d->id;
+                            $new->status_remarks = $d['status_remarks'];
+                            $new->slip_issue_date = (date('Y-m-d', strtotime($d['slip_issue_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_issue_date'])) : date('Y-m-d', strtotime('1970-01-01'));
+                            $new->slip_expiry_date = (date('Y-m-d', strtotime($d['slip_expiry_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_expiry_date'])) : date('Y-m-d', strtotime('1970-01-01'));
+                            $new->token_no = $d['token_no'];
+                            $new->center_id = '6';
+                            $new->print_report_portion = $d['print_report_portion'];
+                            $new->save();
+                        }
                     }
                     else
                     {
@@ -91,7 +96,7 @@ class ImportController extends Controller
                         $new->save();
 
                         $new_2 = new Registrations;
-                        $new_2->id = $d['reg_id'];
+                        $new_2->reg_id = $d['reg_id'];
                         $new_2->candidate_id = $new->id;
                         $new_2->place_of_issue = $d['place_of_issue'];
                         $new_2->reg_date = date('Y-m-d', strtotime($d['reg_date']));
@@ -111,10 +116,10 @@ class ImportController extends Controller
                         // $new_2->created_by = $d->id;
                         // $new_2->updated_by = $d->id;
                         $new_2->status_remarks = $d['status_remarks'];
-                        $new_2->slip_issue_date = date('Y-m-d', strtotime($d['slip_issue_date']));
-                        $new_2->slip_expiry_date = date('Y-m-d', strtotime($d['slip_expiry_date']));
+                        $new->slip_issue_date = (date('Y-m-d', strtotime($d['slip_issue_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_issue_date'])) : date('Y-m-d', strtotime('1970-01-01'));
+                        $new->slip_expiry_date = (date('Y-m-d', strtotime($d['slip_expiry_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_expiry_date'])) : date('Y-m-d', strtotime('1970-01-01'));
                         $new_2->token_no = $d['token_no'];
-                        $new_2->center_id = '1';
+                        $new_2->center_id = '6';
                         $new_2->print_report_portion = $d['print_report_portion'];
                         $new_2->save();
                     }

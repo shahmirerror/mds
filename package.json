@@ -24,6 +24,7 @@
         "vue": "^3.2.31"
     },
     "dependencies": {
-        "@tabler/icons-react": "^2.42.0"
+        "@tabler/icons-react": "^2.42.0",
+        "react-webcam": "^7.2.0"
     }
 }

@@ -78,10 +78,10 @@ export default function Authenticated({ user, header, children }) {
     return (
         <>
         <div className="page">
-            <Header1 user={user} logo={logoImg} bgImg={backGroundImg} />
+            <Header1 user={user} logo={logoImg} />
 
             <Header2 modules={modules}/>
-            <div className="page-wrapper" style={{backgroundImage: `url(${backGroundImg})`, height: "100vh"}}>
+            <div className="page-wrapper">
 
                 <main>{children}</main>
                 <footer className="footer footer-transparent d-print-none">
