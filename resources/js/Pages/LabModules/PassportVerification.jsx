@@ -9,7 +9,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { IconCrosshair, IconClipboardText  } from '@tabler/icons-react';
 import { IconRefresh } from '@tabler/icons-react';
 
-export default function Registration({auth}) {
+export default function PassportVerification({auth}) {
 
     const {data, setData, post, processing, errors, reset} = useForm({
         passport_no: '',
@@ -142,9 +142,9 @@ export default function Registration({auth}) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">PassportVerification</h2>}
         >
-            <Head title="Registration Desk" />
+            <Head title="Passport Verification" />
 
             <div className="page-header d-print-none">
                 <div className="container-xl">
@@ -152,7 +152,7 @@ export default function Registration({auth}) {
                     <div className="col align-items-center">
                         <div className="col-md-3" style={{float: 'left'}}>
                             <h2 className="page-title" style={{float: 'left'}}>
-                                Registeration Desk
+                                Passport Verification
                             </h2>
                             <h3 className="badge bg-success text-white" style={{float: 'right'}}>Counter 1</h3>
                         </div>
@@ -172,20 +172,16 @@ export default function Registration({auth}) {
             <div className="page-body">
                 <div className="container-xl">
                     <div className="row row-cards mb-5">
-                        <div className="col-md-6">
+                        <div className="col-md-3">
                             <div className="row row-cards">
                                 <div className="col-12">
                                     <div className="card">
                                     <div className="card-header">
-                                        <div className="col-md-12 flex align-items-center">
-                                            <div className='col-md-4' style={{float: 'left'}}>
-                                                <span style={{float: "left"}} className={'badge bg-secondary text-white'}>Barcode Number: 12345</span>
-                                            </div>
-                                        </div>
+                                        <h3>Biometric Area</h3>
                                     </div>
                                     <div className="card-body">
                                         <div className="row g-3">
-                                            <div className="col-6">
+                                            <div className="col-12">
                                                 <div className="row g-3 align-items-center">
                                                     <img src={"./../assets/static/photos/ThumbPrint.png"} style={{width : 500}}/>
                                                     <div className="col-md-12 text-center">
@@ -193,207 +189,63 @@ export default function Registration({auth}) {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="col-6">
-                                                <div className="row g-3 align-items-center">
-                                                    <video id="video" autoPlay muted style={{height: '290px', display: 'none'}}/>
-                                                    <img src={"./../assets/static/photos/Photo.png"} className="mb-5 " id="photo-placeholder" style={{width : 274}} />
-                                                    <div className="col-md-6">
-                                                    { camera ?
-                                                        (<button className="btn btn-warning btn-md">Take Photo</button>)
-                                                        :
-                                                        (<></>)
-                                                    }
-                                                    </div>
-                                                    <div className="col-md-6">
-                                                        <button className="btn btn-success btn-md" onClick={handleCamera}>Turn Camera On</button>
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-6">
+                        <div className="col-md-4">
                             <div className="row row-cards">
                                 <div className="col-12">
                                     <div className="card">
                                         <div className="card-header">
                                             <div className="col-md-12 flex align-items-center">
                                                 <div className='col-md-6' style={{float: 'left'}}>
-                                                    {!manual ?
-                                                    (<button className="btn btn-sm btn-yellow">Import Passport</button>)
-                                                    :
-                                                    (<h3>Passport Information</h3>)}
-                                                </div>
-                                                <div className='col-md-6' style={{float: 'right'}}>
-                                                <label class="form-check form-switch" style={{float: 'right'}}>
-                                                    <input class="form-check-input" type="checkbox" checked={manual} onChange={(e) => setManual(e.target.checked)}/>
-                                                    <span class="form-check-label">Manual Entry</span>
-                                                </label>
+                                                    <h3>Passport Information</h3>
                                                 </div>
                                             </div>
                                         </div>
-                                        {!manual ?
-                                        (<div className="card-body" id="auto_import">
+                                        <div className="card-body" id="auto_import">
                                             <div className="row g-5 mb-3">
-                                                <div className="col-6">
+                                                <div className="col-12">
                                                     <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Place of Issue</label>
-                                                        <select className="form-select">
-                                                            <option>Select Place of Issue</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>PP Issue Date</label>
-                                                        <input type="date" className="form-control" name="pp_issue_date" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row g-5">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Reference Slip Issue Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_issue_date" />
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Reference Slip Expiry Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_expiry_date" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>)
-                                        :
-                                        (<div className="card-body" id="manual_import">
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Candidate Name</label>
-                                                        <input type="text" className="form-control" name="name" />
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>PP Issue Date</label>
-                                                        <input type="date" className="form-control" name="pp_issue_date" />
+                                                        <label className='form-label'>Barcode</label>
+                                                        <input type="password" className="form-control" name="barcode"/>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Place of Issue</label>
-                                                        <select className="form-select">
-                                                            <option>Select Place of Issue</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>PP Issue Date</label>
-                                                        <input type="date" className="form-control" name="pp_issue_date" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row g-5">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Reference Slip Issue Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_issue_date" />
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Reference Slip Expiry Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_expiry_date" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>)
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="row row-cards">
-                    <div className="col-md-6">
-                            <div className="row row-cards">
-                                <div className="col-12">
-                                    <div className="card">
-                                        <div className="card-header">
-                                            <div className="col-md-12 flex align-items-center">
-                                                <div className='col-md-6' style={{float: 'left'}}>
-                                                    <h3>General Information</h3>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="card-body">
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-6">
+                                                <div className="col-12">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Registeration Date</label>
                                                         <input type="date" className="form-control" name="reg_date" />
                                                     </div>
                                                 </div>
-                                                <div className="col-6">
+                                            </div>
+                                            <div className="row g-5">
+                                                <div className="col-12">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Serial Number</label>
-                                                        <input type="text" className="form-control" name="serial_no" />
+                                                        <input type="text" className="form-control" name="serial_number" />
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Agency</label>
-                                                        <select className="form-select" name="agency">
-                                                            <option>Select Agency</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Country</label>
-                                                        <select className="form-select" name="country">
-                                                            <option>Select Country</option>
-                                                        </select>
+                                            <div className="row g-3 mt-3">
+                                            <div className="col-12">
+                                                <div className="row g-3 align-items-center">
+                                                    <div className="col-md-12 text-center">
+                                                        <button className="btn btn-info btn-md w-50">Fetch Candidate</button>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Profession</label>
-                                                        <select className="form-select" name="profession">
-                                                            <option>Select Profession</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div className="col-3">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Fees</label>
-                                                        <input className="form-control" name="fees" type="text" />
-                                                    </div>
-                                                </div>
-                                                <div className="col-3">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Discount</label>
-                                                        <input className="form-control" name="discount" type="text" />
-                                                    </div>
-                                                </div>
-                                            </div>
+                                        </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-6">
+                        <div className="col-md-5">
                             <div className="row row-cards">
                                 <div className="col-12">
                                     <div className="card">

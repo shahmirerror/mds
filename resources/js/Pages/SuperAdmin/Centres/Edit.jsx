@@ -33,12 +33,13 @@ export default function Edit(props) {
     const handleFile = (e) => {
         console.log(e.target.files[0]);
         setData(e.target.name, e.target.files[0]);
+        // console.log(data);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        post(route('centres.store'));
+        post(route('centres.update', props.centre.id));
     }
 
     const handleForm = (e, id) => {
@@ -206,7 +207,8 @@ export default function Edit(props) {
 
     const handleModStatus = (e, id, index) => {
 
-        e.preventDefault();
+        // e.preventDefault();
+        console.log(e.target.checked)
 
         let status = e.target.checked ? 'On' : 'Off';
 
@@ -218,7 +220,8 @@ export default function Edit(props) {
                 .then(
                     (result) => {
                         document.getElementById(`switchlabel${index}`).innerHTML = status;
-                        document.getElementById(`switch${index}`).checked = e.target.checked;
+                        // document.getElementById(`switch${index}`).checked = e.target.checked;
+                        console.log(document.getElementById(`switch${index}`).checked, document.getElementById(`switchlabel${index}`).innerHTML)
                     },
                     (error) => {
                         console.log(error)
@@ -272,7 +275,7 @@ export default function Edit(props) {
                             <h3 className="card-title">Logo</h3>
                             <div className="row align-items-center">
                                 <div className="col-auto">
-                                    <input className="form-control" type="file" name="logo" onChange={handleFile}/>
+                                    <input className="form-control" type="file" name="logo" onChange={handleFile} value=""/>
                                 </div>
                             </div>
                         </div>
@@ -392,23 +395,30 @@ export default function Edit(props) {
                   <div className="card-body" id="modules" style={{display: 'none'}}>
                     <h3 className="card-title">Centre Lab Modules</h3>
                     <hr></hr>
+                    <div className="row m-3">
                     {props.modules.map((mod, index) => (
                     <>
-                    <div className="row m-3">
-                      <div className="col-md" style={{display: 'inline-flex',justifyContent: 'space-evenly'}}>
-                        <div className="form-label">{mod?.title}</div>
-                        <div className="form-desc">{mod?.description}</div>
-                        <div>
-                            <label className="form-check form-switch">
-                                <input className="form-check-input" type="checkbox" id={`switch${index}`} name={`switch${index}`} checked={mod?.status} onChange={(e) => handleModStatus(e, mod.id, index)}/>
-                                <span class="form-check-label" id={`switchlabel${index}`}>{mod?.status ? 'On' : 'Off'}</span>
-                            </label>
-                        </div>
-                      </div>
-                    </div>
-                    <hr></hr>
+                        {/* <div style={{content: "", height: "100%", width: "1px", backgroundColor: 'black',position: "absolute", top: 0, right: 0}}> */}
+                            <div className="col-md-5 m-3" style={{display: 'inline-flex',justifyContent: 'space-between'}}>
+                                <div>
+                                    <div className="form-label">{mod?.title}</div>
+                                    <div className="form-desc">{mod?.description}</div>
+                                </div>
+                                <div>
+                                    <label className="form-check form-switch">
+                                        <input className="form-check-input" type="checkbox" id={`switch${index}`} name={`switch${index}`} checked={mod?.status} onChange={(e) => handleModStatus(e, mod?.id, index)}/>
+                                        <span class="form-check-label" id={`switchlabel${index}`}>{mod?.status ? 'On' : 'Off'}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        {(index+1) % 2 == 0 ?
+                            <hr></hr>
+                            :
+                            ''
+                        }
                     </>
                     ))}
+                        </div>
                   </div>
 
                   <div id="form_footer" className="card-footer bg-transparent mt-auto">

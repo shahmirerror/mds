@@ -36,15 +36,15 @@ export default function Header1({user, logo}) {
                         <a href="#" className="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications">
 
                         <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6" /><path d="M9 17v1a3 3 0 0 0 6 0v-1" /></svg>
-                        <span className="badge bg-red"></span>
+                        {/* <span className="badge bg-red"></span> */}
                         </a>
                         <div className="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
                         <div className="card">
                             <div className="card-header">
-                            <h3 className="card-title">Last updates</h3>
+                                <h3 className="card-title">Last updates</h3>
                             </div>
                             <div className="list-group list-group-flush list-group-hoverable">
-                            <div className="list-group-item">
+                            {/* <div className="list-group-item">
                                 <div className="row align-items-center">
                                 <div className="col-auto"><span className="status-dot status-dot-animated bg-red d-block"></span></div>
                                 <div className="col text-truncate">
@@ -111,7 +111,7 @@ export default function Header1({user, logo}) {
                                     </a>
                                 </div>
                                 </div>
-                            </div>
+                            </div> */}
                             </div>
                         </div>
                         </div>

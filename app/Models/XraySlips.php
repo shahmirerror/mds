@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LabStickers extends Model
+class XraySlips extends Model
 {
     use HasFactory;
 }

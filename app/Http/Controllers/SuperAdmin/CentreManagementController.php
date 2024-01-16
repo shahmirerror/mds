@@ -123,9 +123,9 @@ class CentreManagementController extends Controller
         $new->city = $request->city;
         $new->country = $request->country;
 
-        if($request->hasFile('image'))
+        if($request->hasFile('logo'))
         {
-            $image = $request->file('image');
+            $image = $request->file('logo');
             $imageName = time().'.'.$image->getClientOriginalExtension();
 
             $image->move(storage_path('app/public/centres/logos'), $imageName);
