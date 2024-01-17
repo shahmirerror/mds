@@ -6,25 +6,22 @@ import { IconUserPlus } from '@tabler/icons-react';
 import { IconEye } from '@tabler/icons-react';
 
 export default function View(props) {
-    const [rows, setRows] = useState([{id: 1, username: '', password: '', role: 'Staff'}]);
+
+    const [registration, setReg] = useState(null);
+    const [medical, setMedical] = useState(null);
+    const [lab, setLab] = useState(null);
+    const [xray, setXRAY] = useState(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         phone: '',
         city: '',
         country: '',
-        address: '',
-        logo: '',
-        users: rows
+        address: ''
     });
 
     const handleChange = (e) => {
         setData(e.target.name, e.target.value);
-    };
-
-    const handleFile = (e) => {
-        console.log(e.target.files[0]);
-        setData(e.target.name, e.target.files[0]);
     };
 
     const handleSubmit = (e) => {
@@ -33,45 +30,92 @@ export default function View(props) {
         post(route('centres.store'));
     }
 
-    const handleAddRow = () => {
-        const newRow = { id: rows.length + 1, username: '', password: '', role: 'Staff' };
-        setRows([...rows, newRow]);
-    };
-
-    const handleInputChange = (event, field, id) => {
-        const updatedRows = rows.map((row) => {
-          if (row.id === id) {
-            return {
-              ...row,
-              [field]: event.target.value,
-            };
-          }
-          return row;
-        });
-        setRows(updatedRows);
-        setData('users', updatedRows);
-      };
-
-      const handleDeleteRow = (id) => {
-        const filteredRows = rows.filter((row) => row.id !== id);
-        setRows(filteredRows);
-    };
-
-    const handleModStatus = (e, id, index) => {
+    const getReg = (e, id) => {
 
         e.preventDefault();
 
-        let status = e.target.checked ? 'On' : 'Off';
-
         try {
-            const response = fetch(route("super.centre.lab_modules", {'module_id': id, 'centre_id': props.centre.id}), {
-                method: "PUT"
+            const response = fetch(route("admin.candidate.fetch_reg", id), {
+                method: "GET"
             })
                 .then(res => res.json())
                 .then(
                     (result) => {
-                        document.getElementById(`switchlabel${index}`).innerHTML = status;
-                        document.getElementById(`switch${index}`).checked = e.target.checked;
+                        // $('#preloader').hide();
+                        setReg(result.reg);
+                        // console.log(result);
+                    },
+                    (error) => {
+                        console.log(error)
+                    }
+                );
+        } catch (ex) {
+            console.error(ex);
+        }
+    }
+
+    const getMed = (e, id) => {
+
+        e.preventDefault();
+
+        try {
+            const response = fetch(route("admin.candidate.fetch_medical", id), {
+                method: "GET"
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        // $('#preloader').hide();
+                        setMedical(result.medical);
+                        // console.log(result);
+                    },
+                    (error) => {
+                        console.log(error)
+                    }
+                );
+        } catch (ex) {
+            console.error(ex);
+        }
+    }
+
+    const getLab = (e, id) => {
+
+        e.preventDefault();
+
+        try {
+            const response = fetch(route("admin.candidate.fetch_lab", id), {
+                method: "GET"
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        // $('#preloader').hide();
+                        setLab(result.lab);
+                        // console.log(result);
+                    },
+                    (error) => {
+                        console.log(error)
+                    }
+                );
+        } catch (ex) {
+            console.error(ex);
+        }
+    }
+
+    const getXray = (e, id) => {
+
+        e.preventDefault();
+
+        try {
+            const response = fetch(route("admin.candidate.fetch_xray", id), {
+                method: "GET"
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        // $('#preloader').hide();
+                        setXRAY(result.xray);
+                        // console.log(result);
                     },
                     (error) => {
                         console.log(error)
@@ -167,12 +211,12 @@ export default function View(props) {
                                                     : regs?.medical_status == 'UNFIT' ?
                                                         <>
                                                         <span className="badge bg-danger text-white">UNFIT</span>
-                                                        <span className="badge bg-primary text-white float-end">View Medical</span>
+                                                        <span className="badge bg-primary text-white float-end" data-bs-toggle="modal" data-bs-target="#view-medical" onClick={(e) => getMed(e, regs?.med_id)}>View Medical</span>
                                                         </>
                                                     :
                                                         <>
                                                         <span className="badge bg-success text-white">FIT</span>
-                                                        <span className="badge bg-primary text-white float-end">View Medical</span>
+                                                        <span className="badge bg-primary text-white float-end" data-bs-toggle="modal" data-bs-target="#view-medical" onClick={(e) => getMed(e, regs?.med_id)}>View Medical</span>
                                                         </>
                                                     }
                                 </p>
@@ -182,12 +226,12 @@ export default function View(props) {
                                                 : regs?.laboratory_status == 'UNFIT' ?
                                                     <>
                                                     <span className="badge bg-danger text-white">UNFIT</span>
-                                                    <span className="badge bg-primary text-white float-end">View Lab</span>
+                                                    <span className="badge bg-primary text-white float-end" data-bs-toggle="modal" data-bs-target="#view-lab" onClick={(e) => getLab(e, regs?.lab_id)}>View Lab</span>
                                                     </>
                                                 :
                                                     <>
                                                     <span className="badge bg-success text-white">FIT</span>
-                                                    <span className="badge bg-primary text-white float-end">View Lab</span>
+                                                    <span className="badge bg-primary text-white float-end" data-bs-toggle="modal" data-bs-target="#view-lab" onClick={(e) => getLab(e, regs?.lab_id)}>View Lab</span>
                                                     </>
                                                 }
                                 </p>
@@ -197,17 +241,17 @@ export default function View(props) {
                                                 : regs?.xray_status == 'UNFIT' ?
                                                     <>
                                                     <span className="badge bg-danger text-white">UNFIT</span>
-                                                    <span className="badge bg-primary text-white float-end">View XRAY</span>
+                                                    <span className="badge bg-primary text-white float-end" data-bs-toggle="modal" data-bs-target="#view-xray" onClick={(e) => getXray(e, regs?.xray_id)}>View XRAY</span>
                                                     </>
                                                 :
                                                     <>
                                                     <span className="badge bg-success text-white">FIT</span>
-                                                    <span className="badge bg-primary text-white float-end">View XRAY</span>
+                                                    <span className="badge bg-primary text-white float-end" data-bs-toggle="modal" data-bs-target="#view-xray" onClick={(e) => getXray(e, regs?.xray_id)}>View XRAY</span>
                                                     </>
                                                 }
                                 </p>
                                 <p className="text-secondary">
-                                    <button className="btn btn-md float-end btn-primary">View Registration</button>
+                                    <button className="btn btn-md float-end btn-primary" data-bs-toggle="modal" data-bs-target="#view-registration" onClick={(e) => getReg(e, regs?.id)}>View Registration</button>
                                 </p>
                             </div>
                             </div>
@@ -368,6 +412,326 @@ export default function View(props) {
           </div>
         </div>
 
+        {/* View Registration Modal */}
+        <div className="modal modal-blur fade" id="view-registration" tabindex="-1" role="dialog" aria-hidden="true">
+            <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Viewing Registration</h5>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                <div className="modal-body">
+                    <div className="col-2 mb-3 float-end">
+                        <label className="form-label">Marital Status</label>
+                        <span className="text-secondary">{registration?.marital_status}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Gender</label>
+                        <span className="text-secondary">{props?.candidate?.gender == null ? "No Information" : props?.candidate?.gender}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Name</label>
+                        <span className="text-secondary">{props?.candidate?.candidate_name == null ? "No Information" : props?.candidate?.candidate_name}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Token Number</label>
+                        <span className="text-secondary">{registration?.token_no == null ? "No Information" : "M-"+registration?.token_no}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Barcode Number</label>
+                        <span className="text-secondary">{registration?.barcode_no == null ? "No Information" : registration?.barcode_no}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Date of Birth</label>
+                        <span className="text-secondary">{props?.candidate?.dob == null ? "No Information" : props?.candidate?.dob}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Passport Number</label>
+                        <span className="text-secondary">{props?.candidate?.passport_no == null ? "No Information" : props?.candidate?.passport_no}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Passport Issue Date</label>
+                        <span className="text-secondary">{props?.candidate?.passport_issue_date == null ? "No Information" : props?.candidate?.passport_issue_date}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Passport Expiry Date</label>
+                        <span className="text-secondary">{props?.candidate?.passport_expiry_date == null ? "No Information" : props?.candidate?.passport_expiry_date}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Country</label>
+                        <span className="text-secondary">{props?.candidate?.country == null ? "No Information" : props?.candidate?.country}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Profession</label>
+                        <span className="text-secondary">{props?.candidate?.profession == null ? "No Information" : props?.candidate?.profession}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Place of Issue</label>
+                        <span className="text-secondary">{registration?.place_of_issue == null ? "No Information" : registration?.place_of_issue}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Agency</label>
+                        <span className="text-secondary">{props?.candidate?.agency == null ? "No Information" : props?.candidate?.agency}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Nationality</label>
+                        <span className="text-secondary">{registration?.nationality == null ? "No Information" : registration?.nationality}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Serial Number</label>
+                        <span className="text-secondary">{registration?.serial_no == null ? "No Information" : registration?.serial_no}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Relation Type</label>
+                        <span className="text-secondary">{registration?.relation_type == null ? "No Information" : registration?.relation_type}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Relation Name</label>
+                        <span className="text-secondary">{registration?.relation_name == null ? "No Information" : registration?.relation_name}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Slip Expiry Date</label>
+                        <span className="text-secondary">{registration?.slip_expiry_date == null ? "No Information" : registration?.slip_expiry_date}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Slip Issue Date</label>
+                        <span className="text-secondary">{registration?.slip_issue_date == null ? "No Information" : registration?.slip_issue_date}</span>
+                    </div>
+                    {props?.candidate?.gender == "Female" ?
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Pregnancy Test</label>
+                        <span className="text-secondary">{registration?.pregnancy_test == null ? "No Information" : registration?.pregnancy_test}</span>
+                    </div>
+                    :
+                    <></>
+                    }
+                    <div className="mb-3">
+                        <label className="form-label">Print Portion</label>
+                        <span className="text-secondary">{registration?.print_report_portion == null ? "No Information" : registration?.print_report_portion}</span>
+                    </div>
+                </div>
+                <div className="modal-footer">
+                    <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
+                        Close
+                    </a>
+                </div>
+                </div>
+            </div>
+        </div>
+        {/* View Registration Modal */}
+
+        {/* View Medical Modal */}
+        <div className="modal modal-blur fade" id="view-medical" tabindex="-1" role="dialog" aria-hidden="true">
+            <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Viewing Medical</h5>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                <div className="modal-body">
+                    <div className="col-2 mb-3 float-end">
+                        <label className="form-label">Weight</label>
+                        <span className="text-secondary">{medical?.weight}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Height</label>
+                        <span className="text-secondary">{medical?.height == null ? "No Information" : medical?.height}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Date</label>
+                        <span className="text-secondary">{medical?.created_at}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">RR</label>
+                        <span className="text-secondary">{medical?.rr == null ? "No Information" : medical?.rr}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Pulse</label>
+                        <span className="text-secondary">{medical?.pulse == null ? "No Information" : medical?.pulse}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">BMI</label>
+                        <span className="text-secondary">{medical?.bmi == null ? "No Information" : medical?.bmi}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Visual Unaided Right Eye</label>
+                        <span className="text-secondary">{medical?.visual_unaided_right_eye == "" || medical?.visual_unaided_right_eye == null ? "No Information" : medical?.visual_unaided_right_eye}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Visual Unaided Left Eye</label>
+                        <span className="text-secondary">{medical?.visual_unaided_left_eye == "" || medical?.visual_unaided_left_eye == null ? "No Information" : medical?.visual_unaided_left_eye}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Visual Aided Right Eye</label>
+                        <span className="text-secondary">{medical?.visual_aided_right_eye == "" || medical?.visual_aided_right_eye == null ? "No Information" : medical?.visual_aided_right_eye}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Visual Aided Left Eye</label>
+                        <span className="text-secondary">{medical?.visual_aided_left_eye == "" || medical?.visual_aided_left_eye == null ? "No Information" : medical?.visual_aided_left_eye}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Distant Unaided Right Eye</label>
+                        <span className="text-secondary">{medical?.distant_unaided_right_eye == "" || medical?.distant_unaided_right_eye == null ? "No Information" : medical?.distant_unaided_right_eye}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Distant Unaided Left Eye</label>
+                        <span className="text-secondary">{medical?.distant_unaided_left_eye == "" || medical?.distant_unaided_left_eye == null ? "No Information" : medical?.distant_unaided_left_eye}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Distant Aided Right Eye</label>
+                        <span className="text-secondary">{medical?.distant_aided_right_eye == "" || medical?.distant_aided_right_eye == null ? "No Information" : medical?.distant_aided_right_eye}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Distant Aided Left Eye</label>
+                        <span className="text-secondary">{medical?.distant_aided_left_eye == "" || medical?.distant_aided_left_eye == null ? "No Information" : medical?.distant_aided_left_eye}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Near Unaided Right Eye</label>
+                        <span className="text-secondary">{medical?.near_unaided_right_eye == "" || medical?.near_unaided_right_eye == null ? "No Information" : medical?.near_unaided_right_eye}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Near Unaided Left Eye</label>
+                        <span className="text-secondary">{medical?.near_unaided_left_eye == "" || medical?.near_unaided_left_eye == null ? "No Information" : medical?.near_unaided_left_eye}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Near Aided Right Eye</label>
+                        <span className="text-secondary">{medical?.near_aided_right_eye == "" || medical?.near_aided_right_eye == null ? "No Information" : medical?.near_aided_right_eye}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Near Aided Left Eye</label>
+                        <span className="text-secondary">{medical?.near_aided_left_eye == "" || medical?.near_aided_left_eye == null ? "No Information" : medical?.near_aided_left_eye}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Hearing Right Ear</label>
+                        <span className="text-secondary">{medical?.hearing_left_ear == "" || medical?.hearing_left_ear == null ? "No Information" : medical?.hearing_left_ear}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Hearing Left Ear</label>
+                        <span className="text-secondary">{medical?.hearing_right_ear == "" || medical?.hearing_right_ear == null ? "No Information" : medical?.hearing_right_ear}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Color Vision</label>
+                        <span className="text-secondary">{medical?.color_vision == "" || medical?.color_vision == null ? "No Information" : medical?.color_vision}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Appearance</label>
+                        <span className="text-secondary">{medical?.appearance == "" || medical?.appearance == null ? "No Information" : medical?.appearance}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Speech</label>
+                        <span className="text-secondary">{medical?.speech == "" || medical?.speech == null ? "No Information" : medical?.speech}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Behavior</label>
+                        <span className="text-secondary">{medical?.behavior == "" || medical?.behavior == null ? "No Information" : medical?.behavior}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Cognition</label>
+                        <span className="text-secondary">{medical?.cognition == "" || medical?.cognition == null ? "No Information" : medical?.cognition}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Orientation</label>
+                        <span className="text-secondary">{medical?.orientation == "" || medical?.orientation == null ? "No Information" : medical?.orientation}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Memory</label>
+                        <span className="text-secondary">{medical?.memory == "" || medical?.memory == null ? "No Information" : medical?.memory}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Concentration</label>
+                        <span className="text-secondary">{medical?.concentration == "" || medical?.concentration == null ? "No Information" : medical?.concentration}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Other</label>
+                        <span className="text-secondary">{medical?.other == "" || medical?.other == null ? "No Information" : medical?.other}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Mood</label>
+                        <span className="text-secondary">{medical?.mood == "" || medical?.mood == null ? "No Information" : medical?.mood}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Thoughts</label>
+                        <span className="text-secondary">{medical?.thoughts == "" || medical?.thoughts == null ? "No Information" : medical?.thoughts}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Respiratory</label>
+                        <span className="text-secondary">{medical?.respiratory == "" || medical?.respiratory == null ? "No Information" : medical?.respiratory}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Cardio Vascular</label>
+                        <span className="text-secondary">{medical?.cardio_vascular == "" || medical?.cardio_vascular == null ? "No Information" : medical?.cardio_vascular}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">General Appearance</label>
+                        <span className="text-secondary">{medical?.general_appearance == "" || medical?.general_appearance == null ? "No Information" : medical?.general_appearance}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Hydrocele</label>
+                        <span className="text-secondary">{medical?.hydrocele == "" || medical?.hydrocele == null ? "No Information" : medical?.hydrocele}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Abdomen</label>
+                        <span className="text-secondary">{medical?.abdomen == "" || medical?.abdomen == null ? "No Information" : medical?.abdomen}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Hernia</label>
+                        <span className="text-secondary">{medical?.hernia == "" || medical?.hernia == null ? "No Information" : medical?.hernia}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Skin</label>
+                        <span className="text-secondary">{medical?.skin == "" || medical?.skin == null ? "No Information" : medical?.skin}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Back</label>
+                        <span className="text-secondary">{medical?.back == "" || medical?.back == null ? "No Information" : medical?.back}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Extremities</label>
+                        <span className="text-secondary">{medical?.extremities == "" || medical?.extremities == null ? "No Information" : medical?.extremities}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">BP</label>
+                        <span className="text-secondary">{medical?.bp == "" || medical?.bp == null ? "No Information" : medical?.bp}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">CNS</label>
+                        <span className="text-secondary">{medical?.cns == "" || medical?.cns == null ? "No Information" : medical?.cns}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Deformities</label>
+                        <span className="text-secondary">{medical?.deformities == "" || medical?.deformities == null ? "No Information" : medical?.deformities}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">ENT</label>
+                        <span className="text-secondary">{medical?.ent == "" || medical?.ent == null ? "No Information" : medical?.ent}</span>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Remarks</label>
+                        <span className="text-secondary">{medical?.remarks == "" || medical?.remarks == null ? "No Information" : medical?.remarks}</span>
+                    </div>
+
+                </div>
+                <div className="modal-footer">
+                    <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
+                        Close
+                    </a>
+                </div>
+                </div>
+            </div>
+        </div>
+        {/* View Medical Modal */}
 
 
         </AuthenticatedLayout>

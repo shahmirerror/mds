@@ -49,7 +49,14 @@ class CandidatesController extends Controller
     public function show($id)
     {
         $candidate = Candidates::find($id);
-        $registrations = Registrations::select('registrations.id','registrations.token_no','registrations.reg_date','registrations.created_at','xray_result.status as xray_status','lab_result.status as laboratory_status','medical.status as medical_status')
+        $registrations = Registrations::select('registrations.id',
+                                               'registrations.reg_id',
+                                               'registrations.token_no',
+                                               'registrations.reg_date',
+                                               'registrations.created_at',
+                                               'xray_result.status as xray_status','xray_result.id as xray_id',
+                                               'lab_result.status as laboratory_status','lab_result.id as lab_id',
+                                               'medical.status as medical_status','medical.id as med_id')
                                         ->leftjoin('xray_result','xray_result.reg_id','=','registrations.reg_id')
                                         ->leftjoin('lab_result','lab_result.reg_id','=','registrations.reg_id')
                                         ->leftjoin('medical','medical.reg_id','=','registrations.reg_id')

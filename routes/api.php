@@ -52,6 +52,12 @@ Route::get('fetch-prev-labsticker', [App\Http\Controllers\API\ImportController::
 
 //Centre Admin API Routes
 
+            //CandidatesController
+            Route::get('admin/candidates/fetch-registration/{id}', [App\Http\Controllers\API\CentreAdmin\CandidatesController::class, 'fetch_reg'])->name('admin.candidate.fetch_reg');
+            Route::get('admin/candidates/fetch-medical/{id}', [App\Http\Controllers\API\CentreAdmin\CandidatesController::class, 'fetch_medical'])->name('admin.candidate.fetch_medical');
+            Route::get('admin/candidates/fetch-lab/{id}', [App\Http\Controllers\API\CentreAdmin\CandidatesController::class, 'fetch_lab'])->name('admin.candidate.fetch_lab');
+            Route::get('admin/candidates/fetch-xray/{id}', [App\Http\Controllers\API\CentreAdmin\CandidatesController::class, 'fetch_xray'])->name('admin.candidate.fetch_xray');
+
             //ModulesController
             Route::get('fetch-admin-mods', [App\Http\Controllers\API\ModulesController::class, 'fetch_admin'])->name('admin.mods');
 
