@@ -13,6 +13,7 @@ export default function Authenticated({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
     const [modules, setModules] = useState([]);
+    const [labs, setLabs] = useState([]);
 
     const [logoImg, setLogo] = useState();
 
@@ -34,12 +35,13 @@ export default function Authenticated({ user, header, children }) {
         }
         else if(user?.role_id == 2)
         {
-            fetch(route("admin.mods"))
+            fetch(route("admin.mods", user?.centre?.id))
                 .then(res => res.json())
 
                 .then(
                     (result) => {
-                    setModules(result.modules)
+                    setModules(result.modules);
+                    setLabs(result.lab);
 
                     },
                     (error) => {
@@ -80,7 +82,7 @@ export default function Authenticated({ user, header, children }) {
         <div className="page">
             <Header1 user={user} logo={logoImg} />
 
-            <Header2 modules={modules}/>
+            <Header2 modules={modules} labs={labs}/>
             <div className="page-wrapper">
 
                 <main>{children}</main>

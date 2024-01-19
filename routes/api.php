@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    echo $request->user();
 });
-
+// ->middleware('auth')
 Route::get('fetch-prev-regs', [App\Http\Controllers\API\ImportController::class, 'fetch_regs'])->name('import.regs');
 
 Route::get('fetch-prev-meds', [App\Http\Controllers\API\ImportController::class, 'fetch_medicals'])->name('import.meds');
@@ -59,7 +59,7 @@ Route::get('fetch-prev-labsticker', [App\Http\Controllers\API\ImportController::
             Route::get('admin/candidates/fetch-xray/{id}', [App\Http\Controllers\API\CentreAdmin\CandidatesController::class, 'fetch_xray'])->name('admin.candidate.fetch_xray');
 
             //ModulesController
-            Route::get('fetch-admin-mods', [App\Http\Controllers\API\ModulesController::class, 'fetch_admin'])->name('admin.mods');
+            Route::get('fetch-admin-mods/{centre_id}', [App\Http\Controllers\API\ModulesController::class, 'fetch_admin'])->name('admin.mods');
 
             //CentreManagementController
             Route::get('admin/centres/{id}/fetch-staff', [App\Http\Controllers\API\CentreAdmin\CentreManagementController::class, 'fetch_users'])->name('admin.centre.fetch_staff');
@@ -76,3 +76,13 @@ Route::get('fetch-prev-labsticker', [App\Http\Controllers\API\ImportController::
             Route::post('admin/store-centre-devices', [App\Http\Controllers\API\CentreAdmin\SettingsController::class, 'store_centre_devices'])->name('admin.settings.store_devices');
             Route::put('admin/update-centre-devices/{id}', [App\Http\Controllers\API\CentreAdmin\SettingsController::class, 'update_centre_devices'])->name('admin.settings.update_devices');
             Route::delete('admin/delete-centre-devices/{id}', [App\Http\Controllers\API\CentreAdmin\SettingsController::class, 'delete_centre_devices'])->name('admin.settings.delete_devices');
+
+//Lab Modules API Routes
+
+            //XRAY Result
+            Route::get('lab-modules/xray/fetch-result', [App\Http\Controllers\API\LabModulesController::class, 'fetch_xray_result'])->name('xray.fetch_result');
+
+//Centre Staff API Routes
+
+            //ModulesController
+            Route::get('fetch-staff-mods/{centre_id}', [App\Http\Controllers\API\ModulesController::class, 'fetch_staff'])->name('staff.mods');

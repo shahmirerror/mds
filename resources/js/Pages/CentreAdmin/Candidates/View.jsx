@@ -198,25 +198,26 @@ export default function View(props) {
                                     {regs?.medical_status == 'FIT' && regs?.xray_status == 'FIT' && regs?.laboratory_status == 'FIT' ?
                                         <span className="badge bg-success text-white">FIT</span>
                                     : regs?.medical_status == 'UNFIT' || regs?.xray_status == 'UNFIT' || regs?.laboratory_status == 'UNFIT' ?
-                                        <span className="badge bg-danger text-danger">UNFIT</span>
+                                        <span className="badge bg-danger text-white">UNFIT</span>
                                     :
                                         <span className="badge bg-warning text-white">PENDING</span>
                                     }
                                 </h4>
                                 <div className="text-primary mb-3">{'M-'+regs?.token_no}</div>
                                 <p className="text-secondary">Date : {regs?.reg_date}</p>
+                                <hr></hr>
                                 <p className="text-secondary">
                                     Medical Status : {regs?.medical_status == null ?
                                                         <span className="badge bg-warning text-white">In Process</span>
                                                     : regs?.medical_status == 'UNFIT' ?
                                                         <>
                                                         <span className="badge bg-danger text-white">UNFIT</span>
-                                                        <span className="badge bg-primary text-white float-end" data-bs-toggle="modal" data-bs-target="#view-medical" onClick={(e) => getMed(e, regs?.med_id)}>View Medical</span>
+                                                        <span className="btn-pill badge text-primary float-end col-2" data-bs-toggle="modal" data-bs-target="#view-medical" onClick={(e) => getMed(e, regs?.med_id)}>View Medical</span>
                                                         </>
                                                     :
                                                         <>
                                                         <span className="badge bg-success text-white">FIT</span>
-                                                        <span className="badge bg-primary text-white float-end" data-bs-toggle="modal" data-bs-target="#view-medical" onClick={(e) => getMed(e, regs?.med_id)}>View Medical</span>
+                                                        <span className="btn-pill badge text-primary float-end col-2" data-bs-toggle="modal" data-bs-target="#view-medical" onClick={(e) => getMed(e, regs?.med_id)}>View Medical</span>
                                                         </>
                                                     }
                                 </p>
@@ -226,32 +227,33 @@ export default function View(props) {
                                                 : regs?.laboratory_status == 'UNFIT' ?
                                                     <>
                                                     <span className="badge bg-danger text-white">UNFIT</span>
-                                                    <span className="badge bg-primary text-white float-end" data-bs-toggle="modal" data-bs-target="#view-lab" onClick={(e) => getLab(e, regs?.lab_id)}>View Lab</span>
+                                                    <span className="btn-pill badge text-primary float-end col-2" data-bs-toggle="modal" data-bs-target="#view-lab" onClick={(e) => getLab(e, regs?.lab_id)}>View Lab</span>
                                                     </>
                                                 :
                                                     <>
                                                     <span className="badge bg-success text-white">FIT</span>
-                                                    <span className="badge bg-primary text-white float-end" data-bs-toggle="modal" data-bs-target="#view-lab" onClick={(e) => getLab(e, regs?.lab_id)}>View Lab</span>
+                                                    <span className="btn-pill badge text-primary float-end col-2" data-bs-toggle="modal" data-bs-target="#view-lab" onClick={(e) => getLab(e, regs?.lab_id)}>View Lab</span>
                                                     </>
                                                 }
                                 </p>
-                                <p className="text-secondary">
+                                <p className="text-secondary mb-5">
                                     XRAY Status : {regs?.xray_status == null ?
                                                     <span className="badge bg-warning text-white">In Process</span>
                                                 : regs?.xray_status == 'UNFIT' ?
                                                     <>
                                                     <span className="badge bg-danger text-white">UNFIT</span>
-                                                    <span className="badge bg-primary text-white float-end" data-bs-toggle="modal" data-bs-target="#view-xray" onClick={(e) => getXray(e, regs?.xray_id)}>View XRAY</span>
+                                                    <span className="btn-pill badge text-primary float-end col-2" data-bs-toggle="modal" data-bs-target="#view-xray" onClick={(e) => getXray(e, regs?.xray_id)}>View XRAY</span>
                                                     </>
                                                 :
                                                     <>
                                                     <span className="badge bg-success text-white">FIT</span>
-                                                    <span className="badge bg-primary text-white float-end" data-bs-toggle="modal" data-bs-target="#view-xray" onClick={(e) => getXray(e, regs?.xray_id)}>View XRAY</span>
+                                                    <span className="btn-pill badge text-primary float-end col-2" data-bs-toggle="modal" data-bs-target="#view-xray" onClick={(e) => getXray(e, regs?.xray_id)}>View XRAY</span>
                                                     </>
                                                 }
                                 </p>
+                                <hr></hr>
                                 <p className="text-secondary">
-                                    <button className="btn btn-md float-end btn-primary" data-bs-toggle="modal" data-bs-target="#view-registration" onClick={(e) => getReg(e, regs?.id)}>View Registration</button>
+                                    <button className="btn btn-md float-end btn-outline-primary" data-bs-toggle="modal" data-bs-target="#view-registration" onClick={(e) => getReg(e, regs?.id)}>View Registration</button>
                                 </p>
                             </div>
                             </div>
@@ -732,6 +734,198 @@ export default function View(props) {
             </div>
         </div>
         {/* View Medical Modal */}
+
+        {/* View Lab Modal */}
+        <div className="modal modal-blur fade" id="view-lab" tabindex="-1" role="dialog" aria-hidden="true">
+            <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Viewing Lab</h5>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                <div className="modal-body">
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Sticker 2</label>
+                        <span className="text-secondary">{lab?.stickers?.sticker_value_2 == null ? "Sticker Not Available" : lab?.stickers?.sticker_value_2}</span>
+                    </div>
+                    <div className="col-4 mb-3">
+                        <label className="form-label">Sticker 1</label>
+                        <span className="text-secondary">{lab?.stickers?.sticker_value_1 == null ? "Sticker Not Available" : lab?.stickers?.sticker_value_1}</span>
+                    </div>
+                    <hr></hr>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">HCV</label>
+                        <span className="text-secondary">{lab?.result?.hcv == null ? "Sticker Not Available" : lab?.result?.hcv}</span>
+                    </div>
+                    <div className="col-4 mb-3">
+                        <label className="form-label">HBsAg</label>
+                        <span className="text-secondary">{lab?.result?.hbsag == null ? "No Information" : lab?.result?.hbsag}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">VDRL</label>
+                        <span className="text-secondary">{lab?.result?.vdrl == null ? "Sticker Not Available" : lab?.result?.vdrl}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">HIV</label>
+                        <span className="text-secondary">{lab?.result?.hiv == null ? "No Information" : lab?.result?.hiv}</span>
+                    </div>
+                    <div className="col-4 mb-3">
+                        <label className="form-label">TPHA</label>
+                        <span className="text-secondary">{lab?.result?.tpha == null ? "Sticker Not Available" : lab?.result?.tpha}</span>
+                    </div>
+
+                    <div className="col-3 mb-3 float-end">
+                        <label className="form-label">BIL</label>
+                        <span className="text-secondary">{lab?.result?.bil == null ? "No Information" : lab?.result?.bil}</span>
+                    </div>
+                    <div className="col-3 mb-3 float-end">
+                        <label className="form-label">ALT</label>
+                        <span className="text-secondary">{lab?.result?.alt == null ? "No Information" : lab?.result?.alt}</span>
+                    </div>
+                    <div className="col-3 mb-3 float-end">
+                        <label className="form-label">AST</label>
+                        <span className="text-secondary">{lab?.result?.ast == null ? "No Information" : lab?.result?.ast}</span>
+                    </div>
+                    <div className="col-3 mb-3">
+                        <label className="form-label">RBS</label>
+                        <span className="text-secondary">{lab?.result?.rbs == null ? "No Information" : lab?.result?.rbs}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Blood Group</label>
+                        <span className="text-secondary">{lab?.result?.blood_group == null ? "No Information" : lab?.result?.blood_group}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Creatinine</label>
+                        <span className="text-secondary">{lab?.result?.creatinine == null ? "No Information" : lab?.result?.creatinine}</span>
+                    </div>
+                    <div className="col-4 mb-3">
+                        <label className="form-label">ALK</label>
+                        <span className="text-secondary">{lab?.result?.alk == null ? "No Information" : lab?.result?.alk}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Haemoglobin</label>
+                        <span className="text-secondary">{lab?.result?.haemoglobin == null ? "No Information" : lab?.result?.haemoglobin}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Malaria</label>
+                        <span className="text-secondary">{lab?.result?.malaria == null ? "No Information" : lab?.result?.malaria}</span>
+                    </div>
+                    <div className="col-4 mb-3">
+                        <label className="form-label">Micro Filariae</label>
+                        <span className="text-secondary">{lab?.result?.micro_filariae == null ? "No Information" : lab?.result?.micro_filariae}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Helminthes</label>
+                        <span className="text-secondary">{lab?.result?.helminthes == null ? "No Information" : lab?.result?.helminthes}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Albumin</label>
+                        <span className="text-secondary">{lab?.result?.albumin == null ? "No Information" : lab?.result?.albumin}</span>
+                    </div>
+                    <div className="col-4 mb-3">
+                        <label className="form-label">Sugar</label>
+                        <span className="text-secondary">{lab?.result?.sugar == null ? "No Information" : lab?.result?.sugar}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">OVA</label>
+                        <span className="text-secondary">{lab?.result?.ova == null ? "No Information" : lab?.result?.ova}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Cyst</label>
+                        <span className="text-secondary">{lab?.result?.cyst == null ? "No Information" : lab?.result?.cyst}</span>
+                    </div>
+                    <div className="col-4 mb-3">
+                        <label className="form-label">TB</label>
+                        <span className="text-secondary">{lab?.result?.tb == null ? "No Information" : lab?.result?.tb}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Pregnancy</label>
+                        <span className="text-secondary">{lab?.result?.pregnancy == null ? "No Information" : lab?.result?.pregnancy}</span>
+                    </div>
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Meningococcal Date</label>
+                        <span className="text-secondary">{lab?.result?.meningococcal_date == null ? "No Information" : lab?.result?.meningococcal_date}</span>
+                    </div>
+                    <div className="col-4 mb-3">
+                        <label className="form-label">Meningococcal</label>
+                        <span className="text-secondary">{lab?.result?.meningococcal == null ? "No Information" : lab?.result?.meningococcal}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Polio Date</label>
+                        <span className="text-secondary">{lab?.result?.polio_date == null ? "No Information" : lab?.result?.polio_date}</span>
+                    </div>
+                    <div className="col-4 mb-3">
+                        <label className="form-label">Polio</label>
+                        <span className="text-secondary">{lab?.result?.polio == null ? "No Information" : lab?.result?.polio}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">MMR1 Date</label>
+                        <span className="text-secondary">{lab?.result?.mmr1_date == null ? "No Information" : lab?.result?.mmr1_date}</span>
+                    </div>
+                    <div className="col-4 mb-3">
+                        <label className="form-label">MMR1</label>
+                        <span className="text-secondary">{lab?.result?.mmr1 == null ? "No Information" : lab?.result?.nnr1}</span>
+                    </div>
+
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">MMR2 Date</label>
+                        <span className="text-secondary">{lab?.result?.mmr2_date == null ? "No Information" : lab?.result?.mmr2_date}</span>
+                    </div>
+                    <div className="col-4 mb-3">
+                        <label className="form-label">MMR2</label>
+                        <span className="text-secondary">{lab?.result?.mmr2 == null ? "No Information" : lab?.result?.mmr2}</span>
+                    </div>
+
+                </div>
+                <div className="modal-footer">
+                    <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
+                        Close
+                    </a>
+                </div>
+                </div>
+            </div>
+        </div>
+        {/* View Lab Modal */}
+
+        {/* View XRAY Modal */}
+        <div className="modal modal-blur fade" id="view-xray" tabindex="-1" role="dialog" aria-hidden="true">
+            <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Viewing XRAY</h5>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                <div className="modal-body">
+                    <div className="col-4 mb-3 float-end">
+                        <label className="form-label">Notes</label>
+                        <span className="text-secondary">{xray?.result?.notes == null ? "No Information" : xray?.result?.notes}</span>
+                    </div>
+                    <div className="col-4 mb-3">
+                        <label className="form-label">Chest</label>
+                        <span className="text-secondary">{xray?.result?.chest == null ? "No Information" : xray?.result?.chest}</span>
+                    </div>
+                    <div className="col-4 mb-3">
+                        <label className="form-label">Slip</label>
+                        <span className="text-secondary">{xray?.slips?.slips == null ? "No Information" : xray?.slips?.slips}</span>
+                    </div>
+                </div>
+                <div className="modal-footer">
+                    <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
+                        Close
+                    </a>
+                </div>
+                </div>
+            </div>
+        </div>
+        {/* View XRAY Modal */}
 
 
         </AuthenticatedLayout>

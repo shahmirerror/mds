@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
             return Inertia::render('SuperAdmin/Settings');
         })->name('super.settings');
 
+        Route::resource('centres', App\Http\Controllers\SuperAdmin\CentreManagementController::class);
         Route::post('centres/{id}', [App\Http\Controllers\SuperAdmin\CentreManagementController::class, 'update'])->name('centres.update');
         Route::put('centres/{id}/suspend', [App\Http\Controllers\SuperAdmin\CentreManagementController::class, 'suspend'])->name('centres.suspend');
     });
@@ -64,11 +65,19 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/registration-desk', function () {
             return Inertia::render('LabModules/Registration');
-        })->name('centre.regdesk');
+        })->name('registration-desk.index');
 
         Route::get('/passport-verification', function () {
             return Inertia::render('LabModules/PassportVerification');
-        })->name('centre.ppverif');
+        })->name('passport-verification.index');
+
+        Route::get('/sample-collection', function () {
+            return Inertia::render('LabModules/SampleCollection');
+        })->name('sample-collection.index');
+
+        Route::resource('xray-verification', App\Http\Controllers\LabModules\XRAYVerificationController::class);
+
+        Route::resource('xray-result', App\Http\Controllers\LabModules\XRAYResultController::class);
 
         Route::resource('centre-settings', App\Http\Controllers\CentreAdmin\CentreManagementController::class);
 
