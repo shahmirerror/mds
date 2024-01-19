@@ -67,7 +67,8 @@ export default function Create(props) {
 
     const handleModStatus = (e, id, index) => {
 
-        e.preventDefault();
+        // e.preventDefault();
+        console.log(id)
 
         let status = e.target.checked ? 'On' : 'Off';
 
@@ -79,7 +80,7 @@ export default function Create(props) {
                 .then(
                     (result) => {
                         document.getElementById(`switchlabel${index}`).innerHTML = status;
-                        document.getElementById(`switch${index}`).checked = e.target.checked;
+                        e.target.checked = status === 'Off' ? false : true;
                     },
                     (error) => {
                         console.log(error)

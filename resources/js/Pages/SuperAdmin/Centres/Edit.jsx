@@ -207,9 +207,6 @@ export default function Edit(props) {
 
     const handleModStatus = (e, id, index) => {
 
-        // e.preventDefault();
-        console.log(e.target.checked)
-
         let status = e.target.checked ? 'On' : 'Off';
 
         try {
@@ -220,8 +217,8 @@ export default function Edit(props) {
                 .then(
                     (result) => {
                         document.getElementById(`switchlabel${index}`).innerHTML = status;
-                        // document.getElementById(`switch${index}`).checked = e.target.checked;
-                        console.log(document.getElementById(`switch${index}`).checked, document.getElementById(`switchlabel${index}`).innerHTML)
+                        e.target.checked = status === 'Off' ? false : true;
+                        // console.log(e.target.checked+' : '+!e.target.checked, document.getElementById(`switchlabel${index}`).innerHTML)
                     },
                     (error) => {
                         console.log(error)
