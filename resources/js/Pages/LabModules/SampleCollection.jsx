@@ -131,13 +131,13 @@ export default function SampleCollection({auth}) {
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Barcode</label>
-                                                        <input type="date" className="form-control" name="reg_date" />
+                                                        <input type="date" className="form-control" name="barcode" />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Date</label>
-                                                        <input type="text" className="form-control" name="serial_no" />
+                                                        <input type="text" className="form-control" name="reg_date" />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
@@ -151,10 +151,10 @@ export default function SampleCollection({auth}) {
                                                 <div className="col-2">
                                                 </div>
                                                 <div className="col-4">
-                                                    <button className={'btn btn-lg btn-outline-secondary'} disabled={searched ? true : false} onChange={handleReset}>Reset Query</button>
+                                                    <button className={'btn btn-md btn-outline-secondary'} disabled={searched ? true : false} onChange={handleReset}>Reset Query</button>
                                                 </div>
                                                 <div className="col-4">
-                                                    <button className={'btn btn-lg btn-outline-info'} disabled={searched ? false : true} onChange={handleSearch}>Search for Candidate</button>
+                                                    <button className={'btn btn-md btn-outline-info'} disabled={searched ? false : true} onChange={handleSearch}>Search for Candidate</button>
                                                 </div>
                                             </div>
                                         </div>

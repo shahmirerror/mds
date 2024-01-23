@@ -71,4 +71,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo('App\Models\CentreUsers','id','user_id');
     }
+
+    public function modules($centre_id, $user_id)
+    {
+        return LabModules::my_lab_modules($centre_id, $user_id);
+    }
 }

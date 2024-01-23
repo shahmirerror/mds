@@ -80,9 +80,11 @@ export default function Authenticated({ user, header, children }) {
     return (
         <>
         <div className="page">
-            <Header1 user={user} logo={logoImg} />
 
+            <Header1 user={user} logo={logoImg} />
+            <div className="sticky-top">
             <Header2 modules={modules} labs={labs}/>
+            </div>
             <div className="page-wrapper">
 
                 <main>{children}</main>

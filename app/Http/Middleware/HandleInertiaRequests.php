@@ -38,7 +38,8 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => Auth::user(),
                 'role' => (isset(Auth::user()->role)) ? Auth::user()->role : [],
-                'centre' => (isset(Auth::user()->centre->details)) ? Auth::user()->centre->details : []
+                'centre' => (isset(Auth::user()->centre->details)) ? Auth::user()->centre->details : [],
+                'modules' => (isset(Auth::user()->centre->details)) ? Auth::user()->modules(Auth::user()->centre->id, Auth::user()->id) : []
             ],
             'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),

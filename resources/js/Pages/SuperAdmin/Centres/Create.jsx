@@ -1,11 +1,13 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { IconTrash } from '@tabler/icons-react';
 import { IconUserPlus } from '@tabler/icons-react';
 
 export default function Create(props) {
     const [rows, setRows] = useState([{id: 1, username: '', password: '', role: 'Staff'}]);
+    const mods = useState([props.modules]);
+
 
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
@@ -14,7 +16,8 @@ export default function Create(props) {
         country: '',
         address: '',
         logo: '',
-        users: rows
+        users: rows,
+        modules: mods[0][0]
     });
 
     const handleChange = (e) => {
@@ -60,35 +63,28 @@ export default function Create(props) {
         setData('users', updatedRows);
       };
 
-      const handleDeleteRow = (id) => {
+    const handleDeleteRow = (id) => {
         const filteredRows = rows.filter((row) => row.id !== id);
         setRows(filteredRows);
     };
 
     const handleModStatus = (e, id, index) => {
 
-        // e.preventDefault();
-        console.log(id)
 
         let status = e.target.checked ? 'On' : 'Off';
+        let status2 = e.target.checked;
+        // e.target.checked = status === 'Off' ? false : true;
 
-        try {
-            const response = fetch(route("super.centre.lab_modules", {'module_id': id, 'centre_id': props.centre.id}), {
-                method: "PUT"
-            })
-                .then(res => res.json())
-                .then(
-                    (result) => {
-                        document.getElementById(`switchlabel${index}`).innerHTML = status;
-                        e.target.checked = status === 'Off' ? false : true;
-                    },
-                    (error) => {
-                        console.log(error)
-                    }
-                );
-        } catch (ex) {
-            console.error(ex);
-        }
+        mods[0][0][index].status = status2;
+
+        setData('modules',mods[0][0]);
+
+        document.getElementById(`switchlabel${index}`).innerHTML = status;
+
+        // console.log(document.getElementById(`switch${index}`).checked);
+        // // e.target.checked = status === 'Off' ? false : true;
+
+        // console.log(data.modules);
     }
 
     return (
@@ -164,7 +160,7 @@ export default function Create(props) {
                   <div className="card-body" id="users" style={{display: 'none'}}>
                     <div className="row mb-3">
                         <h3 className="card-title" style={{float: 'left', width: '90%'}}>Centre Staff</h3>
-                        <a href="#" type="button" className="btn btn-sm btn-success" style={{float: 'right', width: '10%'}} onClick={handleAddRow}><IconUserPlus /></a>
+                        <a href="#" type="button" className="btn btn-sm btn-success" style={{float: 'right', width: '5%'}} onClick={handleAddRow}><IconUserPlus /></a>
                         <div style={{clear: 'both'}}></div>
                     </div>
                     {rows.map((row, index) => (
@@ -194,21 +190,26 @@ export default function Create(props) {
                   <div className="card-body" id="modules" style={{display: 'none'}}>
                     <h3 className="card-title">Centre Lab Modules</h3>
                     <hr></hr>
-                    {props.modules.map((mod, index) => (
+                    {data.modules.map((mod, index) => (
                     <>
-                    <div className="row m-3">
-                      <div className="col-md" style={{display: 'inline-flex',justifyContent: 'space-evenly'}}>
-                        <div className="form-label">{mod?.title}</div>
-                        <div className="form-desc">{mod?.description}</div>
-                        <div>
-                            <label className="form-check form-switch">
-                                <input className="form-check-input" type="checkbox" id={`switch${index}`} name={`switch${index}`} checked={mod?.status} onChange={(e) => handleModStatus(e, mod.id, index)}/>
-                                <span class="form-check-label" id={`switchlabel${index}`}>{mod?.status ? 'On' : 'Off'}</span>
-                            </label>
-                        </div>
-                      </div>
-                    </div>
-                    <hr></hr>
+                        {/* <div style={{content: "", height: "100%", width: "1px", backgroundColor: 'black',position: "absolute", top: 0, right: 0}}> */}
+                            <div className="col-md-5 m-3" style={{display: 'inline-flex',justifyContent: 'space-between'}}>
+                                <div>
+                                    <div className="form-label">{mod?.title}</div>
+                                    <div className="form-desc">{mod?.description}</div>
+                                </div>
+                                <div>
+                                    <label className="form-check form-switch">
+                                        <input className="form-check-input" type="checkbox" id={`switch${index}`} name={`switch${index}`} checked={mod.status} onChange={(e) => handleModStatus(e, mod.id, index)}/>
+                                        <span class="form-check-label" id={`switchlabel${index}`}>{mod?.status ? 'On' : 'Off'}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        {(index+1) % 2 == 0 ?
+                            <hr></hr>
+                            :
+                            ''
+                        }
                     </>
                     ))}
                   </div>
@@ -218,7 +219,7 @@ export default function Create(props) {
                         <a href={route('centres.index')} className="btn">
                             Cancel
                         </a>
-                        <a href="#" className="btn btn-primary" type="button" onClick={handleSubmit}>
+                        <a href="#" className="btn btn-primary" type="button" onClick={handleSubmit} disabled={processing}>
                             Submit
                         </a>
                     </div>

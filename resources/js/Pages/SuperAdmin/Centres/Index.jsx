@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { IconPencil } from '@tabler/icons-react';
 import { IconTrash } from '@tabler/icons-react';
 import { IconPower } from '@tabler/icons-react';
+import { toast, ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Index(props) {
 
@@ -11,10 +13,12 @@ export default function Index(props) {
     const [ id, setId ] = useState();
 
     const handleDelete = (id) => {
+        // toast.loading("Please wait...");
         deleteResource(route(`centres.destroy`, id));
     };
 
     const handleSuspend = (id) => {
+        // toast.loading("Please wait...");
         put(route(`centres.suspend`, id));
     };
 
@@ -24,6 +28,19 @@ export default function Index(props) {
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Centres Management</h2>}
         >
             <Head title="Centres Management" />
+
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                />
 
             <div className="page-header d-print-none">
             <div className="container-xl">
@@ -53,13 +70,13 @@ export default function Index(props) {
                                 <div className="card">
                                     <div className="card-body p-4 text-center">
                                         {centre?.image != null ?
-                                            <span className="avatar avatar-xl mb-3 rounded" style={{backgroundImage: "url(./../storage/app/public/centres/logos/"+centre?.image+")"}}></span>
+                                            <img class="mb-3 rounded" style={{width: "10rem", height: "3.5rem"}} src={"./../storage/app/public/centres/logos/"+centre?.image+""}/>
                                         :
                                             <></>
                                         }
                                         <h3 className="m-0 mb-1"><a href="#">{centre?.name}</a></h3>
                                         <div className="text-secondary">
-                                            {centre?.city != null ? centre?.city+', ' : ''}{centre?.country != null ? centre?.country : ''}</div>
+                                            {centre?.city != null ? centre?.city+', ' : ''}{centre?.country != null ? centre?.country : 'No Location Specified'}</div>
                                         <div className="mt-3">
                                             <span className="badge bg-purple-lt">{centre?.status}</span>
                                         </div>

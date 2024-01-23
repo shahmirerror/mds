@@ -34,4 +34,21 @@ class LabModulesController extends Controller
             return response()->json(['xray' => []], 404);
         }
     }
+
+    public function fetch_registration(request $request)
+    {
+        $all = json_decode($request->getContent());
+
+        $check = Registrations::where('serial_no',$all->serial_no)->where('reg_date',$all->reg_date)->where('center_id',$all->centre_id)->OrWhere('barcode_no',$all->barcode_no)->first();
+
+        if($check)
+        {
+
+            return response()->json(['registration' => $check, 'candidate' => Candidates::find($check->candidate_id)], 200);
+        }
+        else
+        {
+            return response()->json(['registration' => [], 'candidate' => []], 404);
+        }
+    }
 }

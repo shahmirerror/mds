@@ -36,6 +36,8 @@ Route::get('fetch-prev-labsticker', [App\Http\Controllers\API\ImportController::
             Route::put('super-admin/centres/{id}/edit-staff', [App\Http\Controllers\API\SuperAdmin\CentreManagementController::class, 'update_user'])->name('super.centre.edit_staff');
             Route::put('super-admin/centres/{id}/staff-status', [App\Http\Controllers\API\SuperAdmin\CentreManagementController::class, 'update_user_status'])->name('super.centre.staff_status');
             Route::put('super-admin/centres/{module_id}/edit-lab-modules/{centre_id}', [App\Http\Controllers\API\SuperAdmin\CentreManagementController::class, 'toggle_centre_lab_modules'])->name('super.centre.lab_modules');
+            Route::get('super-admin/centres/fetch-lab-module-permissions/{centre_id}/{user_id}', [App\Http\Controllers\API\SuperAdmin\CentreManagementController::class, 'fetch_lab_module_permissions'])->name('super.centre.lab_module_permissions');
+            Route::post('super-admin/centres/{permission_id}/edit-lab-module-permissions/{user_id}', [App\Http\Controllers\API\SuperAdmin\CentreManagementController::class, 'toggle_lab_module_permissions'])->name('super.centre.toggle_lab_module_permissions');
 
             //ReportsController
             Route::get('super-admin/get-centres', [App\Http\Controllers\API\SuperAdmin\ReportsController::class, 'fetch_centres'])->name('super.reports.fetch_centres');
@@ -81,6 +83,8 @@ Route::get('fetch-prev-labsticker', [App\Http\Controllers\API\ImportController::
 
             //XRAY Result
             Route::get('lab-modules/xray/fetch-result', [App\Http\Controllers\API\LabModulesController::class, 'fetch_xray_result'])->name('xray.fetch_result');
+
+            Route::get('lab-modules/fetch-registration', [App\Http\Controllers\API\LabModulesController::class, 'fetch_registration'])->name('lab.fetch_registration');
 
 //Centre Staff API Routes
 

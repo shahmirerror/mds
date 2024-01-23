@@ -19,4 +19,9 @@ class ReportsController extends Controller
     {
         return response()->json(['modules' => ReportModules::get()], 200);
     }
+
+    public function fetch_result(request $request)
+    {
+
+    }
 }

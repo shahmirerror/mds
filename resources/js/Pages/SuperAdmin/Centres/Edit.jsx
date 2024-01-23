@@ -5,10 +5,17 @@ import { IconTrash } from '@tabler/icons-react';
 import { IconUserPlus } from '@tabler/icons-react';
 import { IconPower } from '@tabler/icons-react';
 import { IconPencil } from '@tabler/icons-react';
+import { IconCategory } from '@tabler/icons-react';
+
+import { toast, ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Edit(props) {
     const [users , setUsers] = useState(props.users);
     const [modules , setModules] = useState(props.modules);
+
+    const [module_rights , setModuleRights] = useState(null);
+    const [module_user_rights , setUserModuleRights] = useState(null);
 
     const [id, setId] = useState(0);
     const [name, setName] = useState('');
@@ -38,6 +45,7 @@ export default function Edit(props) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        toast.loading("Please wait...");
 
         post(route('centres.update', props.centre.id));
     }
@@ -71,14 +79,22 @@ export default function Edit(props) {
                     (result) => {
                         // $('#preloader').hide();
                         setUsers(result.users);
-                        // console.log(result);
                     },
                     (error) => {
                         console.log(error)
                     }
                 );
         } catch (ex) {
-            console.error(ex);
+            toast.error('Something went wrong! Can not fetch users', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
         }
     }
     const handleNewUserSubmit = (e) => {
@@ -107,13 +123,41 @@ export default function Edit(props) {
                         setRole('Staff');
                         setUsername('');
                         refreshUsers();
+                        toast.success('Staff Profile has been created!', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     },
                     (error) => {
-                        console.log(error)
+                        toast.error('Something went wrong! Please try again :(', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     }
                 );
         } catch (ex) {
-            console.error(ex);
+            toast.error('Something went wrong! Please try again :(', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
         }
     }
 
@@ -123,8 +167,6 @@ export default function Edit(props) {
         setName(user.name);
         setUsername(user.username);
         setRole(user.role_id == 2 ? 'Admin' : 'Staff');
-
-        console.log(user, 'edit');
     }
 
     const handleEditUserSubmit = (e) => {
@@ -155,13 +197,41 @@ export default function Edit(props) {
                         setRole('Staff');
                         setUsername('');
                         refreshUsers();
+                        toast.success('Staff Profile has been updated!', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     },
                     (error) => {
-                        console.log(error)
+                        toast.error('Something went wrong! Please try again :(', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     }
                 );
         } catch (ex) {
-            console.error(ex);
+            toast.error('Something went wrong! Please try again :(', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
         }
     }
 
@@ -195,13 +265,41 @@ export default function Edit(props) {
                         setId(0);
                         setStatus('');
                         refreshUsers();
+                        toast.success('Staff Profile has been made Inactive', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     },
                     (error) => {
-                        console.log(error)
+                        toast.error('Something went wrong! Please try again :(', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     }
                 );
         } catch (ex) {
-            console.error(ex);
+            toast.error('Something went wrong! Please try again :(', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
         }
     }
 
@@ -229,6 +327,79 @@ export default function Edit(props) {
         }
     }
 
+    const fetchModPermissions = (e, id, index) => {
+        setModuleRights(null)
+        setUserModuleRights(id)
+        try {
+            const response = fetch(route("super.centre.lab_module_permissions", {'user_id': id, 'centre_id': props.centre.id}), {
+                method: "GET"
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        setModuleRights(result.module_rights);
+                        console.log(result.module_rights);
+                    },
+                    (error) => {
+                        console.log(error)
+                    }
+                );
+        } catch (ex) {
+            console.error(ex);
+        }
+    }
+
+    const handlePerStatus = (e, user_id, permission_id, index) => {
+        // console.log(user_id, permission_id);
+        let status = e.target.checked ? 'On' : 'Off';
+        try {
+            const response = fetch(route("super.centre.toggle_lab_module_permissions", {'user_id': user_id, 'permission_id': permission_id}), {
+                method: "POST",
+                body: JSON.stringify({permission_value: document.getElementById('perswitch'+permission_id).value})
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        e.target.checked = status === 'Off' ? false : true;
+                        let message = status === 'Off' ? "Permission has been removed!" : "Permission has been granted!";
+                        toast.success(message, {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    },
+                    (error) => {
+                        toast.error('Something went wrong! Please try again :(', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    }
+                );
+        } catch (ex) {
+            toast.error('Something went wrong! Please try again :(', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+        }
+    }
+
 
     return (
         <AuthenticatedLayout
@@ -236,204 +407,216 @@ export default function Edit(props) {
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Centres Management</h2>}
         >
             <Head title="Edit Centre" />
-
-            <div className="page-header d-print-none">
-                <div className="container-xl">
-                    <div className="row g-2 align-items-center">
-                    <div className="col">
-                        <h2 className="page-title">
-                            Edit Centre
-                        </h2>
-                    </div>
-                    </div>
-                </div>
-            </div>
-
-        <div className="page-body">
-          <div className="container-xl">
-            <div className="card">
-              <div className="row g-0">
-                <div className="col-12 col-md-2 border-end">
-                  <div className="card-body">
-                    <h4 className="subheader">Centre settings</h4>
-                    <div className="list-group list-group-transparent">
-                      <a href="#" className="list-group-item list-group-item-action d-flex align-items-center" onClick={(e) => handleForm(e, 'basic-information')}>Basic Information</a>
-                      <a href="#" className="list-group-item list-group-item-action d-flex align-items-center" onClick={(e) => handleForm(e, 'users')}>Centre Staff</a>
-                      <a href="#" className="list-group-item list-group-item-action d-flex align-items-center" onClick={(e) => handleForm(e, 'modules')}>Centre Lab Modules</a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-12 col-md-10 d-flex flex-column">
-                    {/* Basic Information */}
-                  <div className="card-body" id="basic-information">
-                    <div class="row">
-                        <div className="col-md">
-                            <h3 className="card-title">Logo</h3>
-                            <div className="row align-items-center">
-                                <div className="col-auto">
-                                    <input className="form-control" type="file" name="logo" onChange={handleFile} value=""/>
-                                </div>
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                />
+                    <div className="page-header d-print-none">
+                        <div className="container-xl">
+                            <div className="row g-2 align-items-center">
+                            <div className="col">
+                                <h2 className="page-title">
+                                    Edit Centre
+                                </h2>
+                            </div>
                             </div>
                         </div>
-                        {props.centre?.image !== null ?
-                        <div className="col-md">
-                            <h3 className="card-title">Current Logo</h3>
-                            <div className="row align-items-center">
-                                <div className="col-auto">
-                                    <span className="avatar avatar-xl rounded" style={{backgroundImage: "url(./../../../storage/app/public/centres/logos/"+props.centre?.image+")"}}></span>
+                    </div>
+
+                    <div className="page-body">
+                    <div className="container-xl">
+                        <div className="card">
+                        <div className="row g-0">
+                            <div className="col-12 col-md-2 border-end">
+                            <div className="card-body">
+                                <h4 className="subheader">Centre settings</h4>
+                                <div className="list-group list-group-transparent">
+                                <a href="#" className="list-group-item list-group-item-action d-flex align-items-center" onClick={(e) => handleForm(e, 'basic-information')}>Basic Information</a>
+                                <a href="#" className="list-group-item list-group-item-action d-flex align-items-center" onClick={(e) => handleForm(e, 'users')}>Centre Staff</a>
+                                <a href="#" className="list-group-item list-group-item-action d-flex align-items-center" onClick={(e) => handleForm(e, 'modules')}>Centre Lab Modules</a>
                                 </div>
                             </div>
-                        </div>
-                        :
-                        <></>
-                        }
-                    </div>
-                    <h3 className="card-title mt-4">Information</h3>
-                    <div className="row mb-3">
-                      <div className="col-md">
-                        <div className="form-label">Name</div>
-                        <input type="text" className="form-control" value={data.name}  name="name" onChange={handleChange} />
-                      </div>
-                      <div className="col-md">
-                        <div className="form-label">City</div>
-                        <input type="text" className="form-control" value={data.city}  name="city" onChange={handleChange} />
-                      </div>
-                      <div className="col-md">
-                        <div className="form-label">Country</div>
-                        <input type="text" className="form-control" value={data.country} name="country" onChange={handleChange} />
-                      </div>
-                    </div>
-                    <div className="row g-3">
-                      <div className="col-md">
-                        <div className="form-label">Phone</div>
-                        <input type="text" className="form-control" value={data.phone} name="phone" onChange={handleChange}/>
-                      </div>
-                      <div className="col-md">
-                        <div className="form-label">Address</div>
-                        <input type="text" className="form-control" value={data.address} name="address" onChange={handleChange} />
-                      </div>
-                    </div>
-                  </div>
+                            </div>
 
-                  <div className="card-body" id="users" style={{display: 'none'}}>
-                    <div className="row mb-3">
-                        <h3 className="card-title" style={{float: 'left', width: '90%'}}>Centre Staff</h3>
-                        <a href="#" type="button" className="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#new-user" style={{float: 'right', width: '10%'}}><IconUserPlus /></a>
-                        <div style={{clear: 'both'}}></div>
-                    </div>
-
-                    <div className='row m-3'>
-                        <div className="table-responsive">
-                            <table className="table card-table table-vcenter text-nowrap datatable">
-                            <thead>
-                                <tr>
-                                    <th className="text-center">Name</th>
-                                    <th className="text-center">Username</th>
-                                    <th className="text-center">Role</th>
-                                    <th className="text-center">Status</th>
-                                    <th className="text-center">Action(s)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {users.map((user, index) => (
-                                <tr>
-                                    <td className="text-center">
-                                        <a href="#" className="text-reset" tabindex="-1">{user.name}</a>
-                                    </td>
-                                    <td className="text-center">
-                                        {user?.username}
-                                    </td>
-                                    <td className="text-center">
-                                        {user?.role_id == 2 ? 'Admin' : 'Staff'}
-                                    </td>
-                                    <td className="text-center">
-                                        {user?.status == 'Active' ?
-                                            <span className="badge bg-success me-1 text-white"> Active</span>
-                                        : user?.status == 'Inactive' ?
-                                            <span className="badge bg-danger me-1 text-white"> Inactive</span>
-                                        :
-                                            <></>
-                                        }
-                                    </td>
-                                    <td className="text-center">
-                                        <div className="d-flex">
-                                            <a className="card-btn" href="#" type="button" data-bs-toggle="modal" data-bs-target="#edit-user" onClick={() => handleEdit(user)}>
-                                                <IconPencil />
-                                            </a>
-                                            {user?.role_id == 3 ?
-                                                <a className="card-btn" href="#">
-                                                    Edit Permissions
-                                                </a>
-                                            :
-                                                <></>
-                                            }
-                                            {user?.status == 'Active' ?
-                                                <a className="card-btn text-danger" href="#" type="button" data-bs-toggle="modal" data-bs-target="#delete-user" onClick={() => handleStatus(user?.id, 'Inactive')}>
-                                                    <IconPower />
-                                                </a>
-                                            :
-                                                <a className="dropdown-item text-success" href="#" type="button" data-bs-toggle="modal" data-bs-target="#delete-user" onClick={() => handleStatus(user?.id, 'Active')}>
-                                                    <IconPower />
-                                                </a>
-                                            }
-
+                            <div className="col-12 col-md-10 d-flex flex-column">
+                                {/* Basic Information */}
+                            <div className="card-body" id="basic-information">
+                                <div class="row">
+                                    <div className="col-md">
+                                        <h3 className="card-title">Logo</h3>
+                                        <div className="row align-items-center">
+                                            <div className="col-auto">
+                                                <input className="form-control" type="file" name="logo" onChange={handleFile} value=""/>
+                                            </div>
                                         </div>
-                                    </td>
-                                </tr>
-                                ))}
-                            </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                  </div>
-
-                  <div className="card-body" id="modules" style={{display: 'none'}}>
-                    <h3 className="card-title">Centre Lab Modules</h3>
-                    <hr></hr>
-                    <div className="row m-3">
-                    {props.modules.map((mod, index) => (
-                    <>
-                        {/* <div style={{content: "", height: "100%", width: "1px", backgroundColor: 'black',position: "absolute", top: 0, right: 0}}> */}
-                            <div className="col-md-5 m-3" style={{display: 'inline-flex',justifyContent: 'space-between'}}>
-                                <div>
-                                    <div className="form-label">{mod?.title}</div>
-                                    <div className="form-desc">{mod?.description}</div>
+                                    </div>
+                                    {props.centre?.image !== null ?
+                                    <div className="col-md">
+                                        <h3 className="card-title">Current Logo</h3>
+                                        <div className="row align-items-center">
+                                            <div className="col-auto">
+                                                <img class="mb-3 rounded" style={{width: "5.5rem"}} src={"./../../../storage/app/public/centres/logos/"+props.centre?.image+""}/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    :
+                                    <></>
+                                    }
                                 </div>
-                                <div>
-                                    <label className="form-check form-switch">
-                                        <input className="form-check-input" type="checkbox" id={`switch${index}`} name={`switch${index}`} checked={mod?.status} onChange={(e) => handleModStatus(e, mod?.id, index)}/>
-                                        <span class="form-check-label" id={`switchlabel${index}`}>{mod?.status ? 'On' : 'Off'}</span>
-                                    </label>
+                                <h3 className="card-title mt-4">Information</h3>
+                                <div className="row mb-3">
+                                <div className="col-md">
+                                    <div className="form-label">Name</div>
+                                    <input type="text" className="form-control" value={data.name}  name="name" onChange={handleChange} />
+                                </div>
+                                <div className="col-md">
+                                    <div className="form-label">City</div>
+                                    <input type="text" className="form-control" value={data.city}  name="city" onChange={handleChange} />
+                                </div>
+                                <div className="col-md">
+                                    <div className="form-label">Country</div>
+                                    <input type="text" className="form-control" value={data.country} name="country" onChange={handleChange} />
+                                </div>
+                                </div>
+                                <div className="row g-3">
+                                <div className="col-md">
+                                    <div className="form-label">Phone</div>
+                                    <input type="text" className="form-control" value={data.phone} name="phone" onChange={handleChange}/>
+                                </div>
+                                <div className="col-md">
+                                    <div className="form-label">Address</div>
+                                    <input type="text" className="form-control" value={data.address} name="address" onChange={handleChange} />
+                                </div>
                                 </div>
                             </div>
-                        {(index+1) % 2 == 0 ?
-                            <hr></hr>
-                            :
-                            ''
-                        }
-                    </>
-                    ))}
+
+                            <div className="card-body" id="users" style={{display: 'none'}}>
+                                <div className="row mb-3">
+                                    <h3 className="card-title" style={{float: 'left', width: '90%'}}>Centre Staff</h3>
+                                    <a href="#" type="button" className="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#new-user" style={{float: 'right', width: '5%'}}><IconUserPlus /></a>
+                                    <div style={{clear: 'both'}}></div>
+                                </div>
+
+                                <div className='row m-3'>
+                                    <div className="table-responsive">
+                                        <table className="table card-table table-vcenter text-nowrap datatable">
+                                        <thead>
+                                            <tr>
+                                                <th className="text-center">Name</th>
+                                                <th className="text-center">Username</th>
+                                                <th className="text-center">Role</th>
+                                                <th className="text-center">Status</th>
+                                                <th className="text-center">Action(s)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {users.map((user, index) => (
+                                            <tr>
+                                                <td className="text-center">
+                                                    <a href="#" className="text-reset" tabindex="-1">{user.name}</a>
+                                                </td>
+                                                <td className="text-center">
+                                                    {user?.username}
+                                                </td>
+                                                <td className="text-center">
+                                                    {user?.role_id == 2 ? 'Admin' : 'Staff'}
+                                                </td>
+                                                <td className="text-center">
+                                                    {user?.status == 'Active' ?
+                                                        <span className="badge bg-success me-1 text-white"> Active</span>
+                                                    : user?.status == 'Inactive' ?
+                                                        <span className="badge bg-danger me-1 text-white"> Inactive</span>
+                                                    :
+                                                        <></>
+                                                    }
+                                                </td>
+                                                <td className="text-center">
+                                                    <div className="d-flex">
+                                                        <a className="card-btn" href="#" type="button" data-bs-toggle="modal" data-bs-target="#edit-user" onClick={() => handleEdit(user)}>
+                                                            <IconPencil />
+                                                        </a>
+                                                        {user?.role_id == 3 ?
+                                                            <a className="card-btn" href="#" type="button" data-bs-toggle="modal" data-bs-target="#edit-permissions" onClick={(e) => fetchModPermissions(e, user?.id, index)}>
+                                                                <IconCategory />
+                                                            </a>
+                                                        :
+                                                            <></>
+                                                        }
+                                                        {user?.status == 'Active' ?
+                                                            <a className="card-btn text-danger" href="#" type="button" data-bs-toggle="modal" data-bs-target="#delete-user" onClick={() => handleStatus(user?.id, 'Inactive')}>
+                                                                <IconPower />
+                                                            </a>
+                                                        :
+                                                            <a className="card-btn text-success" href="#" type="button" data-bs-toggle="modal" data-bs-target="#delete-user" onClick={() => handleStatus(user?.id, 'Active')}>
+                                                                <IconPower />
+                                                            </a>
+                                                        }
+
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            ))}
+                                        </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div className="card-body" id="modules" style={{display: 'none'}}>
+                                <h3 className="card-title">Centre Lab Modules</h3>
+                                <hr></hr>
+                                <div className="row m-3">
+                                {props.modules.map((mod, index) => (
+                                <>
+                                    {/* <div style={{content: "", height: "100%", width: "1px", backgroundColor: 'black',position: "absolute", top: 0, right: 0}}> */}
+                                        <div className="col-md-5 m-3" style={{display: 'inline-flex',justifyContent: 'space-between'}}>
+                                            <div>
+                                                <div className="form-label">{mod?.title}</div>
+                                                <div className="form-desc">{mod?.description}</div>
+                                            </div>
+                                            <div>
+                                                <label className="form-check form-switch">
+                                                    <input className="form-check-input" type="checkbox" id={`switch${index}`} name={`switch${index}`} checked={mod?.status} onChange={(e) => handleModStatus(e, mod?.id, index)}/>
+                                                    <span class="form-check-label" id={`switchlabel${index}`}>{mod?.status ? 'On' : 'Off'}</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    {(index+1) % 2 == 0 ?
+                                        <hr></hr>
+                                        :
+                                        ''
+                                    }
+                                </>
+                                ))}
+                                    </div>
+                            </div>
+
+                            <div id="form_footer" className="card-footer bg-transparent mt-auto">
+                                <div className="btn-list justify-content-end">
+                                <a href={route('centres.index')} className="btn">
+                                    Cancel
+                                </a>
+                                <a href="#" className="btn btn-primary" type="button" onClick={handleSubmit}>
+                                    Update Centre
+                                </a>
+                                </div>
+                            </div>
+
+                            </div>
                         </div>
-                  </div>
-
-                  <div id="form_footer" className="card-footer bg-transparent mt-auto">
-                    <div className="btn-list justify-content-end">
-                      <a href={route('centres.index')} className="btn">
-                        Cancel
-                      </a>
-                      <a href="#" className="btn btn-primary" type="button" onClick={handleSubmit}>
-                        Submit
-                      </a>
+                        </div>
                     </div>
-                  </div>
+                    </div>
 
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Create User Modal */}
         <div className="modal modal-blur fade" id="new-user" tabindex="-1" role="dialog" aria-hidden="true">
@@ -531,6 +714,65 @@ export default function Edit(props) {
             </div>
         </div>
         {/* Edit User Modal */}
+
+        {/* Edit Permissions Modal */}
+        <div className="modal modal-blur fade" id="edit-permissions" tabindex="-1" role="dialog" aria-hidden="true">
+            <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Edit Permissions</h5>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                <div className="modal-body">
+                <div className="row m-3">
+                    {module_rights?.length > 0 ? module_rights.map((mod, index) => (
+                    <>
+                        {/* <div style={{content: "", height: "100%", width: "1px", backgroundColor: 'black',position: "absolute", top: 0, right: 0}}> */}
+                            <div className="col-md-12 mb-2" >
+                                <div>
+                                    <div className="form-label">{mod?.title}</div>
+                                </div>
+                                <div className="col-md-12" style={{display: 'inline-flex', justifyContent: 'space-between'}}>
+                                {mod?.rights?.length > 0 ? mod?.rights.map((right, index) => (
+                                    <div>
+                                        {right?.permission_type == 'CRUD' || right?.permission_type == 'Alternate' ?
+                                        <label className="form-check form-switch">
+                                            <input className="form-check-input" type="checkbox" id={`perswitch${right?.permission_id}`} name={`perswitch${right?.permission_id}`} checked={right?.status} onChange={(e) => handlePerStatus(e, module_user_rights, right?.permission_id, index)}/>
+                                            <span class="form-check-label" id={`perswitchlabel${right?.permission_id}`}>{right?.permission_name.replaceAll('_',' ').toUpperCase()}</span>
+                                        </label>
+                                        :
+                                        <>
+                                            <label className="form-label" id={`perswitchlabel${index}`}>{right?.permission_name.replaceAll('_',' ').toUpperCase()}</label>
+                                            <input className="form-control" type="text" id={`perswitch${right?.permission_id}`} name={`perswitch${right?.permission_id}`} placeholder="Enter Value" value={right?.permission_value} onChange={(e) => handlePerStatus(e, module_user_rights, right?.permission_id, index)}/>
+                                        </>
+                                        }
+                                    </div>
+                                ))
+                                :
+                                    <div>
+                                        <span class="form-check-label" id={``}>{'No Rights are available for this Module'}</span>
+                                    </div>
+                            }
+                                </div>
+                            </div>
+
+                            <hr></hr>
+                    </>
+                    ))
+                :
+                <></>
+                }
+                        </div>
+                </div>
+                <div className="modal-footer">
+                    <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
+                        Close
+                    </a>
+                </div>
+                </div>
+            </div>
+        </div>
+        {/* Edit Permissions Modal */}
 
         {/* Delete User Modal */}
         <div className="modal modal-blur fade" id="delete-user" tabindex="-1" role="dialog" aria-hidden="true">

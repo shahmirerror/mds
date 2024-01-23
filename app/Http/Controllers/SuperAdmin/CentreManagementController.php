@@ -11,6 +11,8 @@ use App\Models\CentreLabModules;
 use App\Models\LabModules;
 use App\Models\User;
 
+use Hash;
+
 use Inertia\Inertia;
 
 class CentreManagementController extends Controller
@@ -62,12 +64,12 @@ class CentreManagementController extends Controller
 
         foreach($request->users as $staff)
         {
-            if($staff->username != NULL && $staff->password != NULL && $staff->role != NULL)
+            if($staff['username'] != NULL && $staff['password'] != NULL && $staff['role'] != NULL)
             {
                 $new_user = new User;
-                $new_user->username = $staff->username;
-                $new_user->password = Hash::make($staff->password);
-                if($staff->role == 'Staff')
+                $new_user->username = $staff['username'];
+                $new_user->password = Hash::make($staff['password']);
+                if($staff['role'] == 'Staff')
                 {
                     $new_user->role_id = 3;
                 }
@@ -81,6 +83,17 @@ class CentreManagementController extends Controller
                 $new_staff->centre_id = $new->id;
                 $new_staff->user_id = $new_user->id;
                 $new_staff->save();
+            }
+        }
+
+        foreach($request->modules as $mods)
+        {
+            if($mods['status'] == true)
+            {
+                $new_mod = new CentreLabModules;
+                $new_mod->centre_id = $new->id;
+                $new_mod->lab_module_id = $mods['id'];
+                $new_mod->save();
             }
         }
 

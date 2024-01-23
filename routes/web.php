@@ -75,6 +75,18 @@ Route::middleware('auth')->group(function () {
             return Inertia::render('LabModules/SampleCollection');
         })->name('sample-collection.index');
 
+        Route::get('/medical-examination', function () {
+            return Inertia::render('LabModules/MedicalExamination');
+        })->name('medical-examination.index');
+
+        Route::get('/lab-result', function () {
+            return Inertia::render('LabModules/LabResult');
+        })->name('lab-result.index');
+
+        Route::get('/lab-sticker', function () {
+            return Inertia::render('LabModules/LabStickers');
+        })->name('lab-sticker.index');
+
         Route::resource('xray-verification', App\Http\Controllers\LabModules\XRAYVerificationController::class);
 
         Route::resource('xray-result', App\Http\Controllers\LabModules\XRAYResultController::class);
