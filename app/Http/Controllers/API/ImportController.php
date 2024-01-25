@@ -11,6 +11,13 @@ use App\Models\Medical;
 use App\Models\XrayResult;
 use App\Models\LabResult;
 use App\Models\LabSticker;
+use App\Models\Profession;
+use App\Models\Country;
+use App\Models\Agency;
+use App\Models\Nationality;
+use App\Models\PlaceOfIssue;
+
+use App\Models\Centres;
 
 class ImportController extends Controller
 {
@@ -416,6 +423,202 @@ class ImportController extends Controller
                 $new->created_by = $d['created_by'];
 
                 $new->save();
+            }
+        }
+
+        // Close the cURL session
+        curl_close($curl);
+    }
+
+    public function fetch_country()
+    {
+        // Define the URL to be accessed
+        $url = "http://localhost:81/old_mls/reliance/country.php";
+
+        $centres = Centres::where('status','Active')->get();
+
+        // Initialize a cURL session
+        $curl = curl_init($url);
+
+        // Set options for the cURL session
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+        ));
+
+        // Execute the cURL request and store the response
+        $response = curl_exec($curl);
+
+        // Check for errors
+        if (curl_errno($curl)) {
+            echo "Error: " . curl_error($curl);
+        } else {
+            // Decode the JSON response
+            $data = json_decode($response, true);
+
+            // Print the retrieved data
+            // echo "<pre>";
+            // print_r($data);
+            // echo "</pre>";
+
+            foreach($data as $d)
+            {
+                foreach($centres as $centre)
+                {
+                    $new = new Country;
+                    $new->centre_id = $centre->id;
+                    $new->name = $d['Name'];
+                    $new->status = ($d['status'] == 1) ? 'Active' : 'Inactive';
+
+                    $new->save();
+                }
+            }
+        }
+
+        // Close the cURL session
+        curl_close($curl);
+    }
+
+    public function fetch_agency()
+    {
+        // Define the URL to be accessed
+        $url = "http://localhost:81/old_mls/reliance/agency.php";
+
+        $centres = Centres::where('status','Active')->get();
+
+        // Initialize a cURL session
+        $curl = curl_init($url);
+
+        // Set options for the cURL session
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+        ));
+
+        // Execute the cURL request and store the response
+        $response = curl_exec($curl);
+
+        // Check for errors
+        if (curl_errno($curl)) {
+            echo "Error: " . curl_error($curl);
+        } else {
+            // Decode the JSON response
+            $data = json_decode($response, true);
+
+            // Print the retrieved data
+            // echo "<pre>";
+            // print_r($data);
+            // echo "</pre>";
+
+            foreach($data as $d)
+            {
+                foreach($centres as $centre)
+                {
+                    $new = new Agency;
+                    $new->centre_id = $centre->id;
+                    $new->name = $d['Name'];
+                    $new->status = ($d['status'] == 1) ? 'Active' : 'Inactive';
+
+                    $new->save();
+                }
+            }
+        }
+
+        // Close the cURL session
+        curl_close($curl);
+    }
+
+    public function fetch_profession()
+    {
+        // Define the URL to be accessed
+        $url = "http://localhost:81/old_mls/reliance/profession.php";
+
+        $centres = Centres::where('status','Active')->get();
+
+        // Initialize a cURL session
+        $curl = curl_init($url);
+
+        // Set options for the cURL session
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+        ));
+
+        // Execute the cURL request and store the response
+        $response = curl_exec($curl);
+
+        // Check for errors
+        if (curl_errno($curl)) {
+            echo "Error: " . curl_error($curl);
+        } else {
+            // Decode the JSON response
+            $data = json_decode($response, true);
+
+            // Print the retrieved data
+            // echo "<pre>";
+            // print_r($data);
+            // echo "</pre>";
+
+            foreach($data as $d)
+            {
+                foreach($centres as $centre)
+                {
+                    $new = new Profession;
+                    $new->centre_id = $centre->id;
+                    $new->name = $d['profession'];
+                    $new->status = ($d['status'] == 1) ? 'Active' : 'Inactive';
+
+                    $new->save();
+                }
+            }
+        }
+
+        // Close the cURL session
+        curl_close($curl);
+    }
+
+    public function fetch_nationality()
+    {
+        // Define the URL to be accessed
+        $url = "http://localhost:81/old_mls/reliance/nationality.php";
+
+        $centres = Centres::where('status','Active')->get();
+
+        // Initialize a cURL session
+        $curl = curl_init($url);
+
+        // Set options for the cURL session
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+        ));
+
+        // Execute the cURL request and store the response
+        $response = curl_exec($curl);
+
+        // Check for errors
+        if (curl_errno($curl)) {
+            echo "Error: " . curl_error($curl);
+        } else {
+            // Decode the JSON response
+            $data = json_decode($response, true);
+
+            // Print the retrieved data
+            // echo "<pre>";
+            // print_r($data);
+            // echo "</pre>";
+
+            foreach($data as $d)
+            {
+                foreach($centres as $centre)
+                {
+                    $new = new Nationaltiy;
+                    $new->centre_id = $centre->id;
+                    $new->name = $d['nationaltiy'];
+                    $new->status = ($d['status'] == 1) ? 'Active' : 'Inactive';
+
+                    $new->save();
+                }
             }
         }
 

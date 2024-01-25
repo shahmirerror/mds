@@ -48,9 +48,9 @@ export default function Index(props) {
 
         console.log(data)
 
-        const modal = document.getElementById('edit-user');
-        modal.classList.toggle('show');
-        modal.style.display = 'block';
+        // const modal = document.getElementById('edit-user');
+        // modal.classList.toggle('show');
+        // modal.style.display = 'block';
     }
 
     return (
@@ -95,7 +95,7 @@ export default function Index(props) {
                                         </div> */}
                                     </div>
                                     <div className="d-flex">
-                                        <a href="#" className="card-btn" onClick={() => handleEdit(user)}>
+                                        <a href="#" className="card-btn" data-bs-toggle="modal" data-bs-target="#edit-user" onClick={() => handleEdit(user)}>
                                             <IconPencil />
                                         </a>
                                         <a href="#" className="card-btn" data-bs-toggle="modal" data-bs-target="#delete-user">

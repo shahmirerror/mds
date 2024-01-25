@@ -316,14 +316,42 @@ export default function Edit(props) {
                     (result) => {
                         document.getElementById(`switchlabel${index}`).innerHTML = status;
                         e.target.checked = status === 'Off' ? false : true;
-                        // console.log(e.target.checked+' : '+!e.target.checked, document.getElementById(`switchlabel${index}`).innerHTML)
+                        let message = status === 'Off' ? "Module has been removed!" : "Module has been activated!";
+                        toast.success(message, {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     },
                     (error) => {
-                        console.log(error)
+                        toast.error("Something went wrong! Please try again :(", {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     }
                 );
         } catch (ex) {
-            console.error(ex);
+            toast.error("Something went wrong! Please try again :(", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
         }
     }
 
@@ -338,14 +366,41 @@ export default function Edit(props) {
                 .then(
                     (result) => {
                         setModuleRights(result.module_rights);
-                        console.log(result.module_rights);
+                        toast.info("Module Permissions have been loaded!", {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     },
                     (error) => {
-                        console.log(error)
+                        toast.error("Something went wrong! Please try again :(", {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     }
                 );
         } catch (ex) {
-            console.error(ex);
+            toast.error("Something went wrong! Please try again :(", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
         }
     }
 
@@ -361,7 +416,7 @@ export default function Edit(props) {
                 .then(
                     (result) => {
                         e.target.checked = status === 'Off' ? false : true;
-                        let message = status === 'Off' ? "Permission has been removed!" : "Permission has been granted!";
+                        let message = "Permissions have been updated!";
                         toast.success(message, {
                             position: "top-right",
                             autoClose: 5000,

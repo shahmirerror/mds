@@ -1,12 +1,23 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { IconTrash, IconUserPlus, IconDownload } from '@tabler/icons-react';
+import { IconPencil } from '@tabler/icons-react';
+import { IconPower } from '@tabler/icons-react';
+
+import { toast, ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Settings(props) {
 
     const [devices, setDevices] = useState([]);
     const [logs, setLogs] = useState([]);
+
+    const [id, setID] = useState(0);
+    const [centre, setCentre] = useState(0);
+    const [brand, setBrand] = useState('');
+    const [type, setType] = useState('');
+    const [name, setName] = useState('');
 
     const { data, setData, post, processing, errors, reset } = useForm({
         frequency: 0,
@@ -18,6 +29,36 @@ export default function Settings(props) {
         console.log(e.target.name, e.target.value)
     };
 
+    const refreshDevices = () => {
+
+        try {
+            const response = fetch(route("super.settings.fetch_devices"), {
+                method: "GET"
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        // $('#preloader').hide();
+                        setDevices(result.devices);
+                    },
+                    (error) => {
+                        console.log(error)
+                    }
+                );
+        } catch (ex) {
+            toast.error('Something went wrong! Can not fetch devices', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+        }
+    }
+
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -25,20 +66,47 @@ export default function Settings(props) {
 
         try {
             const response = fetch(route("super.settings.update_settings", 1), {
-                method: "PUT",
+                method: "POST",
                 body: requestJson,
             })
                 .then(res => res.json())
                 .then(
                     (result) => {
-
+                        toast.success("Backup Settings have been updated!", {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     },
                     (error) => {
-                        console.log(error)
+                        toast.error("Something went wrong! Please try again :(", {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     }
                 );
         } catch (ex) {
-            console.error(ex);
+            toast.error("Something went wrong! Please try again :(", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
         }
     }
 
@@ -60,17 +128,7 @@ export default function Settings(props) {
         }
     }
 
-    const handleAddRow = () => {
-        const newRow = { id: rows.length + 1, username: '', password: '', role: 'Staff' };
-        setRows([...rows, newRow]);
-    };
-
-    const handleDeleteRow = (id) => {
-        const filteredRows = rows.filter((row) => row.id !== id);
-        setRows(filteredRows);
-    };
-
-    const handleModStatus = (e, id, index) => {
+    const handleStore = () => {
 
         e.preventDefault();
 
@@ -95,12 +153,46 @@ export default function Settings(props) {
         }
     }
 
+    const handleEdit = (user) => {
+
+        setId(user.id);
+        setName(user.name);
+        setBrand(user.brand);
+        setType(user.type);
+        setCentre(user.centre_id);
+    }
+
+    const handleDelete = () => {
+
+    }
+
+    const handleUpdate = () => {
+
+    }
+
+    useEffect(() => {
+        refreshDevices()
+    }, [])
+
+
     return (
         <AuthenticatedLayout
             user={props.auth.user}
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Organization Settings</h2>}
         >
             <Head title="Organization Settings" />
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                />
 
             <div className="page-header d-print-none">
                 <div className="container-xl">
@@ -163,21 +255,19 @@ export default function Settings(props) {
                             </label>
                         </div>
                       </div>
-                        {data.type == 'Daily' ?
                             <div className="col-md">
-                                <div className="form-label">Frequency</div>
-                                <input type="number" className="form-control" name="frequency" value={data.frequency} onChange={handleChange} />
+                                <div className="col-md-3">
+                                    <div className="form-label">Frequency</div>
+                                    <input type="number" className="form-control sm" name="frequency" value={data.frequency} onChange={handleChange} />
+                                </div>
                             </div>
-                        :
-                            <></>
-                        }
                     </div>
                   </div>
 
                   <div className="card-body" id="users" style={{display: 'none'}}>
                     <div className="row mb-3">
                         <h3 className="card-title" style={{float: 'left', width: '90%'}}>Centre Devices</h3>
-                        <a href="#" type="button" className="btn btn-sm btn-success" style={{float: 'right', width: '10%'}} onClick={handleAddRow}><IconUserPlus /></a>
+                        <a href="#" type="button" className="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#new-device" style={{float: 'right', width: '10%'}} ><IconUserPlus /></a>
                         <div style={{clear: 'both'}}></div>
                     </div>
                     <div className='row m-3'>
@@ -196,7 +286,7 @@ export default function Settings(props) {
                                 {devices?.length > 0 ? devices.map((device, index) => (
                                 <tr>
                                     <td className="text-center">
-                                        <a href="#" className="text-reset" tabindex="-1">{device.centre}</a>
+                                        <a href="#" className="text-reset" tabindex="-1">{device.centre_name}</a>
                                     </td>
                                     <td className="text-center">
                                         {device?.name}
@@ -209,10 +299,10 @@ export default function Settings(props) {
                                     </td>
                                     <td className="text-center">
                                         <div className="d-flex">
-                                            <a className="card-btn" href="#" type="button" data-bs-toggle="modal" data-bs-target="#edit-user" onClick={() => handleEdit(device)}>
+                                            <a className="card-btn" href="#" type="button" data-bs-toggle="modal" data-bs-target="#edit-device" onClick={() => handleEdit(device)}>
                                                 <IconPencil />
                                             </a>
-                                            <a className="card-btn text-danger" href="#" type="button" data-bs-toggle="modal" data-bs-target="#delete-user" onClick={() => handleStatus(device?.id, 'Inactive')}>
+                                            <a className="card-btn text-danger" href="#" type="button" data-bs-toggle="modal" data-bs-target="#delete-device" onClick={() => handleStatus(device?.id, 'Inactive')}>
                                                 <IconPower />
                                             </a>
 
@@ -252,7 +342,7 @@ export default function Settings(props) {
                                     </td>
                                     <td className="text-center">
                                         <div className="d-flex">
-                                            <a className="card-btn" href="#" type="button" data-bs-toggle="modal" data-bs-target="#edit-user" onClick={() => handleEdit(device)}>
+                                            <a className="card-btn" href="#" type="button" data-bs-toggle="modal" data-bs-target="#edit-user" onClick={''}>
                                                 <IconDownload />
                                             </a>
                                         </div>
@@ -281,6 +371,110 @@ export default function Settings(props) {
             </div>
           </div>
         </div>
+
+        {/* Create Device Modal */}
+        <div className="modal modal-blur fade" id="new-device" tabindex="-1" role="dialog" aria-hidden="true">
+                <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Create Centre Device</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    <div className="modal-body">
+                        <div className="mb-3">
+                            <label className="form-label">Centre</label>
+                            <input type="text" className="form-control" placeholder="Centre" name="name" onChange={(e) => setCentre(e.target.value)}/>
+                        </div>
+                        <div className="mb-3">
+                            <label className="form-label">Name</label>
+                            <input type="text" className="form-control" placeholder="Device Name" name="name" onChange={(e) => setName(e.target.value)}/>
+                        </div>
+                        <div className="mb-3">
+                            <label className="form-label">Brand</label>
+                            <input type="text" className="form-control" placeholder="Brand" name="brand" onChange={(e) => setBrand(e.target.value)}/>
+                        </div>
+                        <div className="mb-3">
+                            <label className="form-label">Type</label>
+                            <input type="text" className="form-control" placeholder="Type" name="type" onChange={(e) => setType(e.target.value)}/>
+                        </div>
+                    </div>
+                    <div className="modal-footer">
+                        <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </a>
+                        <button className="btn btn-primary ms-auto" data-bs-dismiss="modal" type="button" onClick={handleStore}>
+
+                            <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+                            Create Centre Device
+                        </button>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            {/* Create Device Modal */}
+
+            {/* Edit Device Modal */}
+            <div className="modal modal-blur fade" id="edit-device" tabindex="-1" role="dialog" aria-hidden="true">
+                <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Edit Centre Device</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    <div className="modal-body">
+                        <div className="mb-3">
+                            <label className="form-label">Name</label>
+                            <input type="text" className="form-control" placeholder="Super Admin's name" name="name" value={name} onChange={handleChange}/>
+                        </div>
+                        <div className="mb-3">
+                            <label className="form-label">Brand</label>
+                            <input type="text" className="form-control" placeholder="Email Address" name="email" value={brand} onChange={handleChange}/>
+                        </div>
+                        <div className="mb-3">
+                            <label className="form-label">Type</label>
+                            <input type="text" className="form-control" placeholder="Username" name="username" value={type} onChange={handleChange}/>
+                        </div>
+                    </div>
+                    <div className="modal-footer">
+                        <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </a>
+                        <button className="btn btn-primary ms-auto" data-bs-dismiss="modal" type="button" onClick={handleUpdate}>
+
+                            <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+                            Update Centre Device
+                        </button>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            {/* Edit Device Modal */}
+
+            {/* Delete Device Modal */}
+            <div className="modal modal-blur fade" id="delete-device" tabindex="-1" role="dialog" aria-hidden="true">
+                <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Delete Centre Device</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    <div className="modal-body">
+                        <span>Are you sure you want to delete this device?</span>
+                    </div>
+                    <div className="modal-footer">
+                        <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </a>
+                        <button className="btn btn-primary ms-auto" data-bs-dismiss="modal" type="button" onClick={handleDelete}>
+
+                            <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+                            Delete Centre Device
+                        </button>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            {/* Delete User Modal */}
 
 
         </AuthenticatedLayout>

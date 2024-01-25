@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 export default function Reports({ auth }) {
     const [centres, setCentres] = useState([]);
     const [modules, setModules] = useState([]);
+    const [countries, setCountries] = useState([]);
 
     const months = [
                     {value: 1,label: 'January'},
@@ -50,6 +51,7 @@ export default function Reports({ auth }) {
 
     const [report_type, setReportType] = useState(null);
     const [centreID, setCentre] = useState(0);
+    const [country, setCountry] = useState(null);
 
     const fetchCentres = () => {
 
@@ -95,6 +97,28 @@ export default function Reports({ auth }) {
         }
     }
 
+    const fetchCountries = () => {
+
+        try {
+            const response = fetch(route("super.reports.fetch_countries"), {
+                method: "GET"
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        // $('#preloader').hide();
+                        setCountries(result.countries);
+                        // console.log(result);
+                    },
+                    (error) => {
+                        console.log(error)
+                    }
+                );
+        } catch (ex) {
+            console.error(ex);
+        }
+    }
+
     const resetSelection = (e) => {
         e.preventDefault();
 
@@ -127,8 +151,7 @@ export default function Reports({ auth }) {
     useEffect(() => {
       fetchModules();
       fetchCentres();
-
-
+      fetchCountries();
     }, [])
 
 
@@ -247,8 +270,8 @@ export default function Reports({ auth }) {
                             <div className="form-label">Countries</div>
                             <select className="form-select form-control">
                                 <option value="0">Select Countries</option>
-                                {modules.map((mod, index) => (
-                                    <option value={mod?.id}>{mod?.title}</option>
+                                {countries.map((c, index) => (
+                                    <option value={c?.name}>{c?.name}</option>
                                 ))}
                             </select>
                         </div>

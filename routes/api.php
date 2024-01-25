@@ -25,6 +25,10 @@ Route::get('fetch-prev-xrays', [App\Http\Controllers\API\ImportController::class
 Route::get('fetch-prev-labs', [App\Http\Controllers\API\ImportController::class, 'fetch_labs'])->name('import.labs');
 Route::get('fetch-prev-labsticker', [App\Http\Controllers\API\ImportController::class, 'fetch_labsticker'])->name('import.labsticker');
 
+Route::get('fetch-prev-country', [App\Http\Controllers\API\ImportController::class, 'fetch_country'])->name('import.country');
+Route::get('fetch-prev-agency', [App\Http\Controllers\API\ImportController::class, 'fetch_agency'])->name('import.agency');
+Route::get('fetch-prev-profession', [App\Http\Controllers\API\ImportController::class, 'fetch_profession'])->name('import.profession');
+
 //Super Admin API Routes
 
             //ModulesController
@@ -41,12 +45,13 @@ Route::get('fetch-prev-labsticker', [App\Http\Controllers\API\ImportController::
 
             //ReportsController
             Route::get('super-admin/get-centres', [App\Http\Controllers\API\SuperAdmin\ReportsController::class, 'fetch_centres'])->name('super.reports.fetch_centres');
+            Route::get('super-admin/get-countries', [App\Http\Controllers\API\SuperAdmin\ReportsController::class, 'fetch_countries'])->name('super.reports.fetch_countries');
             Route::get('super-admin/get-reports', [App\Http\Controllers\API\SuperAdmin\ReportsController::class, 'fetch_reports'])->name('super.reports.fetch_reports');
 
             //SettingsController
             Route::get('super-admin/get-backup-logs', [App\Http\Controllers\API\SuperAdmin\SettingsController::class, 'backup_logs'])->name('super.settings.fetch_logs');
             Route::get('super-admin/get-backup-settings', [App\Http\Controllers\API\SuperAdmin\SettingsController::class, 'backup_settings'])->name('super.settings.fetch_settings');
-            Route::put('super-admin/update-backup-settings/{id}', [App\Http\Controllers\API\SuperAdmin\SettingsController::class, 'update_backup_settings'])->name('super.settings.update_settings');
+            Route::post('super-admin/update-backup-settings', [App\Http\Controllers\API\SuperAdmin\SettingsController::class, 'update_backup_settings'])->name('super.settings.update_settings');
             Route::get('super-admin/get-centre-devices', [App\Http\Controllers\API\SuperAdmin\SettingsController::class, 'centre_devices'])->name('super.settings.fetch_devices');
             Route::post('super-admin/store-centre-devices', [App\Http\Controllers\API\SuperAdmin\SettingsController::class, 'store_centre_devices'])->name('super.settings.store_devices');
             Route::put('super-admin/update-centre-devices/{id}', [App\Http\Controllers\API\SuperAdmin\SettingsController::class, 'update_centre_devices'])->name('super.settings.update_devices');
