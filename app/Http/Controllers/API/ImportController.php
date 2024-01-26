@@ -24,7 +24,7 @@ class ImportController extends Controller
     public function fetch_regs()
     {
         // Define the URL to be accessed
-        $url = "http://localhost:81/old_mls/frontier/candidates.php";
+        $url = "http://localhost:81/old_mls/reliance/candidates.php";
 
         // Initialize a cURL session
         $curl = curl_init($url);
@@ -58,7 +58,7 @@ class ImportController extends Controller
 
                     if($check)
                     {
-                        $check2 = Registrations::where('reg_id',$d['reg_id'])->where('center_id',6)->first();
+                        $check2 = Registrations::where('reg_id',$d['reg_id'])->where('center_id',1)->first();
 
                         if(!$check2)
                         {
@@ -73,6 +73,40 @@ class ImportController extends Controller
                             $new->phone_1 = $d['phone_1'];
                             $new->phone_2 = $d['phone_2'];
                             $new->nationality = $d['nationality'];
+                            $new->agency = $d['agency'];
+                            $new->country = $d['country'];
+                            $new->profession = $d['profession'];
+                            $new->marital_status = $d['marital_status'];
+                            $new->barcode_no = $d['barcode_no'];
+                            $new->biometric_fingerprint = $d['biometric_fingerprint'];
+                            $new->fee_charged = $d['fee_charged'];
+                            $new->discount = $d['discount'];
+                            $new->remarks = $d['remarks'];
+                            $new->pregnancy_test = $d['pregnancy_test'];
+                            $new->status_remarks = $d['status_remarks'];
+                            $new->slip_issue_date = (date('Y-m-d', strtotime($d['slip_issue_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_issue_date'])) : date('Y-m-d', strtotime('1970-01-01'));
+                            $new->slip_expiry_date = (date('Y-m-d', strtotime($d['slip_expiry_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_expiry_date'])) : date('Y-m-d', strtotime('1970-01-01'));
+                            $new->token_no = $d['token_no'];
+                            $new->center_id = '1';
+                            $new->print_report_portion = $d['print_report_portion'];
+                            $new->save();
+                        }
+                        else
+                        {
+                            $new = Registrations::find($check2->id);
+                            $new->reg_id = $d['reg_id'];
+                            $new->candidate_id = $check->id;
+                            $new->place_of_issue = $d['place_of_issue'];
+                            $new->reg_date = date('Y-m-d', strtotime($d['reg_date']));
+                            $new->serial_no = $d['serial_no'];
+                            $new->relation_type = $d['relation_type'];
+                            $new->relative_name = $d['son_of'];
+                            $new->phone_1 = $d['phone_1'];
+                            $new->phone_2 = $d['phone_2'];
+                            $new->nationality = $d['nationality'];
+                            $new->agency = $d['agency'];
+                            $new->country = $d['country'];
+                            $new->profession = $d['profession'];
                             $new->marital_status = $d['marital_status'];
                             $new->barcode_no = $d['barcode_no'];
                             $new->biometric_fingerprint = $d['biometric_fingerprint'];
@@ -86,9 +120,9 @@ class ImportController extends Controller
                             $new->slip_issue_date = (date('Y-m-d', strtotime($d['slip_issue_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_issue_date'])) : date('Y-m-d', strtotime('1970-01-01'));
                             $new->slip_expiry_date = (date('Y-m-d', strtotime($d['slip_expiry_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_expiry_date'])) : date('Y-m-d', strtotime('1970-01-01'));
                             $new->token_no = $d['token_no'];
-                            $new->center_id = '6';
+                            $new->center_id = '1';
                             $new->print_report_portion = $d['print_report_portion'];
-                            $new->save();
+                            $new->update();
                         }
                     }
                     else
@@ -98,9 +132,6 @@ class ImportController extends Controller
                         $new->passport_issue_date = date('Y-m-d', strtotime($d['passport_issue_date']));
                         $new->passport_expiry_date = date('Y-m-d', strtotime($d['passport_expiry_date']));
                         $new->candidate_name = $d['candidate_name'];
-                        $new->agency = $d['agency'];
-                        $new->country = $d['country'];
-                        $new->profession = $d['profession'];
                         $new->cnic = $d['cnic'];
                         $new->gender = $d['gender'];
                         $new->dob = $d['d_o_b'];
@@ -117,6 +148,9 @@ class ImportController extends Controller
                         $new_2->phone_1 = $d['phone_1'];
                         $new_2->phone_2 = $d['phone_2'];
                         $new_2->nationality = $d['nationality'];
+                        $new->agency = $d['agency'];
+                        $new->country = $d['country'];
+                        $new->profession = $d['profession'];
                         $new_2->marital_status = $d['marital_status'];
                         $new_2->barcode_no = $d['barcode_no'];
                         $new_2->biometric_fingerprint = $d['biometric_fingerprint'];
@@ -124,8 +158,6 @@ class ImportController extends Controller
                         $new_2->discount = $d['discount'];
                         $new_2->remarks = $d['remarks'];
                         $new_2->pregnancy_test = $d['pregnancy_test'];
-                        // $new_2->created_by = $d->id;
-                        // $new_2->updated_by = $d->id;
                         $new_2->status_remarks = $d['status_remarks'];
                         $new->slip_issue_date = (date('Y-m-d', strtotime($d['slip_issue_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_issue_date'])) : date('Y-m-d', strtotime('1970-01-01'));
                         $new->slip_expiry_date = (date('Y-m-d', strtotime($d['slip_expiry_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_expiry_date'])) : date('Y-m-d', strtotime('1970-01-01'));

@@ -25,11 +25,17 @@ export default function Index(props) {
             <div className="page-header d-print-none">
                 <div className="container-xl">
                     <div className="row g-2 align-items-center">
-                        <div className="col">
+                        <div className="col" style={{display: 'inline-flex', justifyContent: 'space-between'}}>
                             <h2 className="page-title">
                             Candidates
                             </h2>
-                            {/* <div className="text-secondary mt-1">1-18 of 413 people</div> */}
+                            <div>
+                                <select className="form-select">
+                                    <option value="list">List</option>
+                                    <option value="token_process">Token Process</option>
+                                    <option value="medical_status">Medical Status</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -39,14 +45,14 @@ export default function Index(props) {
                 <div class="card">
 
                   <div class="card-body border-bottom py-3">
-                    {/* <div class="d-flex">
+                    <div class="d-flex">
                       <div class="ms-auto text-secondary">
                         Search:
                         <div class="ms-2 d-inline-block">
-                          <input type="text" class="form-control form-control-sm" aria-label="Search invoice" />
+                          <input type="text" class="form-control form-control-sm" aria-label="Search candidate" />
                         </div>
                       </div>
-                    </div> */}
+                    </div>
                   </div>
                   <div class="table-responsive">
                     <table class="table card-table table-vcenter text-nowrap datatable">

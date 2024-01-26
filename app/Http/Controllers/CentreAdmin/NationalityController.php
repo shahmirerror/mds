@@ -1,26 +1,24 @@
 <?php
 
-namespace App\Http\Controllers\SuperAdmin;
+namespace App\Http\Controllers\CentreAdmin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+use App\Models\Nationality;
+
 use Inertia\Inertia;
 
-use App\Models\User;
+use Auth;
 
-use Hash;
-
-class SuperAdminController extends Controller
+class NationalityController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $users = User::where('role_id',1)->where('status','Active')->where('id','!=',1)->get();
-
-        return Inertia::render('SuperAdmin/Users/Index', ['data' => $users]);
+        return Inertia::render('CentreAdmin/Nationality', ['nationality' => Nationality::where('centre_id', Auth::user()->centre->id)->where('status', 'Active')->get()], 200);
     }
 
     /**
@@ -36,16 +34,13 @@ class SuperAdminController extends Controller
      */
     public function store(Request $request)
     {
-        $new = new User;
+        $new = new Nationality;
         $new->name = $request->name;
-        $new->role_id = 1;
-        $new->username = $request->username;
-        $new->email = $request->email;
-        $new->password = Hash::make($request->password);
+        $new->centre_id = Auth::user()->centre->id;
 
         $new->save();
 
-        return redirect()->route('users.index');
+        return redirect()->route('nationality-setup.index');
     }
 
     /**
@@ -69,19 +64,13 @@ class SuperAdminController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $new = User::find($id);
+        $new = Nationality::find($id);
         $new->name = $request->name;
-        $new->role_id = 1;
-        $new->username = $request->username;
-        $new->email = $request->email;
-        if($request->password != '')
-        {
-            $new->password = Hash::make($request->password);
-        }
+        $new->centre_id = Auth::user()->centre->id;
 
         $new->update();
 
-        return redirect()->route('users.index');
+        return redirect()->route('nationality-setup.index');
     }
 
     /**
@@ -89,8 +78,8 @@ class SuperAdminController extends Controller
      */
     public function destroy($id)
     {
-        User::where('id',$id)->update(array('status' => 'Deleted'));
+        Nationality::where('id',$id)->update(array('status' => 'Inactive'));
 
-        return redirect()->route('users.index');
+        return redirect()->route('nationality-setup.index');
     }
 }

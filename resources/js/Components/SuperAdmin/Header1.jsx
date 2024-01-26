@@ -17,7 +17,7 @@ export default function Header1({user, logo}) {
                 </button>
                 <h1 className="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
                     <a href=".">
-                        <img src={logo} width="110" height="50" alt="Medical Laboratory System" className="navbar-brand-image" />
+                        <img src={logo} width="110" height="50" alt="Medical Diagnostic System" className="navbar-brand-image" />
                     </a>
                 </h1>
                 <div className="navbar-nav flex-row order-md-last">
@@ -128,7 +128,7 @@ export default function Header1({user, logo}) {
                     <div className="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                         <a href={route('users.edit', user?.id)} className="dropdown-item">Profile</a>
                         <div className="dropdown-divider"></div>
-                        <a href={route('super.settings')} className="dropdown-item">Settings</a>
+                        <a href={route('organization-settings.index')} className="dropdown-item">Settings</a>
                         <a type="button" href='#' className="dropdown-item" onClick={handleDelete}>Logout</a>
                     </div>
                     </div>

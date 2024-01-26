@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { IconDownload } from '@tabler/icons-react';
 
-export default function Reports({ auth }) {
+export default function Reports({auth}) {
     const [centres, setCentres] = useState([]);
     const [modules, setModules] = useState([]);
     const [countries, setCountries] = useState([]);
@@ -54,35 +54,13 @@ export default function Reports({ auth }) {
     const [fromRange, setFromRange] = useState(lMDate.getFullYear()+"-"+lMDate.getMonth()+1+"-"+lMDate.getDate());
 
     const [report_type, setReportType] = useState(null);
-    const [centreID, setCentre] = useState(0);
+    const [centreID, setCentre] = useState(auth.centre.id);
     const [country, setCountry] = useState([]);
-
-    const fetchCentres = () => {
-
-        try {
-            const response = fetch(route("super.reports.fetch_centres"), {
-                method: "GET"
-            })
-                .then(res => res.json())
-                .then(
-                    (result) => {
-                        // $('#preloader').hide();
-                        setCentres(result.centres);
-                        // console.log(result);
-                    },
-                    (error) => {
-                        console.log(error)
-                    }
-                );
-        } catch (ex) {
-            console.error(ex);
-        }
-    }
 
     const fetchModules = () => {
 
         try {
-            const response = fetch(route("super.reports.fetch_reports"), {
+            const response = fetch(route("admin.reports.fetch_reports"), {
                 method: "GET"
             })
                 .then(res => res.json())
@@ -104,7 +82,7 @@ export default function Reports({ auth }) {
     const fetchCountries = () => {
 
         try {
-            const response = fetch(route("super.reports.fetch_countries"), {
+            const response = fetch(route("admin.reports.fetch_countries"), {
                 method: "GET"
             })
                 .then(res => res.json())
@@ -137,7 +115,6 @@ export default function Reports({ auth }) {
         setToRange(todayDate.getFullYear()+"-"+todayDate.getMonth()+1+"-"+todayDate.getDate());
         setFromRange(lMDate.getFullYear()+"-"+lMDate.getMonth()+1+"-"+lMDate.getDate());
 
-        setCentre(0);
         setReportType(0);
         setCountry([]);
 
@@ -180,7 +157,7 @@ export default function Reports({ auth }) {
         const requestJson = JSON.stringify(requestData);
 
         try {
-            const response = fetch(route("super.reports.generate_report"), {
+            const response = fetch(route("admin.reports.generate_report"), {
                 method: "POST",
                 body: requestJson,
             })
@@ -272,7 +249,6 @@ export default function Reports({ auth }) {
 
     useEffect(() => {
       fetchModules();
-      fetchCentres();
       fetchCountries();
     }, [])
 
@@ -312,13 +288,14 @@ export default function Reports({ auth }) {
                 <div className="row row-deck row-cards">
 
                     <div className="col-sm-6 col-lg-3">
+
                         <div style={{width: '100%'}}>
-                            <div className="form-label">Select Centre</div>
+                            <div className="form-label">Report Type</div>
                             <Select
-                                options={centres}
-                                value={centreID}
-                                name="centreID"
-                                onChange={setCentre}
+                                options={modules}
+                                value={report_type}
+                                name="report_type"
+                                onChange={setReportType}
                             />
                         </div>
                     </div>
@@ -389,17 +366,7 @@ export default function Reports({ auth }) {
                 <div className="row row-deck row-cards">
 
 
-                    <div className="col-sm-6 col-lg-3">
-                        <div style={{width: '100%'}}>
-                            <div className="form-label">Report Type</div>
-                            <Select
-                                options={modules}
-                                value={report_type}
-                                name="report_type"
-                                onChange={setReportType}
-                            />
-                        </div>
-                    </div>
+
                     <div className="col-sm-6 col-lg-3">
                         <div style={{width: '100%'}}>
                             <div className="form-label">Countries</div>
@@ -435,6 +402,16 @@ export default function Reports({ auth }) {
                                 <div>
                                     <button className="btn btn-sm btn-success text-white mr-2">Export CSV<IconDownload /></button>
                                     <button className="btn btn-sm btn-danger text-white ml-2">Export PDF<IconDownload /></button>
+                                </div>
+                            </div>
+                            <div class="card-body border-bottom py-3">
+                                <div class="d-flex">
+                                    <div class="ms-auto text-secondary">
+                                        Search:
+                                        <div class="ms-2 d-inline-block">
+                                        <input type="text" class="form-control form-control-sm" aria-label="Search" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="card-body">

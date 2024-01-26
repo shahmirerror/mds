@@ -40,7 +40,7 @@ export default function TokenGeneration({ centres }) {
                             {centres.map((centre, index) => (
                                 <div className="col-md-3" onClick={() => setCentre(centre)}>
                                     <div className="card card-sm">
-                                        <div className="card-body">
+                                        <div className="card-body" style={{justifyContent: 'center', display: 'flex'}}>
                                             {centre?.image !== null ?
                                                 <img src={`./storage/app/public/centres/logos/${centre?.image}`}  height="100"/>
                                             :

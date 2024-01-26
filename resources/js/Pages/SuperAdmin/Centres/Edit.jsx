@@ -439,6 +439,7 @@ export default function Edit(props) {
                             progress: undefined,
                             theme: "light",
                             });
+                            console.log(error)
                     }
                 );
         } catch (ex) {
@@ -452,6 +453,7 @@ export default function Edit(props) {
                 progress: undefined,
                 theme: "light",
                 });
+                console.log(ex)
         }
     }
 
@@ -784,22 +786,39 @@ export default function Edit(props) {
                     <>
                         {/* <div style={{content: "", height: "100%", width: "1px", backgroundColor: 'black',position: "absolute", top: 0, right: 0}}> */}
                             <div className="col-md-12 mb-2" >
+                                <div style={{display: 'inline-flex',justifyContent: 'space-between'}} className="col-7">
+                                <div className="form-label h4">{mod?.title}</div>
+                                {mod?.rights?.length > 0 ? mod?.rights.map((right, index) => (
                                 <div>
-                                    <div className="form-label">{mod?.title}</div>
+                                    {right?.permission_type == 'Primary' ?
+                                    <label className="form-check form-switch">
+                                        <input className="form-check-input" type="checkbox" id={`perswitch${right?.permission_id}`} name={`perswitch${right?.permission_id}`} checked={right?.status} onChange={(e) => handlePerStatus(e, module_user_rights, right?.permission_id, index)}/>
+                                        <span class="form-check-label text-small" id={`perswitchlabel${right?.permission_id}`}>{'Allow Access?'}</span>
+                                    </label>
+                                    :
+                                    <></>
+                                    }
                                 </div>
-                                <div className="col-md-12" style={{display: 'inline-flex', justifyContent: 'space-between'}}>
+                                ))
+                                :
+                                <></>
+                                }
+                                </div>
+                                <div className="mt-2 col-md-12 mb-3" style={{display: 'inline-flex', justifyContent: 'space-between'}}>
                                 {mod?.rights?.length > 0 ? mod?.rights.map((right, index) => (
                                     <div>
                                         {right?.permission_type == 'CRUD' || right?.permission_type == 'Alternate' ?
-                                        <label className="form-check form-switch">
+                                        <label className="form-check">
                                             <input className="form-check-input" type="checkbox" id={`perswitch${right?.permission_id}`} name={`perswitch${right?.permission_id}`} checked={right?.status} onChange={(e) => handlePerStatus(e, module_user_rights, right?.permission_id, index)}/>
-                                            <span class="form-check-label" id={`perswitchlabel${right?.permission_id}`}>{right?.permission_name.replaceAll('_',' ').toUpperCase()}</span>
+                                            <span class="form-check-label text-small" id={`perswitchlabel${right?.permission_id}`}>{right?.permission_name.replaceAll('_',' ').toUpperCase()}</span>
                                         </label>
-                                        :
+                                        :right?.permission_type == 'Counter' || right?.permission_type == 'Printing' ?
                                         <>
                                             <label className="form-label" id={`perswitchlabel${index}`}>{right?.permission_name.replaceAll('_',' ').toUpperCase()}</label>
                                             <input className="form-control" type="text" id={`perswitch${right?.permission_id}`} name={`perswitch${right?.permission_id}`} placeholder="Enter Value" value={right?.permission_value} onChange={(e) => handlePerStatus(e, module_user_rights, right?.permission_id, index)}/>
                                         </>
+                                        :
+                                        <></>
                                         }
                                     </div>
                                 ))

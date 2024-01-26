@@ -40,9 +40,7 @@ Route::middleware('auth')->group(function () {
             return Inertia::render('SuperAdmin/Reports');
         })->name('super.reports');
 
-        Route::get('/organization-settings', function () {
-            return Inertia::render('SuperAdmin/Settings');
-        })->name('super.settings');
+        Route::resource('organization-settings', App\Http\Controllers\SuperAdmin\OrganizationSettingsController::class);
 
         Route::resource('centres', App\Http\Controllers\SuperAdmin\CentreManagementController::class);
         Route::post('centres/{id}', [App\Http\Controllers\SuperAdmin\CentreManagementController::class, 'update'])->name('centres.update');
@@ -54,6 +52,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
             return Inertia::render('CentreAdmin/Dashboard');
         })->name('admin.dashboard');
+
+        Route::get('/reports', function () {
+            return Inertia::render('CentreAdmin/Reports');
+        })->name('admin.reports');
+
+        Route::resource('nationality-setup', App\Http\Controllers\CentreAdmin\NationalityController::class);
+        Route::resource('profession-setup', App\Http\Controllers\CentreAdmin\ProfessionController::class);
+        Route::resource('agency-setup', App\Http\Controllers\CentreAdmin\AgencyController::class);
+        Route::resource('place-of-issue-setup', App\Http\Controllers\CentreAdmin\PlaceOfIssueController::class);
+        Route::resource('country-setup', App\Http\Controllers\CentreAdmin\CountryController::class);
 
         Route::resource('candidates', App\Http\Controllers\CentreAdmin\CandidatesController::class);
 

@@ -5,10 +5,17 @@ import { IconTrash } from '@tabler/icons-react';
 import { IconUserPlus } from '@tabler/icons-react';
 import { IconPower } from '@tabler/icons-react';
 import { IconPencil } from '@tabler/icons-react';
+import { IconCategory } from '@tabler/icons-react';
+
+import { toast, ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Centre(props) {
     const [users , setUsers] = useState(props.users);
     const [modules , setModules] = useState(props.modules);
+
+    const [module_rights , setModuleRights] = useState(null);
+    const [module_user_rights , setUserModuleRights] = useState(null);
 
     const [id, setId] = useState(0);
     const [name, setName] = useState('');
@@ -62,7 +69,7 @@ export default function Centre(props) {
     const refreshUsers = () => {
 
         try {
-            const response = fetch(route("admin.centre.fetch_staff", props.centre.id), {
+            const response = fetch(route("admin.centre.fetch_staff", {'id' : props.centre.id, 'userid' : props.auth.user.id}), {
                 method: "GET"
             })
                 .then(res => res.json())
@@ -106,13 +113,43 @@ export default function Centre(props) {
                         setRole('Staff');
                         setUsername('');
                         refreshUsers();
+                        toast.success('New Staff Profile has been created!', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     },
                     (error) => {
                         console.log(error)
+                        toast.error('Something went wrong! Please try again :(', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     }
                 );
         } catch (ex) {
             console.error(ex);
+            toast.error('Something went wrong! Please try again :(', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
         }
     }
 
@@ -154,13 +191,43 @@ export default function Centre(props) {
                         setRole('Staff');
                         setUsername('');
                         refreshUsers();
+                        toast.success('Staff Profile has been updated!', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     },
                     (error) => {
                         console.log(error)
+                        toast.error('Something went wrong! Please try again :(', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     }
                 );
         } catch (ex) {
             console.error(ex);
+            toast.error('Something went wrong! Please try again :(', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
         }
     }
 
@@ -194,13 +261,43 @@ export default function Centre(props) {
                         setId(0);
                         setStatus('');
                         refreshUsers();
+                        toast.success('Staff Profile has been made inactive!', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     },
                     (error) => {
                         console.log(error)
+                        toast.error('Something went wrong! Please try again :(', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     }
                 );
         } catch (ex) {
             console.error(ex);
+            toast.error('Something went wrong! Please try again :(', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
         }
     }
 
@@ -229,20 +326,134 @@ export default function Centre(props) {
         }
     }
 
+    const fetchModPermissions = (e, id, index) => {
+        setModuleRights(null)
+        setUserModuleRights(id)
+        try {
+            const response = fetch(route("admin.centre.lab_module_permissions", {'user_id': id, 'centre_id': props.centre.id}), {
+                method: "GET"
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        setModuleRights(result.module_rights);
+                        toast.info("Module Permissions have been loaded!", {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    },
+                    (error) => {
+                        toast.error("Something went wrong! Please try again :(", {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    }
+                );
+        } catch (ex) {
+            toast.error("Something went wrong! Please try again :(", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+        }
+    }
+
+    const handlePerStatus = (e, user_id, permission_id, index) => {
+        // console.log(user_id, permission_id);
+        let status = e.target.checked ? 'On' : 'Off';
+        try {
+            const response = fetch(route("admin.centre.toggle_lab_module_permissions", {'user_id': user_id, 'permission_id': permission_id}), {
+                method: "POST",
+                body: JSON.stringify({permission_value: document.getElementById('perswitch'+permission_id).value})
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        e.target.checked = status === 'Off' ? false : true;
+                        let message = "Permissions have been updated!";
+                        toast.success(message, {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    },
+                    (error) => {
+                        toast.error('Something went wrong! Please try again :(', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                            console.log(error)
+                    }
+                );
+        } catch (ex) {
+            toast.error('Something went wrong! Please try again :(', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+                console.log(ex)
+        }
+    }
+
 
     return (
         <AuthenticatedLayout
             user={props.auth.user}
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Centre Management</h2>}
         >
-            <Head title="Edit Centre" />
+            <Head title="Centre Management" />
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                />
 
             <div className="page-header d-print-none">
                 <div className="container-xl">
                     <div className="row g-2 align-items-center">
                     <div className="col">
                         <h2 className="page-title">
-                            Edit Centre
+                            Centre Management
                         </h2>
                     </div>
                     </div>
@@ -362,8 +573,8 @@ export default function Centre(props) {
                                                 <IconPencil />
                                             </a>
                                             {user?.role_id == 3 ?
-                                                <a className="card-btn" href="#">
-                                                    Edit Permissions
+                                                <a className="card-btn" href="#" type="button" data-bs-toggle="modal" data-bs-target="#edit-permissions" onClick={(e) => fetchModPermissions(e, user?.id, index)}>
+                                                    <IconCategory />
                                                 </a>
                                             :
                                                 <></>
@@ -521,6 +732,82 @@ export default function Centre(props) {
             </div>
         </div>
         {/* Edit User Modal */}
+
+        {/* Edit Permissions Modal */}
+        <div className="modal modal-blur fade" id="edit-permissions" tabindex="-1" role="dialog" aria-hidden="true">
+            <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Edit Permissions</h5>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                <div className="modal-body">
+                <div className="row m-3">
+                    {module_rights?.length > 0 ? module_rights.map((mod, index) => (
+                    <>
+                        {/* <div style={{content: "", height: "100%", width: "1px", backgroundColor: 'black',position: "absolute", top: 0, right: 0}}> */}
+                            <div className="col-md-12 mb-2" >
+                                <div style={{display: 'inline-flex',justifyContent: 'space-between'}} className="col-7">
+                                <div className="form-label h4">{mod?.title}</div>
+                                {mod?.rights?.length > 0 ? mod?.rights.map((right, index) => (
+                                <div>
+                                    {right?.permission_type == 'Primary' ?
+                                    <label className="form-check form-switch">
+                                        <input className="form-check-input" type="checkbox" id={`perswitch${right?.permission_id}`} name={`perswitch${right?.permission_id}`} checked={right?.status} onChange={(e) => handlePerStatus(e, module_user_rights, right?.permission_id, index)}/>
+                                        <span class="form-check-label text-small" id={`perswitchlabel${right?.permission_id}`}>{'Allow Access?'}</span>
+                                    </label>
+                                    :
+                                    <></>
+                                    }
+                                </div>
+                                ))
+                                :
+                                <></>
+                                }
+                                </div>
+                                <div className="mt-2 col-md-12 mb-3" style={{display: 'inline-flex', justifyContent: 'space-between'}}>
+                                {mod?.rights?.length > 0 ? mod?.rights.map((right, index) => (
+                                    <div>
+                                        {right?.permission_type == 'CRUD' || right?.permission_type == 'Alternate' ?
+                                        <label className="form-check">
+                                            <input className="form-check-input" type="checkbox" id={`perswitch${right?.permission_id}`} name={`perswitch${right?.permission_id}`} checked={right?.status} onChange={(e) => handlePerStatus(e, module_user_rights, right?.permission_id, index)}/>
+                                            <span class="form-check-label text-small" id={`perswitchlabel${right?.permission_id}`}>{right?.permission_name.replaceAll('_',' ').toUpperCase()}</span>
+                                        </label>
+                                        :right?.permission_type == 'Counter' || right?.permission_type == 'Printing' ?
+                                        <>
+                                            <label className="form-label" id={`perswitchlabel${index}`}>{right?.permission_name.replaceAll('_',' ').toUpperCase()}</label>
+                                            <input className="form-control" type="text" id={`perswitch${right?.permission_id}`} name={`perswitch${right?.permission_id}`} placeholder="Enter Value" value={right?.permission_value} onChange={(e) => handlePerStatus(e, module_user_rights, right?.permission_id, index)}/>
+                                        </>
+                                        :
+                                        <></>
+                                        }
+                                    </div>
+                                ))
+                                :
+                                    <div>
+                                        <span class="form-check-label" id={``}>{'No Rights are available for this Module'}</span>
+                                    </div>
+                            }
+                                </div>
+                            </div>
+
+                            <hr></hr>
+                    </>
+                    ))
+                :
+                <></>
+                }
+                        </div>
+                </div>
+                <div className="modal-footer">
+                    <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
+                        Close
+                    </a>
+                </div>
+                </div>
+            </div>
+        </div>
+        {/* Edit Permissions Modal */}
 
         {/* Delete User Modal */}
         <div className="modal modal-blur fade" id="delete-user" tabindex="-1" role="dialog" aria-hidden="true">

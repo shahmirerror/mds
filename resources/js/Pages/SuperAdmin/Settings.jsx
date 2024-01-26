@@ -13,7 +13,7 @@ export default function Settings(props) {
     const [devices, setDevices] = useState([]);
     const [logs, setLogs] = useState([]);
 
-    const [id, setID] = useState(0);
+    const [id, setId] = useState(0);
     const [centre, setCentre] = useState(0);
     const [brand, setBrand] = useState('');
     const [type, setType] = useState('');
@@ -128,46 +128,182 @@ export default function Settings(props) {
         }
     }
 
-    const handleStore = () => {
+    const handleStore = (e) => {
 
         e.preventDefault();
 
-        let status = e.target.checked ? 'On' : 'Off';
+        const requestData = {
+            centre_id: centre,
+            name: name,
+            brand: brand,
+            type: type
+        };
+
+        const requestJson = JSON.stringify(requestData);
 
         try {
-            const response = fetch(route("super.centre.lab_modules", {'module_id': id, 'centre_id': props.centre.id}), {
-                method: "PUT"
+            const response = fetch(route("super.settings.store_devices"), {
+                method: "POST",
+                body: requestJson
             })
                 .then(res => res.json())
                 .then(
                     (result) => {
-                        document.getElementById(`switchlabel${index}`).innerHTML = status;
-                        document.getElementById(`switch${index}`).checked = e.target.checked;
+                        refreshDevices();
+                        toast.success("New Device details have been saved!", {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     },
                     (error) => {
-                        console.log(error)
+                        toast.error("Something went wrong! Please try again :(", {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
                     }
                 );
         } catch (ex) {
-            console.error(ex);
+            toast.error("Something went wrong! Please try again :(", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+        }
+
+    }
+
+    const handleEdit = (device) => {
+
+        setId(device.id);
+        setName(device.name);
+        setBrand(device.brand);
+        setType(device.type);
+        setCentre(device.centre_id);
+    }
+
+    const handleDelete = (e, id) => {
+        e.preventDefault();
+
+        try {
+            const response = fetch(route("super.settings.delete_devices", id), {
+                method: "DELETE"
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        refreshDevices();
+                        toast.success("Device details have been removed!", {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    },
+                    (error) => {
+                        toast.error("Something went wrong! Please try again :(", {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    }
+                );
+        } catch (ex) {
+            toast.error("Something went wrong! Please try again :(", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
         }
     }
 
-    const handleEdit = (user) => {
+    const handleUpdate = (e, id) => {
+        e.preventDefault();
 
-        setId(user.id);
-        setName(user.name);
-        setBrand(user.brand);
-        setType(user.type);
-        setCentre(user.centre_id);
-    }
+        const requestData = {
+            centre_id: centre,
+            name: name,
+            brand: brand,
+            type: type
+        };
 
-    const handleDelete = () => {
+        const requestJson = JSON.stringify(requestData);
 
-    }
-
-    const handleUpdate = () => {
-
+        try {
+            const response = fetch(route("super.settings.update_devices", id), {
+                method: "PUT",
+                body: requestJson
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        refreshDevices();
+                        toast.success("Device details have been updated!", {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    },
+                    (error) => {
+                        toast.error("Something went wrong! Please try again :(", {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    }
+                );
+        } catch (ex) {
+            toast.error("Something went wrong! Please try again :(", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+        }
     }
 
     useEffect(() => {
@@ -302,7 +438,7 @@ export default function Settings(props) {
                                             <a className="card-btn" href="#" type="button" data-bs-toggle="modal" data-bs-target="#edit-device" onClick={() => handleEdit(device)}>
                                                 <IconPencil />
                                             </a>
-                                            <a className="card-btn text-danger" href="#" type="button" data-bs-toggle="modal" data-bs-target="#delete-device" onClick={() => handleStatus(device?.id, 'Inactive')}>
+                                            <a className="card-btn text-danger" href="#" type="button" data-bs-toggle="modal" data-bs-target="#delete-device" onClick={() => handleEdit(device)}>
                                                 <IconPower />
                                             </a>
 
@@ -374,107 +510,127 @@ export default function Settings(props) {
 
         {/* Create Device Modal */}
         <div className="modal modal-blur fade" id="new-device" tabindex="-1" role="dialog" aria-hidden="true">
-                <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Create Centre Device</h5>
-                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                    <div className="modal-body">
-                        <div className="mb-3">
-                            <label className="form-label">Centre</label>
-                            <input type="text" className="form-control" placeholder="Centre" name="name" onChange={(e) => setCentre(e.target.value)}/>
-                        </div>
-                        <div className="mb-3">
-                            <label className="form-label">Name</label>
-                            <input type="text" className="form-control" placeholder="Device Name" name="name" onChange={(e) => setName(e.target.value)}/>
-                        </div>
-                        <div className="mb-3">
-                            <label className="form-label">Brand</label>
-                            <input type="text" className="form-control" placeholder="Brand" name="brand" onChange={(e) => setBrand(e.target.value)}/>
-                        </div>
-                        <div className="mb-3">
-                            <label className="form-label">Type</label>
-                            <input type="text" className="form-control" placeholder="Type" name="type" onChange={(e) => setType(e.target.value)}/>
-                        </div>
+            <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Create Centre Device</h5>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div className="modal-footer">
-                        <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
-                            Cancel
-                        </a>
-                        <button className="btn btn-primary ms-auto" data-bs-dismiss="modal" type="button" onClick={handleStore}>
-
-                            <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
-                            Create Centre Device
-                        </button>
+                <div className="modal-body">
+                    <div className="mb-3">
+                        <label className="form-label">Centre</label>
+                        <select className="form-select" value={centre} name="centre" onChange={(e) => setCentre(e.target.value)}>
+                            <option value={0}>Select Centre</option>
+                            {props.centres.map((centre, index) => (
+                                <option value={centre?.id}>{centre.name}</option>
+                            ))}
+                        </select>
                     </div>
+                    <div className="mb-3">
+                        <label className="form-label">Name</label>
+                        <input type="text" className="form-control" placeholder="Device Name" name="name" value={name} onChange={(e) => setName(e.target.value)}/>
                     </div>
-                </div>
-            </div>
-            {/* Create Device Modal */}
-
-            {/* Edit Device Modal */}
-            <div className="modal modal-blur fade" id="edit-device" tabindex="-1" role="dialog" aria-hidden="true">
-                <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Edit Centre Device</h5>
-                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                    <div className="modal-body">
-                        <div className="mb-3">
-                            <label className="form-label">Name</label>
-                            <input type="text" className="form-control" placeholder="Super Admin's name" name="name" value={name} onChange={handleChange}/>
-                        </div>
-                        <div className="mb-3">
-                            <label className="form-label">Brand</label>
-                            <input type="text" className="form-control" placeholder="Email Address" name="email" value={brand} onChange={handleChange}/>
-                        </div>
-                        <div className="mb-3">
-                            <label className="form-label">Type</label>
-                            <input type="text" className="form-control" placeholder="Username" name="username" value={type} onChange={handleChange}/>
-                        </div>
+                    <div className="mb-3">
+                        <label className="form-label">Brand</label>
+                        <input type="text" className="form-control" placeholder="Brand" name="brand" value={brand} onChange={(e) => setBrand(e.target.value)}/>
                     </div>
-                    <div className="modal-footer">
-                        <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
-                            Cancel
-                        </a>
-                        <button className="btn btn-primary ms-auto" data-bs-dismiss="modal" type="button" onClick={handleUpdate}>
-
-                            <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
-                            Update Centre Device
-                        </button>
-                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Type</label>
+                        <select className="form-select" value={type} name="type" onChange={(e) => setType(e.target.value)}>
+                            <option value={null}>--</option>
+                            <option value={"Thumb Print Scanner"}>Thumb Print Scanner</option>
+                            <option value={"Barcode Scanner"}>Barcode Scanner</option>
+                            <option value={"Printer"}>Printer</option>
+                            <option value={"Passport Scanner"}>Passport Scanner</option>
+                        </select>
                     </div>
                 </div>
-            </div>
-            {/* Edit Device Modal */}
-
-            {/* Delete Device Modal */}
-            <div className="modal modal-blur fade" id="delete-device" tabindex="-1" role="dialog" aria-hidden="true">
-                <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Delete Centre Device</h5>
-                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                    <div className="modal-body">
-                        <span>Are you sure you want to delete this device?</span>
-                    </div>
-                    <div className="modal-footer">
-                        <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
-                            Cancel
-                        </a>
-                        <button className="btn btn-primary ms-auto" data-bs-dismiss="modal" type="button" onClick={handleDelete}>
-
-                            <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
-                            Delete Centre Device
-                        </button>
-                    </div>
-                    </div>
+                <div className="modal-footer">
+                    <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </a>
+                    <button className="btn btn-primary ms-auto" data-bs-dismiss="modal" type="button" onClick={handleStore}>
+                        Create Centre Device
+                    </button>
+                </div>
                 </div>
             </div>
-            {/* Delete User Modal */}
+        </div>
+        {/* Create Device Modal */}
+
+        {/* Edit Device Modal */}
+        <div className="modal modal-blur fade" id="edit-device" tabindex="-1" role="dialog" aria-hidden="true">
+            <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Edit Centre Device</h5>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                <div className="modal-body">
+                <div className="mb-3">
+                        <label className="form-label">Centre</label>
+                        <select className="form-select" value={centre} name="centre" onChange={(e) => setCentre(e.target.value)}>
+                            <option value={0}>Select Centre</option>
+                            {props.centres.map((centre, index) => (
+                                <option value={centre?.id}>{centre.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Name</label>
+                        <input type="text" className="form-control" placeholder="Device Name" name="name" value={name} onChange={(e) => setName(e.target.value)}/>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Brand</label>
+                        <input type="text" className="form-control" placeholder="Brand Name" name="brand" value={brand} onChange={(e) => setBrand(e.target.value)}/>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Type</label>
+                        <select className="form-select" value={type} name="type" onChange={(e) => setType(e.target.value)}>
+                            <option value={null}>--</option>
+                            <option value={"Thumb Print Scanner"}>Thumb Print Scanner</option>
+                            <option value={"Barcode Scanner"}>Barcode Scanner</option>
+                            <option value={"Printer"}>Printer</option>
+                            <option value={"Passport Scanner"}>Passport Scanner</option>
+                        </select>
+                    </div>
+                </div>
+                <div className="modal-footer">
+                    <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </a>
+                    <button className="btn btn-primary ms-auto" data-bs-dismiss="modal" type="button" onClick={(e) => handleUpdate(e, id)}>
+                        Update Centre Device
+                    </button>
+                </div>
+                </div>
+            </div>
+        </div>
+        {/* Edit Device Modal */}
+
+        {/* Delete Device Modal */}
+        <div className="modal modal-blur fade" id="delete-device" tabindex="-1" role="dialog" aria-hidden="true">
+            <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Delete Centre Device</h5>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                <div className="modal-body">
+                    <span>Are you sure you want to delete this device?</span>
+                </div>
+                <div className="modal-footer">
+                    <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </a>
+                    <button className="btn btn-primary ms-auto" data-bs-dismiss="modal" type="button" onClick={(e) => handleDelete(e, id)}>
+                        Delete Centre Device
+                    </button>
+                </div>
+                </div>
+            </div>
+        </div>
+        {/* Delete User Modal */}
 
 
         </AuthenticatedLayout>

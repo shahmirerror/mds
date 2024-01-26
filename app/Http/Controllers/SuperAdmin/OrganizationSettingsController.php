@@ -5,6 +5,10 @@ namespace App\Http\Controllers\SuperAdmin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+use App\Models\Centres;
+
+use Inertia\Inertia;
+
 class OrganizationSettingsController extends Controller
 {
     /**
@@ -12,7 +16,9 @@ class OrganizationSettingsController extends Controller
      */
     public function index()
     {
-        //
+        $centres = Centres::where('status','Active')->get();
+
+        return Inertia::render('SuperAdmin/Settings', ['centres' => $centres]);
     }
 
     /**

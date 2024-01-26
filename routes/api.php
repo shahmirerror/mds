@@ -47,6 +47,7 @@ Route::get('fetch-prev-profession', [App\Http\Controllers\API\ImportController::
             Route::get('super-admin/get-centres', [App\Http\Controllers\API\SuperAdmin\ReportsController::class, 'fetch_centres'])->name('super.reports.fetch_centres');
             Route::get('super-admin/get-countries', [App\Http\Controllers\API\SuperAdmin\ReportsController::class, 'fetch_countries'])->name('super.reports.fetch_countries');
             Route::get('super-admin/get-reports', [App\Http\Controllers\API\SuperAdmin\ReportsController::class, 'fetch_reports'])->name('super.reports.fetch_reports');
+            Route::post('super-admin/generate-report', [App\Http\Controllers\API\SuperAdmin\ReportsController::class, 'generate_report'])->name('super.reports.generate_report');
 
             //SettingsController
             Route::get('super-admin/get-backup-logs', [App\Http\Controllers\API\SuperAdmin\SettingsController::class, 'backup_logs'])->name('super.settings.fetch_logs');
@@ -69,14 +70,19 @@ Route::get('fetch-prev-profession', [App\Http\Controllers\API\ImportController::
             Route::get('fetch-admin-mods/{centre_id}', [App\Http\Controllers\API\ModulesController::class, 'fetch_admin'])->name('admin.mods');
 
             //CentreManagementController
-            Route::get('admin/centres/{id}/fetch-staff', [App\Http\Controllers\API\CentreAdmin\CentreManagementController::class, 'fetch_users'])->name('admin.centre.fetch_staff');
+            Route::get('admin/centres/{id}/fetch-staff/{userid}', [App\Http\Controllers\API\CentreAdmin\CentreManagementController::class, 'fetch_users'])->name('admin.centre.fetch_staff');
             Route::post('admin/centres/{id}/add-staff', [App\Http\Controllers\API\CentreAdmin\CentreManagementController::class, 'store_user'])->name('admin.centre.add_staff');
             Route::put('admin/centres/{id}/edit-staff', [App\Http\Controllers\API\CentreAdmin\CentreManagementController::class, 'update_user'])->name('admin.centre.edit_staff');
             Route::put('admin/centres/{id}/staff-status', [App\Http\Controllers\API\CentreAdmin\CentreManagementController::class, 'update_user_status'])->name('admin.centre.staff_status');
             Route::put('admin/centres/{module_id}/edit-lab-modules/{centre_id}', [App\Http\Controllers\API\CentreAdmin\CentreManagementController::class, 'toggle_centre_lab_modules'])->name('admin.centre.lab_modules');
+            Route::get('admin/centres/fetch-lab-module-permissions/{centre_id}/{user_id}', [App\Http\Controllers\API\CentreAdmin\CentreManagementController::class, 'fetch_lab_module_permissions'])->name('admin.centre.lab_module_permissions');
+            Route::post('admin/centres/{permission_id}/edit-lab-module-permissions/{user_id}', [App\Http\Controllers\API\CentreAdmin\CentreManagementController::class, 'toggle_lab_module_permissions'])->name('admin.centre.toggle_lab_module_permissions');
 
             //ReportsController
             Route::get('admin/get-reports', [App\Http\Controllers\API\CentreAdmin\ReportsController::class, 'fetch_reports'])->name('admin.reports.fetch_reports');
+            Route::get('admin/get-countries', [App\Http\Controllers\API\CentreAdmin\ReportsController::class, 'fetch_countries'])->name('admin.reports.fetch_countries');
+            Route::get('admin/get-reports', [App\Http\Controllers\API\CentreAdmin\ReportsController::class, 'fetch_reports'])->name('admin.reports.fetch_reports');
+            Route::post('admin/generate-report', [App\Http\Controllers\API\CentreAdmin\ReportsController::class, 'generate_report'])->name('admin.reports.generate_report');
 
             //SettingsController
             Route::get('admin/get-centre-devices', [App\Http\Controllers\API\CentreAdmin\SettingsController::class, 'centre_devices'])->name('admin.settings.fetch_devices');
