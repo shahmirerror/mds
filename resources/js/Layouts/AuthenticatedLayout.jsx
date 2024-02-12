@@ -6,6 +6,8 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link } from '@inertiajs/react';
 import Header1 from '@/Components/Header1';
 import Header2 from '@/Components/Header2'
+import NavBar from '@/Components/NavBar';
+import VerticalNav from '@/Components/VerticalNav'
 import backGroundImg from "@/../../assets/static/photos/panel-background.png";
 
 
@@ -81,10 +83,12 @@ export default function Authenticated({ user, header, children }) {
         <>
         <div className="page">
 
-            <Header1 user={user} logo={logoImg} />
+            {/* <Header1 user={user} logo={logoImg} />
             <div className="sticky-top">
             <Header2 modules={modules} labs={labs}/>
-            </div>
+            </div> */}
+            <VerticalNav logo={logoImg} modules={modules} labs={labs}/>
+            <NavBar user={user} />
             <div className="page-wrapper">
 
                 <main>{children}</main>

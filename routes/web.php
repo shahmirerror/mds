@@ -32,10 +32,11 @@ Route::resource('redirect', App\Http\Controllers\RedirectController::class);
 Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'super-admin'], function () {
         Route::get('/dashboard', function () {
-            return Inertia::render('SuperAdmin/Dashboard');
+            return Inertia::render('SuperAdmin/Dashboard', ['centres' => Centres::select('id as value','name as label')->where('status','Active')->get()]);
         })->name('super.dashboard');
 
         Route::resource('users', App\Http\Controllers\SuperAdmin\SuperAdminController::class);
+        Route::post('users/{id}/update', [App\Http\Controllers\SuperAdmin\SuperAdminController::class, 'update'])->name('users.update');
         Route::get('/reports', function () {
             return Inertia::render('SuperAdmin/Reports');
         })->name('super.reports');
@@ -71,9 +72,7 @@ Route::middleware('auth')->group(function () {
 
     Route::group(['prefix' => 'centre'], function () {
 
-        Route::get('/registration-desk', function () {
-            return Inertia::render('LabModules/Registration');
-        })->name('registration-desk.index');
+        Route::resource('registration-desk', App\Http\Controllers\LabModules\RegistrationsController::class);
 
         Route::get('/passport-verification', function () {
             return Inertia::render('LabModules/PassportVerification');
@@ -94,6 +93,22 @@ Route::middleware('auth')->group(function () {
         Route::get('/lab-sticker', function () {
             return Inertia::render('LabModules/LabStickers');
         })->name('lab-sticker.index');
+
+        Route::get('/electronic-number', function () {
+            return Inertia::render('LabModules/ENO/Update');
+        })->name('electronic-number.index');
+
+        Route::get('/print-report', function () {
+            return Inertia::render('LabModules/PrintReport');
+        })->name('print-report.index');
+
+        Route::get('/duplicate-lab-stickers', function () {
+            return Inertia::render('LabModules/DuplicateLabStickers');
+        })->name('duplicate-lab-stickers.index');
+
+        Route::get('/token-status', function () {
+            return Inertia::render('LabModules/TokenStatus');
+        })->name('token-status.index');
 
         Route::resource('xray-verification', App\Http\Controllers\LabModules\XRAYVerificationController::class);
 

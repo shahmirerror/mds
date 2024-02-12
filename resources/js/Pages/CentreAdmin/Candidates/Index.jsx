@@ -46,12 +46,12 @@ export default function Index(props) {
 
                   <div class="card-body border-bottom py-3">
                     <div class="d-flex">
-                      <div class="ms-auto text-secondary">
-                        Search:
-                        <div class="ms-2 d-inline-block">
-                          <input type="text" class="form-control form-control-sm" aria-label="Search candidate" />
+                        <div class="ms-auto text-secondary">
+                            Search:
+                            <div class="ms-2 d-inline-block">
+                            <input type="text" class="form-control form-control-sm" aria-label="Search candidate" />
+                            </div>
                         </div>
-                      </div>
                     </div>
                   </div>
                   <div class="table-responsive">

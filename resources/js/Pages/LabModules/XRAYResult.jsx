@@ -17,6 +17,7 @@ export default function XRAYResult({auth}) {
     const [editchest, setEditChest] = useState(null);
     const [editnote, setEditNote] = useState(null);
     const [editremarks, setEditRemarks] = useState(null);
+    const [currToken, setToken] = useState('None');
 
     const {data, setData, post, processing, errors, reset} = useForm({
         chest: '',
@@ -66,6 +67,14 @@ export default function XRAYResult({auth}) {
                         <div className="col-md-3" style={{float: 'left'}}>
                             <h2 className="page-title" style={{float: 'left'}}>
                                 XRAY Result
+                            </h2>
+                        </div>
+                        <div className="col-md-3 align-items-center" style={{float: 'right'}}>
+                            <h2 className="page-title">
+                                {/* <button className="btn btn-secondary btn-sm mr-5 btn-pill" onClick={handleToken}>
+                                    <IconRefresh />
+                                </button> */}
+                                <span className="badge">Current Token: {currToken}</span>
                             </h2>
                         </div>
                     </div>

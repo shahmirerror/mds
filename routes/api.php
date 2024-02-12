@@ -29,7 +29,15 @@ Route::get('fetch-prev-country', [App\Http\Controllers\API\ImportController::cla
 Route::get('fetch-prev-agency', [App\Http\Controllers\API\ImportController::class, 'fetch_agency'])->name('import.agency');
 Route::get('fetch-prev-profession', [App\Http\Controllers\API\ImportController::class, 'fetch_profession'])->name('import.profession');
 
+Route::post('assign-new-token', [App\Http\Controllers\API\TokenManagementController::class, 'assign_token'])->name('token.assign');
+Route::post('create-new-token', [App\Http\Controllers\API\TokenManagementController::class, 'new_token'])->name('token.new');
+
+Route::post('fetch-passport', [App\Http\Controllers\API\PPScannerController::class, 'fetch_passport'])->name('ppscan.new');
+
 //Super Admin API Routes
+
+            //DashboardController
+            Route::get('super-admin/fetch-centre-stats/{id}', [App\Http\Controllers\API\SuperAdmin\DashboardController::class, 'stats'])->name('super.centre.stats');
 
             //ModulesController
             Route::get('fetch-super-mods', [App\Http\Controllers\API\ModulesController::class, 'fetch_super'])->name('super.mods');
@@ -48,6 +56,7 @@ Route::get('fetch-prev-profession', [App\Http\Controllers\API\ImportController::
             Route::get('super-admin/get-countries', [App\Http\Controllers\API\SuperAdmin\ReportsController::class, 'fetch_countries'])->name('super.reports.fetch_countries');
             Route::get('super-admin/get-reports', [App\Http\Controllers\API\SuperAdmin\ReportsController::class, 'fetch_reports'])->name('super.reports.fetch_reports');
             Route::post('super-admin/generate-report', [App\Http\Controllers\API\SuperAdmin\ReportsController::class, 'generate_report'])->name('super.reports.generate_report');
+            Route::post('super-admin/export-report/{type}', [App\Http\Controllers\API\SuperAdmin\ReportsController::class, 'export_report'])->name('super.reports.export_report');
 
             //SettingsController
             Route::get('super-admin/get-backup-logs', [App\Http\Controllers\API\SuperAdmin\SettingsController::class, 'backup_logs'])->name('super.settings.fetch_logs');
@@ -59,6 +68,9 @@ Route::get('fetch-prev-profession', [App\Http\Controllers\API\ImportController::
             Route::delete('super-admin/delete-centre-devices/{id}', [App\Http\Controllers\API\SuperAdmin\SettingsController::class, 'delete_centre_devices'])->name('super.settings.delete_devices');
 
 //Centre Admin API Routes
+
+            //DashboardController
+            Route::get('admin/fetch-centre-stats/{id}', [App\Http\Controllers\API\CentreAdmin\DashboardController::class, 'stats'])->name('admin.centre.stats');
 
             //CandidatesController
             Route::get('admin/candidates/fetch-registration/{id}', [App\Http\Controllers\API\CentreAdmin\CandidatesController::class, 'fetch_reg'])->name('admin.candidate.fetch_reg');
@@ -83,6 +95,7 @@ Route::get('fetch-prev-profession', [App\Http\Controllers\API\ImportController::
             Route::get('admin/get-countries', [App\Http\Controllers\API\CentreAdmin\ReportsController::class, 'fetch_countries'])->name('admin.reports.fetch_countries');
             Route::get('admin/get-reports', [App\Http\Controllers\API\CentreAdmin\ReportsController::class, 'fetch_reports'])->name('admin.reports.fetch_reports');
             Route::post('admin/generate-report', [App\Http\Controllers\API\CentreAdmin\ReportsController::class, 'generate_report'])->name('admin.reports.generate_report');
+            Route::post('admin/export-report/{type}', [App\Http\Controllers\API\CentreAdmin\ReportsController::class, 'export_report'])->name('admin.reports.export_report');
 
             //SettingsController
             Route::get('admin/get-centre-devices', [App\Http\Controllers\API\CentreAdmin\SettingsController::class, 'centre_devices'])->name('admin.settings.fetch_devices');
@@ -94,8 +107,14 @@ Route::get('fetch-prev-profession', [App\Http\Controllers\API\ImportController::
 
             //XRAY Result
             Route::get('lab-modules/xray/fetch-result', [App\Http\Controllers\API\LabModulesController::class, 'fetch_xray_result'])->name('xray.fetch_result');
-
-            Route::get('lab-modules/fetch-registration', [App\Http\Controllers\API\LabModulesController::class, 'fetch_registration'])->name('lab.fetch_registration');
+            //Registration Desk
+            Route::post('lab-modules/fetch-registration', [App\Http\Controllers\API\LabModulesController::class, 'fetch_registration'])->name('lab.fetch_registration');
+            //Barcode
+            Route::post('lab-modules/barcode/fetch', [App\Http\Controllers\API\LabModulesController::class, 'fetch_barcode'])->name('barcode.new');
+            //Biometric
+            Route::post('lab-modules/biometric/fetch', [App\Http\Controllers\API\LabModulesController::class, 'fetch_by_fingerprint'])->name('lab.fetch_by_fingerprint');
+            //Passport Verification
+            Route::post('lab-modules/verify-passport', [App\Http\Controllers\API\LabModulesController::class, 'verify_passport'])->name('lab.verify_passport');
 
 //Centre Staff API Routes
 

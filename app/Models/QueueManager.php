@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class QueueManager extends Model
 {
     use HasFactory;
+
+    protected $table = 'queue_manager';
 }

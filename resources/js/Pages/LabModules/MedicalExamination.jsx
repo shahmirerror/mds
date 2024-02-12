@@ -20,6 +20,8 @@ export default function MedicalExamination({auth}) {
 
     const [searched, setSearched] = useState(false);
 
+    const [currToken, setToken] = useState('None');
+
     const {data, setData, post, processing, errors, reset} = useForm({
         notes: ''
     });
@@ -63,7 +65,7 @@ export default function MedicalExamination({auth}) {
                                 {/* <button className="btn btn-secondary btn-sm mr-5 btn-pill" onClick={handleToken}>
                                     <IconRefresh />
                                 </button> */}
-                                {/* <span className="badge">Current Token: {currToken}</span> */}
+                                <span className="badge">Current Token: {currToken}</span>
                             </h2>
                         </div>
                     </div>

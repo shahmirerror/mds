@@ -7,17 +7,94 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { IconCrosshair, IconClipboardText  } from '@tabler/icons-react';
+import { toast, ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 
 export default function TokenGeneration({ centres }) {
 
     const [centre, setCentre] = useState(null);
+
+    const [newToken, setToken] = useState(null);
+
+    const fetchToken = (e, token_type) => {
+
+        const requestData = {
+            centre_id: centre.id,
+            token_type: token_type
+        };
+
+        const requestJson = JSON.stringify(requestData);
+
+        try {
+            const response = fetch(route("token.new"), {
+                method: "POST",
+                body: requestJson,
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        // $('#preloader').hide();
+                        setToken('M'+result.token_no)
+
+                            toast.success('New Token has been generated!', {
+                                position: "top-right",
+                                autoClose: 5000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                                progress: undefined,
+                                theme: "light",
+                                });
+                    },
+                    (error) => {
+
+                        toast.error('Something went wrong! Please try again :(', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    }
+                );
+        } catch (ex) {
+
+            toast.error('Something went wrong! Please try again :(', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+        }
+    }
+
     useEffect(() => {
     }, []);
 
     return (
         <GuestLayout>
             <Head title="Token Generation" />
-            <div className="page page-center" style={{backgroundColor: "#0054a6", height: "100vh"}}>
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                />
+            <div className="page page-center" style={{backgroundImage: 'url(./assets/static/photos/mdsbackground.png)', height: '100vh', blur: "10%"}}>
                 <div className="p-6">
 
                     {centre == null ?
@@ -74,13 +151,13 @@ export default function TokenGeneration({ centres }) {
                         </div>
                         <div className="row align-items-center g-4 mt-7" id={'choose_token'}>
                             <div className="col-md-6 text-center">
-                                <button className="btn btn-lg">
+                                <button className="btn btn-lg" onClick={(e) => fetchToken(e, 'Medical')}>
                                     <span className="mr-1"><IconCrosshair style={{width: "70px", height: "70px"}}/></span>
                                     <span style={{fontSize: "xx-large"}}>{'Medical Registration'}</span>
                                 </button>
                             </div>
                             <div className="col-md-6 text-center">
-                                <button className="btn btn-lg">
+                                <button className="btn btn-lg" onClick={(e) => fetchToken(e, 'Reporting')}>
                                     <span><IconClipboardText style={{width: "70px", height: "70px"}}/></span>
                                     <span style={{fontSize: "xx-large"}}>{'Report Collection'}</span>
                                 </button>

@@ -156,7 +156,7 @@ export default function Reports({ auth }) {
         {
             reqError("Centre");
         }
-        else if(report_type == 0)
+        else if(report_type == null)
         {
             reqError("Report Type");
         }
@@ -190,7 +190,7 @@ export default function Reports({ auth }) {
                         // $('#preloader').hide();
                         setResultData(result.data);
                         setResultKeys(result.keys);
-                        setReset(false);
+                        setGenerated(null);
                         if(result.data?.length > 0)
                         {
                             toast.success('Report has been generated!', {
@@ -219,7 +219,7 @@ export default function Reports({ auth }) {
                         }
                     },
                     (error) => {
-                        setReset(false);
+                        setGenerated(null);
                         toast.error('Something went wrong! Please try again :(', {
                             position: "top-right",
                             autoClose: 5000,
@@ -233,7 +233,7 @@ export default function Reports({ auth }) {
                     }
                 );
         } catch (ex) {
-            setReset(false);
+            setGenerated(null);
             toast.error('Something went wrong! Please try again :(', {
                 position: "top-right",
                 autoClose: 5000,
@@ -268,6 +268,84 @@ export default function Reports({ auth }) {
             progress: undefined,
             theme: "light",
             });
+    }
+
+    const handleExport = (e) => {
+        e.preventDefault();
+
+        const requestData = {
+            datafreq: datafreq,
+            dailydate: dailydate,
+            monthlydate: monthlydate,
+            yearlydate: yearlydate,
+            fromRange: fromRange,
+            toRange: toRange,
+            centreID: centreID,
+            countries: country,
+            report_type: report_type,
+            keys: resultKeys,
+            data: resultData
+        };
+
+        const requestJson = JSON.stringify(requestData);
+
+        try {
+            const response = fetch(route("super.reports.export_report",e.target.value), {
+                method: "POST",
+                body: requestJson,
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        // Remove the anchor from the body
+                        document.body.removeChild(downloadLink);
+                            toast.success('Report has been exported!', {
+                                position: "top-right",
+                                autoClose: 5000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                                progress: undefined,
+                                theme: "light",
+                                });
+
+                                const downloadUrl = result.filename;
+
+                                // Create a hidden anchor element to trigger the download
+                                const downloadLink = document.createElement('a');
+                                downloadLink.href = downloadUrl;
+                                downloadLink.download = data.filename;
+
+                                // Append the anchor to the body and simulate a click
+                                document.body.appendChild(downloadLink);
+                                downloadLink.click();
+                    },
+                    (error) => {
+                        toast.error('Something went wrong! Please try again :(', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    }
+                );
+        } catch (ex) {
+            toast.error('Something went wrong! Please try again :(', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+        }
     }
 
     useEffect(() => {
@@ -419,7 +497,7 @@ export default function Reports({ auth }) {
 
                         <div className="col-12" style={{display: 'inline-flex', justifyContent: 'space-between'}}>
                             <button type="submit" className="btn btn-primary" onClick={handleGenerate} disabled={generated === null ? false : true}>Generate Report</button>
-                            <button type="submit" className="btn btn-secondary" disabled={reset} onClick={resetSelection}>Reset Selection</button>
+                            <button type="submit" className="btn btn-secondary" disabled={centreID == 0 && report_type == 0 && datafreq == null ? true : false} onClick={resetSelection}>Reset Selection</button>
                         </div>
                     </div>
 
@@ -430,11 +508,11 @@ export default function Reports({ auth }) {
                         <div class="card">
                             <div className="card-header" style={{display: 'inline-flex', justifyContent: "space-between"}}>
                                 <h2 class="page-title">
-                                    {report_type?.label} - Result
+                                    Query Result
                                 </h2>
                                 <div>
-                                    <button className="btn btn-sm btn-success text-white mr-2">Export CSV<IconDownload /></button>
-                                    <button className="btn btn-sm btn-danger text-white ml-2">Export PDF<IconDownload /></button>
+                                    <button className="btn btn-sm btn-success text-white mr-2" value="csv" onClick={handleExport}>Export CSV<IconDownload /></button>
+                                    <button className="btn btn-sm btn-danger text-white ml-2" value="pdf" onClick={handleExport}>Export PDF<IconDownload /></button>
                                 </div>
                             </div>
                             <div class="card-body">

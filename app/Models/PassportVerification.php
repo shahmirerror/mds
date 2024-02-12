@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class PassportVerification extends Model
 {
     use HasFactory;
+
+    protected $table = 'passport_verification';
 }

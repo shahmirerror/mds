@@ -8,15 +8,15 @@ export default function Index(props) {
     const [editId, setId] = useState(0);
     const [editName, setName] = useState('');
     const [editEmail, setEmail] = useState('');
-    const [editPhone, setPhone] = useState('');
+    const [editPassword, setPassword] = useState('');
     const [editUsername, setUsername] = useState('');
 
-    const { data, setData, post, delete: deleteResource, put, processing, errors, reset } = useForm({
-        id: 0,
-        name: '',
-        email: '',
-        username: '',
-        password: ''
+    const { data, setData, post, delete: deleteResource, processing, errors, reset } = useForm({
+        id: null,
+        name: null,
+        email: null,
+        username: null,
+        password: null
     });
 
     const handleChange = (e) => {
@@ -36,21 +36,23 @@ export default function Index(props) {
     const handleUpdate = (e) => {
         e.preventDefault();
 
-        put(route('users.update', data.id));
+        data.id = editId;
+        data.name = editName;
+        data.username = editUsername;
+        data.email = editEmail;
+        data.password = editPassword;
+
+        post(route('users.update', editId));
     }
 
     const handleEdit = (user) => {
 
-        setData('id',user?.id);
-        setData('name', user?.name);
-        setData('username',user?.username);
-        setData('email', user?.email);
+        setId(user?.id);
+        setName(user?.name);
+        setUsername(user?.username);
+        setEmail(user?.email);
 
-        console.log(user)
-
-        // const modal = document.getElementById('edit-user');
-        // modal.classList.toggle('show');
-        // modal.style.display = 'block';
+        console.log(data.id, data.name, data.username)
     }
 
     const handleDelete = (id) => {
@@ -70,7 +72,7 @@ export default function Index(props) {
             <div className="row g-2 align-items-center">
               <div className="col">
                 <h2 className="page-title">
-                  Users
+                  Super Administration
                 </h2>
                 {/* <div className="text-secondary mt-1">1-18 of 413 people</div> */}
               </div>
@@ -78,7 +80,7 @@ export default function Index(props) {
                 <div className="d-flex">
                   <a href="#" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-user">
                     <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
-                    New user
+                    New Super Admin
                   </a>
                 </div>
               </div>
@@ -187,19 +189,19 @@ export default function Index(props) {
                     <div className="modal-body">
                         <div className="mb-3">
                             <label className="form-label">Name</label>
-                            <input type="text" className="form-control" placeholder="Super Admin's name" name="name" value={data.name} onChange={handleChange}/>
+                            <input type="text" className="form-control" placeholder="Super Admin's name" name="name" value={editName} onChange={(e) => setName(e.target.value)}/>
                         </div>
                         <div className="mb-3">
                             <label className="form-label">Email</label>
-                            <input type="text" className="form-control" placeholder="Email Address" name="email" value={data.email} onChange={handleChange}/>
+                            <input type="email" className="form-control" placeholder="Email Address" name="email" value={editEmail} onChange={(e) => setEmail(e.target.value)}/>
                         </div>
                         <div className="mb-3">
                             <label className="form-label">Username</label>
-                            <input type="text" className="form-control" placeholder="Username" name="username" value={data.username} onChange={handleChange}/>
+                            <input type="text" className="form-control" placeholder="Username" name="username" value={editUsername} onChange={(e) => setUsername(e.target.value)}/>
                         </div>
                         <div className="mb-3">
                             <label className="form-label">Change Password (if forgotten)</label>
-                            <input type="password" className="form-control" placeholder="Password" name="password" onChange={handleChange}/>
+                            <input type="password" className="form-control" placeholder="Password" name="password"  value={editPassword} onChange={(e) => setPassword(e.target.value)}/>
                         </div>
                     </div>
                     <div className="modal-footer">

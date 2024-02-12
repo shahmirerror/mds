@@ -14,6 +14,7 @@ export default function SampleCollection({auth}) {
     const [barcode, setBarcode] = useState(null);
     const [date, setRegDate] = useState(null);
     const [serial_no, setSerialNo] = useState(null);
+    const [currToken, setToken] = useState('None');
 
     const [candidate, setCandidate] = useState(null);
     const [exist, setExist] = useState(false);
@@ -63,7 +64,7 @@ export default function SampleCollection({auth}) {
                                 {/* <button className="btn btn-secondary btn-sm mr-5 btn-pill" onClick={handleToken}>
                                     <IconRefresh />
                                 </button> */}
-                                {/* <span className="badge">Current Token: {currToken}</span> */}
+                                <span className="badge">Current Token: {currToken}</span>
                             </h2>
                         </div>
                     </div>
