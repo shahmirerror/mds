@@ -8,143 +8,227 @@ import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { IconCrosshair, IconClipboardText  } from '@tabler/icons-react';
 import { IconRefresh } from '@tabler/icons-react';
+import { toast, ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 
-export default function PrintReport({auth}) {
-
-    const {data, setData, post, processing, errors, reset} = useForm({
-        passport_no: '',
-        passport_issue_date: '',
-        passport_expiry_date: '',
-        candidate_name: '',
-        agency: '',
-        country: '',
-        profession: '',
-        cnic: '',
-        gender: '',
-        dob: '',
-        place_of_issue: '',
-        reg_date: '',
-        serial_no: '',
-        relation_type: '',
-        relative_name: '',
-        phone_1: '',
-        phone_2: '',
-        nationality: '',
-        marital_status: '',
-        biometric_fingerprint: '',
-        fee_charged: '',
-        discount: '',
-        remarks: '',
-        pregnancy_test: 0,
-        repeat: false
-
-    });
-
-    function findElementPromise(elementSelector, timeout = 5000) {
-        return new Promise((resolve, reject) => {
-          const timer = setTimeout(() => reject("Element not found"), timeout);
-
-          const observer = new MutationObserver((mutations) => {
-            for (const mutation of mutations) {
-              const target = mutation.target;
-              if (target.matches(elementSelector)) {
-                clearTimeout(timer);
-                observer.disconnect();
-                resolve(target);
-                return;
-              }
-            }
-          });
-
-          observer.observe(document.body, { childList: true, subtree: true });
-
-          if (document.querySelector(elementSelector)) {
-            clearTimeout(timer);
-            observer.disconnect();
-            resolve(document.querySelector(elementSelector));
-          }
-        });
-      }
-
-    const [camera, setCamera] = useState(false);
-    const [centre, setCentre] = useState(null);
+export default function PrintReport(props) {
     const [currToken, setToken] = useState('None');
-    const [manual, setManual] = useState(false);
+    const [candidate, setCandidate] = useState(null);
+    const [serial_no, setSerialNo] = useState(null);
+    const [reg_date, setRegDate] = useState(null);
+    const [passport_no, setPassportNo] = useState(null);
 
-    const [stream, setStream] = useState(null);
-    const [imageSrc, setImageSrc] = useState(null);
+    const handleSearchNormal = (e) =>
+    {
+        setCandidate(null);
 
-    const handleCamera = (e) => {
-        if(camera)
+        const requestData = {
+            centre_id: props.auth.user.centre.centre_id,
+            serial_no: serial_no,
+            reg_date: reg_date
+        };
+
+        const requestJson = JSON.stringify(requestData);
+
+        if(serial_no == null && reg_date == null)
         {
-            setCamera(false);
-            let video = document.getElementById('video');
-            let ph = document.getElementById('photo-placeholder');
-            e.target.innerHTML = 'Turn Camera On';
-            e.target.classList.value = 'btn btn-success btn-md';
-            stream.getTracks().forEach((track) => track.stop())
-            // navigator.mediaDevices
-            // .getUserMedia({ video: true })
-            // .then(() => {
-
-                ph.style.display = 'block';
-                video.style.display = 'none';
-            // })
-            // .catch(() => {
-
-            // });
+            toast.warning('Please select date & serial number or input barcode number to proceed!', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
         }
         else
         {
-            setCamera(true);
 
-            e.target.innerHTML = 'Turn Camera Off';
-            e.target.classList.value = 'btn btn-danger btn-md';
-
-            findElementPromise("#video")
-            .then((element) => {
-                let video = document.getElementById('video');
-                let ph = document.getElementById('photo-placeholder');
-                navigator.mediaDevices
-                .getUserMedia({ video: true })
-                .then((stream) => {
-                    setStream(stream);
-                    ph.style.display = 'none';
-                    video.style.display = 'block';
-                    video.srcObject = stream;
-
+            try {
+                const response = fetch(route("lab.fetch_registration_print_normal"), {
+                    method: "POST",
+                    body: requestJson,
                 })
-                .catch((error) => {
-                    console.error(error);
-                });
-            })
-            .catch((error) => {
-              console.error(error);
-            });
+                    .then(res => res.json())
+                    .then(
+                        (result) => {
+
+                                if(result.registration.length == 0)
+                                {
+                                    toast.warning('No Registration Found!', {
+                                        position: "top-right",
+                                        autoClose: 5000,
+                                        hideProgressBar: false,
+                                        closeOnClick: true,
+                                        pauseOnHover: true,
+                                        draggable: true,
+                                        progress: undefined,
+                                        theme: "light",
+                                        });
+                                }
+                                else
+                                {
+                                    // setSearched(true);
+                                    setCandidate(result.registration);
+
+                                    toast.success('Candidate Found!', {
+                                        position: "top-right",
+                                        autoClose: 5000,
+                                        hideProgressBar: false,
+                                        closeOnClick: true,
+                                        pauseOnHover: true,
+                                        draggable: true,
+                                        progress: undefined,
+                                        theme: "light",
+                                        });
+                                }
+                        },
+                        (error) => {
+
+                            toast.error('Something went wrong! Please try again :(', {
+                                position: "top-right",
+                                autoClose: 5000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                                progress: undefined,
+                                theme: "light",
+                                });
+                        }
+                    );
+            } catch (ex) {
+
+                toast.error('Something went wrong! Please try again :(', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    });
+            }
         }
+    };
 
-    }
+    const handleSearchPassport = (e) =>
+    {
+        setCandidate(null);
 
-    const handleToken = (e) => {
-        e.preventDefault();
+        const requestData = {
+            centre_id: props.auth.user.centre.centre_id,
+            passport_no: passport_no
+        };
 
+        const requestJson = JSON.stringify(requestData);
 
-        reset();
-        setCamera(false);
-        setManual(false);
-        setStream(false);
-        setSImageSrc(null);
-    }
+        if(passport_no == null)
+        {
+            toast.warning('Please input barcode number to proceed!', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+        }
+        else
+        {
 
-    useEffect(() => {
-    }, []);
+            try {
+                const response = fetch(route("lab.fetch_registration_print_passport"), {
+                    method: "POST",
+                    body: requestJson,
+                })
+                    .then(res => res.json())
+                    .then(
+                        (result) => {
+
+                                if(result.registration.length == 0)
+                                {
+                                    toast.warning('No Registration Found!', {
+                                        position: "top-right",
+                                        autoClose: 5000,
+                                        hideProgressBar: false,
+                                        closeOnClick: true,
+                                        pauseOnHover: true,
+                                        draggable: true,
+                                        progress: undefined,
+                                        theme: "light",
+                                        });
+                                }
+                                else
+                                {
+                                    // setSearched(true);
+                                    setCandidate(result.registration);
+
+                                    toast.success('Candidate Found!', {
+                                        position: "top-right",
+                                        autoClose: 5000,
+                                        hideProgressBar: false,
+                                        closeOnClick: true,
+                                        pauseOnHover: true,
+                                        draggable: true,
+                                        progress: undefined,
+                                        theme: "light",
+                                        });
+                                }
+                        },
+                        (error) => {
+
+                            toast.error('Something went wrong! Please try again :(', {
+                                position: "top-right",
+                                autoClose: 5000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                                progress: undefined,
+                                theme: "light",
+                                });
+                        }
+                    );
+            } catch (ex) {
+
+                toast.error('Something went wrong! Please try again :(', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    });
+            }
+        }
+    };
 
     return (
         <AuthenticatedLayout
-            user={auth.user}
+            user={props.auth.user}
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Print Report</h2>}
         >
-            <Head title="Registration Desk" />
+            <Head title="Print Report" />
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                />
 
             <div className="page-header d-print-none">
                 <div className="container-xl">
@@ -157,9 +241,9 @@ export default function PrintReport({auth}) {
                         </div>
                         <div className="col-md-3 align-items-center" style={{float: 'right'}}>
                             <h2 className="page-title">
-                                {/* <button className="btn btn-secondary btn-sm mr-5 btn-pill" onClick={handleToken}>
+                                <button className="btn btn-secondary btn-sm mr-5 btn-pill" onClick={(e) => location.reload()}>
                                     <IconRefresh />
-                                </button> */}
+                                </button>
                                 <span className="badge">Current Token: {currToken}</span>
                             </h2>
                         </div>
@@ -171,7 +255,7 @@ export default function PrintReport({auth}) {
             <div className="page-body">
                 <div className="container-xl">
                     <div className="row row-cards mb-5">
-                    <div className="col-md-6">
+                        <div className="col-md-6">
                             <div className="row row-cards">
                                 <div className="col-12">
                                     <div className="card">
@@ -187,19 +271,19 @@ export default function PrintReport({auth}) {
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Date</label>
-                                                        <input type="date" className="form-control" name="name" />
+                                                        <input type="date" className="form-control" name="reg_date" onChange={(e) => setRegDate(e.target.value)} />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Serial Number</label>
-                                                        <input type="text" className="form-control" name="pp_issue_date" />
+                                                        <input type="text" className="form-control" name="serial_no"  onChange={(e) => setSerialNo(e.target.value)}/>
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Passport Number</label>
-                                                        <input type="text" className="form-control" name="pp_issue_date" />
+                                                        <input type="text" className="form-control" name="passport_no"  onChange={(e) => setPassportNo(e.target.value)}/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -207,6 +291,66 @@ export default function PrintReport({auth}) {
                                     </div>
                                 </div>
                             </div>
+                            {candidate && (
+                            <div className="row row-cards">
+                                <div className="col-12">
+                                    <div className="card">
+                                        <div className="card-header">
+                                            <div className="col-md-12 flex align-items-center">
+                                                <div className='col-md-6' style={{float: 'left'}}>
+                                                    <h3>Candidate Information</h3>
+                                                </div>
+                                            </div>
+                                        </div><div className="card-body" id="manual_import">
+                                            <div className="row g-5 mb-3">
+                                                <div className="col-6">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Candidate Name</label>
+                                                        <input type="text" className="form-control" name="candidate_name" value={candidate?.candidate_name} disabled={true} />
+                                                    </div>
+                                                </div>
+                                                <div className="col-6">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Relative Name</label>
+                                                        <input type="text" className="form-control" name="passport_no" value={candidate?.relative_name} disabled={true} />
+                                                    </div>
+                                                </div>
+                                                <div className="col-6">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Passport Number</label>
+                                                        <input type="date" className="form-control" name="passport_issue_date" value={candidate?.passport_no} disabled={true} />
+                                                    </div>
+                                                </div>
+                                                <div className="col-6">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>CNIC</label>
+                                                        <input type="date" className="form-control" name="passport_expiry_date" value={candidate?.cnic} disabled={true} />
+                                                    </div>
+                                                </div>
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Country</label>
+                                                        <input type="date" className="form-control" name="dob" value={candidate?.country} disabled={true} />
+                                                    </div>
+                                                </div>
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Registration Date</label>
+                                                        <input type="date" className="form-control" name="passport_image" value={candidate?.reg_date} disabled={true} />
+                                                    </div>
+                                                </div>
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Serial No</label>
+                                                        <input type="text" className="form-control" name="passport_image" value={candidate?.serial_no} disabled={true} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            )}
                         </div>
                         <div className="col-md-6">
                             <div className="row row-cards">
@@ -216,62 +360,32 @@ export default function PrintReport({auth}) {
                                             <div className="row g-5 mb-3">
                                                 <div className="col-3">
                                                     <div className="row g-3 align-items-center">
-                                                        <button className="btn btn-primary btn-md">Find Candidate</button>
+                                                        <button className="btn btn-primary btn-md" onClick={handleSearchNormal}>Find Candidate</button>
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
                                                     <div className="row g-3">
-                                                        <button className="btn btn-info btn-md">Find Candidate by Passport</button>
+                                                        <button className="btn btn-info btn-md" onClick={handleSearchPassport}>Find Candidate by Passport</button>
                                                     </div>
                                                 </div>
                                                 <div className="col-3">
                                                     <div className="row g-3 align-items-center">
-                                                        <button className="btn btn-success btn-md">Print Report</button>
+                                                        <button className="btn btn-success btn-md" disabled={candidate == null}>Print Report</button>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div className="row g-5 mb-3">
                                                 <div className="col-3">
                                                     <div className="row g-3 align-items-center">
-                                                        <button className="btn btn-secondary btn-md">History</button>
+                                                        <button className="btn btn-secondary btn-md" disabled={candidate == null}>History</button>
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
                                                     <div className="row g-3">
-                                                        <button className="btn btn-outline-success btn-md">Embassy Slip</button>
+                                                        <button className="btn btn-outline-success btn-md" disabled={candidate == null}>Embassy Slip</button>
                                                     </div>
                                                 </div>
                                             </div>
-                                            {/* <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Place of Issue</label>
-                                                        <select className="form-select">
-                                                            <option>Select Place of Issue</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>PP Issue Date</label>
-                                                        <input type="date" className="form-control" name="pp_issue_date" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row g-5">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Reference Slip Issue Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_issue_date" />
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Reference Slip Expiry Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_expiry_date" />
-                                                    </div>
-                                                </div>
-                                            </div> */}
                                         </div>
                                     </div>
                                 </div>

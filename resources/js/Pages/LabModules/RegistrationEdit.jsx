@@ -15,15 +15,21 @@ import Select from 'react-select';
 
 export default function RegistrationEdit(props) {
 
-    const [currToken, setToken] = useState('None');
+    const [barcode, setBarcode] = useState(null);
+    const [date, setRegDate] = useState(null);
+    const [serial_no, setSerialNo] = useState(null);
+    const [searched, setSearched] = useState(false);
+    const [candidate, setCandidate] = useState(null);
+    const [report, setReport] = useState(null);
 
     const {data, setData, post, processing, errors, reset} = useForm({
-        passport_no: '',
+        passport_no: candidate?.passport_no,
         passport_issue_date: '',
         passport_expiry_date: '',
+        candidate_id: 0,
+        reg_id: 0,
         candidate_name: '',
         candidate_image: null,
-        passport_image: null,
         agency: '',
         country: '',
         profession: '',
@@ -33,7 +39,6 @@ export default function RegistrationEdit(props) {
         dob: '',
         place_of_issue: '',
         reg_date: '',
-        barcode: props.barcode,
         serial_no: '',
         relation_type: '',
         relative_name: '',
@@ -41,13 +46,10 @@ export default function RegistrationEdit(props) {
         phone_2: '',
         nationality: '',
         marital_status: '',
-        biometric_fingerprint: '',
         fee_charged: '',
         discount: '',
         remarks: '',
         pregnancy_test: 0,
-        repeat: false,
-        token_no: currToken
 
     });
 
@@ -181,13 +183,16 @@ export default function RegistrationEdit(props) {
             const filename = 'webcam_photo_' + Date.now() + '.png';
             const file = new File([blob], filename, { type: 'image/png' });
 
-            setData('candidate_image',file);
+            data.candidate_image = canvas.toDataURL('image/png');
+            console.log(data.candidate_image)
         }
         else if(e.target.value == 'retake')
         {
-            setData('candidate_image',null);
+
             video.style.display = 'block';
             ph.style.display = 'none';
+
+            data.candidate_image = null;
         }
     }
 
@@ -283,15 +288,11 @@ export default function RegistrationEdit(props) {
 
     const handleToken = () => {
         // e.preventDefault();
-
-        fetchToken();
         reset();
-        fetchBarcode();
         if(stream !== null)
         {
             stream.getTracks().forEach((track) => track.stop())
         }
-        document.getElementById('fingerPrint').src = "./../assets/static/photos/ThumbPrint.png";
         let video = document.getElementById('video');
         let ph = document.getElementById('photo-placeholder');
         let ph2 = document.getElementById('taken_photo');
@@ -449,20 +450,264 @@ export default function RegistrationEdit(props) {
     }
 
     const handleChange = (e) => {
-        if(e.target.name == 'gender')
-        {
-            setData('pregnancy_test',0);
-        }
-        setData(e.target.name, e.target.value);
+        const { name, value } = e.target;
+        setCandidate(prevCandidate => ({
+            ...prevCandidate,
+            [name]: value.toUpperCase()
+        }));
     }
 
-    const submit = (e) => {
-        post(route('registration-desk.store'));
+    const handleChangeSelects = (name, e) => {
+        const Name = name;
+        const value = e;
+        setCandidate(prevCandidate => ({
+            ...prevCandidate,
+            [Name]: value
+        }));
+    }
+
+    const handleSearch = async (e) =>
+    {
+        setCandidate(null);
+
+        const requestData = {
+            centre_id: props.auth.user.centre.centre_id,
+            passport_no: barcode,
+            serial_no: serial_no,
+            reg_date: date
+        };
+
+        const requestJson = JSON.stringify(requestData);
+
+        if(serial_no == null && date == null && barcode == null)
+        {
+            toast.warning('Please select date & serial number or input Passport number to proceed!', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+        }
+        else
+        {
+
+            try {
+                const response = await toast.promise(fetch(route("lab.fetch_registration_edit"), {
+                    method: "POST",
+                    body: requestJson,
+                }),
+                {
+                    pending: 'Fetching Candidate',
+                })
+                    .then(res => res.json())
+                    .then(
+                        (result) => {
+
+                                if(result.registration.length == 0)
+                                {
+                                    toast.warning('No Registration Found!', {
+                                        position: "top-right",
+                                        autoClose: 5000,
+                                        hideProgressBar: false,
+                                        closeOnClick: true,
+                                        pauseOnHover: true,
+                                        draggable: true,
+                                        progress: undefined,
+                                        theme: "light",
+                                        });
+                                }
+                                else
+                                {
+                                    setSearched(true);
+                                    setCandidate(result.registration);
+
+                                    toast.success('Candidate Found!', {
+                                        position: "top-right",
+                                        autoClose: 5000,
+                                        hideProgressBar: false,
+                                        closeOnClick: true,
+                                        pauseOnHover: true,
+                                        draggable: true,
+                                        progress: undefined,
+                                        theme: "light",
+                                        });
+                                }
+                        },
+                        (error) => {
+
+                            toast.error('Something went wrong! Please try again :(', {
+                                position: "top-right",
+                                autoClose: 5000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                                progress: undefined,
+                                theme: "light",
+                                });
+                        }
+                    );
+            } catch (ex) {
+
+                toast.error('Something went wrong! Please try again :(', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    });
+            }
+        }
+    };
+
+    const handleReset = (e) =>
+    {
+        setCandidate(null);
+        setBarcode(null);
+        setRegDate(null);
+        setSerialNo(null);
+        setSearched(false);
+
+        location.reload();
+    };
+
+    const handleSubmit = async (e) => {
+        const requestData = {
+            candidate: candidate,
+            candidate_image: data.candidate_image,
+            passport_image: data.passport_image
+        };
+
+        const requestJson = JSON.stringify(requestData);
+
+            try {
+                const response = await toast.promise(fetch(route("lab.update_registration"), {
+                    method: "POST",
+                    body: requestJson,
+                }),
+                {
+                    pending: 'Submitting Form',
+                })
+                    .then(res => res.json())
+                    .then(
+                        (result) => {
+                                    toast.success('Candidate has been updated!', {
+                                        position: "top-right",
+                                        autoClose: 5000,
+                                        hideProgressBar: false,
+                                        closeOnClick: true,
+                                        pauseOnHover: true,
+                                        draggable: true,
+                                        progress: undefined,
+                                        theme: "light",
+                                        });
+
+
+                        },
+                        (error) => {
+
+                            toast.error('Something went wrong! Please try again :(', {
+                                position: "top-right",
+                                autoClose: 5000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                                progress: undefined,
+                                theme: "light",
+                                });
+                        }
+                    );
+            } catch (ex) {
+
+                toast.error('Something went wrong! Please try again :(', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    });
+            }
+    }
+
+    const handlePrint = async () => {
+
+        const requestData = {
+            centre_id: props.auth.user.centre.centre_id,
+            barcode_no: candidate?.barcode_no
+        };
+
+        const requestJson = JSON.stringify(requestData);
+
+        try {
+            setReport(null);
+            const response = await toast.promise(fetch(route("lab.export_reg_report"), {
+                method: "POST",
+                body: requestJson,
+            }),
+            {
+                pending: 'Fetching Report',
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+
+                        toast.success('Report has been generated!', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+
+                            setReport(result.filename);
+                            // setModal(true);
+                    },
+                    (error) => {
+
+                        toast.error('Something went wrong! Please try again :(', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    }
+                );
+        } catch (ex) {
+
+            toast.error('Something went wrong! Please try again :(', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+        }
     }
 
     useEffect(() => {
         // reset();
-        handleToken();
+
     }, []);
 
     return (
@@ -492,11 +737,11 @@ export default function RegistrationEdit(props) {
                             <h2 className="page-title" style={{float: 'left'}}>
                                 Registration Desk - Edit
                             </h2>
-                            {/* <h3 className="badge bg-success text-white" style={{float: 'right'}}>Counter 1</h3> */}
+                            <a className="btn btn-danger btn-sm" type={'button'} href={route('registration-desk.index')} style={{float: 'right'}}>Go Back</a>
                         </div>
                         <div className="col-md-3 align-items-center" style={{float: 'right'}}>
-                            <h2 className="page-title">
-                                <button className="btn btn-secondary btn-sm mr-5 btn-pill" onClick={''}>
+                            <h2 className="page-title" style={{float: 'right'}}>
+                                <button className="btn btn-secondary btn-sm mr-5 btn-pill" onClick={handleReset}>
                                     <IconRefresh />
                                 </button>
                             </h2>
@@ -510,150 +755,92 @@ export default function RegistrationEdit(props) {
                 <div className="container-xl">
                     <div className="row row-cards mb-5">
                         <div className="col-md-6">
-                            <div className="row row-cards">
+                        <div className="row row-cards">
                                 <div className="col-12">
                                     <div className="card">
-                                    <div className="card-header">
-                                        <div className="col-md-12 flex align-items-center">
+                                        <div className="card-body" id="manual_import">
+                                        <div className="row g-5 mb-3">
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Passport Number</label>
+                                                        <input type="password" className="form-control" name="barcode" onChange={(e) => setBarcode(e.target.value)}/>
+                                                    </div>
+                                                </div>
 
-                                        </div>
-                                    </div>
-                                    <div className="card-body">
-                                        <div className="row g-3">
-                                            <div className="col-6">
-                                                <div className="row g-3 align-items-center">
-                                                    <img id="fingerPrint" src={"./../../assets/static/photos/ThumbPrint.png"} style={{width : 500}}/>
-                                                    <div className="col-md-12 text-center">
-                                                        <button className="btn btn-purple btn-md w-50" onClick={handleFinger}>Scan fingerprint</button>
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Date</label>
+                                                        <input type="date" className="form-control" name="reg_date" onChange={(e) => setRegDate(e.target.value)}/>
                                                     </div>
-                                                    <div className="col-md-12 text-center">
-                                                        <select className="form-select" name="finger_type" onChange={handleChange}>
-                                                            <option>--</option>
-                                                            {fingers.map((finger, index) => (
-                                                                <option value={finger.value}>{finger.label}</option>
-                                                            ))}
-                                                        </select>
+                                                </div>
+
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Serial Number</label>
+                                                        <input type="text" className="form-control" name="serial_no" onChange={(e) => setSerialNo(e.target.value)}/>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="col-6">
-                                                <div className="row g-3 align-items-center">
-                                                    <video id="video" autoPlay muted style={{height: '280px', display: 'none'}}/>
-                                                    <img src={null} id="taken_photo" style={{width : 300, display: 'none', marginTop: '55px'}} className="mb-5" />
-                                                    <img src={"./../assets/static/photos/Photo.png"} className="mb-4" id="photo-placeholder" style={{width : 274}} />
-                                                    <div className="col-md-6">
-                                                    { camera && data.candidate_image == null ?
-                                                        (<button className="btn btn-warning btn-md" value="take" onClick={handleCapture}>Take Photo</button>)
-                                                    : camera && data.candidate_image != null ?
-                                                        (<button className="btn btn-warning btn-md" value="retake" onClick={handleCapture}>Re-Take Photo</button>)
-                                                    :
-                                                        (<></>)
-                                                    }
-                                                    </div>
-                                                    <div className="col-md-6">
-                                                        <button className="btn btn-success btn-md" id="cameraToggle" disabled={data.candidate_image != null} onClick={handleCamera}>Turn Camera On</button>
-                                                    </div>
+                                            <div className="row g-5 mb-3">
+                                                <div className="col-2">
+                                                </div>
+                                                <div className="col-4">
+                                                    <button className={'btn btn-md btn-outline-secondary'} disabled={searched ? false : true} onClick={handleReset}>Reset Form</button>
+                                                </div>
+                                                <div className="col-4">
+                                                    <button className={'btn btn-md btn-outline-info'} disabled={searched ? true : false} onClick={handleSearch}>Search for Candidate</button>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="col-md-6">
+                            {candidate && (
                             <div className="row row-cards">
                                 <div className="col-12">
                                     <div className="card">
                                         <div className="card-header">
                                             <div className="col-md-12 flex align-items-center">
                                                 <div className='col-md-6' style={{float: 'left'}}>
-                                                    {!manual ?
-                                                    (<button className="btn btn-sm btn-yellow" onClick={handleImport}>Import Passport</button>)
-                                                    :
-                                                    (<h3>Passport Information</h3>)}
-                                                </div>
-                                                <div className='col-md-6' style={{float: 'right'}}>
-                                                <label class="form-check form-switch" style={{float: 'right'}}>
-                                                    <input class="form-check-input" type="checkbox" checked={manual} onChange={(e) => setManual(e.target.checked)}/>
-                                                    <span class="form-check-label">Manual Entry</span>
-                                                </label>
+                                                    <h3>Candidate Information</h3>
                                                 </div>
                                             </div>
-                                        </div>
-                                        {!manual ?
-                                        (<div className="card-body" id="auto_import">
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Place of Issue</label>
-                                                        <Select
-                                                            options={props.places}
-                                                            value={data.place_of_issue}
-                                                            name="place_of_issue"
-                                                            onChange={(e) => setData('place_of_issue', e)}
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>PP Issue Date</label>
-                                                        <input type="date" className="form-control" name="passport_issue_date" onChange={handleChange} />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row g-5">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Reference Slip Issue Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_issue_date" value={data.ref_slip_issue_date} onChange={handleChange} />
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Reference Slip Expiry Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_expiry_date" value={data.ref_slip_expiry_date} onChange={handleChange} />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>)
-                                        :
-                                        (<div className="card-body" id="manual_import">
+                                        </div><div className="card-body" id="manual_import">
                                             <div className="row g-5 mb-3">
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Candidate Name</label>
-                                                        <input type="text" className="form-control" name="candidate_name" value={data.candidate_name} onChange={handleChange} />
+                                                        <input type="text" className="form-control" name="candidate_name" value={candidate?.candidate_name} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Passport Number</label>
-                                                        <input type="text" className="form-control" name="passport_no" value={data.passport_no} onChange={handleChange} />
+                                                        <input type="text" className="form-control" name="passport_no" value={candidate?.passport_no} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>PP Issue Date</label>
-                                                        <input type="date" className="form-control" name="passport_issue_date" value={data.passport_issue_date} onChange={handleChange} />
+                                                        <input type="date" className="form-control" name="passport_issue_date" value={candidate?.passport_issue_date} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>PP Expiry Date</label>
-                                                        <input type="date" className="form-control" name="passport_expiry_date" value={data.passport_expiry_date} onChange={handleChange} />
+                                                        <input type="date" className="form-control" name="passport_expiry_date" value={candidate?.passport_expiry_date} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>DOB</label>
-                                                        <input type="date" className="form-control" name="dob" value={data.dob} onChange={handleChange} />
+                                                        <input type="date" className="form-control" name="dob" value={candidate?.dob} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Gender</label>
-                                                        <select className="form-control" name="gender" onChange={handleChange}>
+                                                        <select className="form-control" name="gender" value={candidate?.gender} onChange={handleChange}>
                                                             <option value="">Select Gender</option>
                                                             <option value="Male">Male</option>
                                                             <option value="Female">Female</option>
@@ -671,13 +858,13 @@ export default function RegistrationEdit(props) {
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Nationality</label>
-                                                        <input type="text" className="form-control" name="nationality" value={data.nationality} onChange={handleChange} />
+                                                        <input type="text" className="form-control" name="nationality" value={candidate?.nationality} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>CNIC</label>
-                                                        <input type="text" className="form-control" name="cnic" value={data.cnic} onChange={handleChange} />
+                                                        <input type="text" className="form-control" name="cnic" value={candidate?.cnic} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
@@ -685,9 +872,9 @@ export default function RegistrationEdit(props) {
                                                         <label className='form-label'>Place of Issue</label>
                                                         <Select
                                                             options={props.places}
-                                                            value={data.place_of_issue}
+                                                            value={candidate?.place_of_issue}
                                                             name="place_of_issue"
-                                                            onChange={(e) => setData('place_of_issue', e)}
+                                                            onChange={(e) => handleChangeSelects('place_of_issue',e)}
                                                         />
                                                     </div>
                                                 </div>
@@ -696,25 +883,67 @@ export default function RegistrationEdit(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Reference Slip Issue Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_issue_date" value={data.ref_slip_issue_date} onChange={handleChange} />
+                                                        <input type="date" className="form-control" name="slip_issue_date" value={candidate?.slip_issue_date} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Reference Slip Expiry Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_expiry_date" value={data.ref_slip_expiry_date} onChange={handleChange} />
+                                                        <input type="date" className="form-control" name="slip_expiry_date" value={candidate?.slip_expiry_date} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>)
-                                        }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            )}
+                        </div>
+                        <div className="col-md-6">
+                            <div className="row row-cards">
+                                <div className="col-12">
+                                    <div className="card">
+                                    <div className="card-header">
+                                        <div className="col-md-12 flex align-items-center">
+
+                                        </div>
+                                    </div>
+                                    <div className="card-body">
+                                        <div className="row g-3">
+                                            <div className="col-6">
+                                                <div className="row g-3 align-items-center">
+                                                    <video id="video" autoPlay muted style={{height: '280px', display: 'none'}}/>
+                                                    <img src={null} id="taken_photo" style={{width : 300, display: 'none', marginTop: '55px'}} className="mb-5" />
+                                                    <img src={"./../../assets/static/photos/Photo.png"} className="mb-4" id="photo-placeholder" style={{width : 274}} />
+                                                    <div className="col-md-6">
+                                                    { camera && data?.candidate_image == null ?
+                                                        (<button className="btn btn-warning btn-md" value="take" onClick={handleCapture}>Take Photo</button>)
+                                                    : camera && data?.candidate_image != null ?
+                                                        (<button className="btn btn-warning btn-md" value="retake" onClick={handleCapture}>Re-Take Photo</button>)
+                                                    :
+                                                        (<></>)
+                                                    }
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <button className="btn btn-success btn-md" id="cameraToggle" disabled={data?.candidate_image != null} onClick={handleCamera}>Turn Camera On</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="col-6">
+                                                <div className="row g-3 align-items-center">
+                                                    <img src={candidate?.candidate_image} style={{width : 300, marginTop: '55px'}} className="mb-5" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    {candidate && (
                     <div className="row row-cards">
-                    <div className="col-md-6">
+                        <div className="col-md-6">
                             <div className="row row-cards">
                                 <div className="col-12">
                                     <div className="card">
@@ -730,13 +959,13 @@ export default function RegistrationEdit(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Registration Date</label>
-                                                        <input type="date" className="form-control" name="reg_date" value={data.reg_date} onChange={handleChange} />
+                                                        <input type="date" className="form-control" name="reg_date" value={candidate?.reg_date} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Serial Number</label>
-                                                        <input type="text" className="form-control" name="serial_no" value={data.serial_no} onChange={handleChange} />
+                                                        <input type="text" className="form-control" name="serial_no" value={candidate?.serial_no} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -746,9 +975,9 @@ export default function RegistrationEdit(props) {
                                                         <label className='form-label'>Agency</label>
                                                         <Select
                                                             options={props.agencies}
-                                                            value={data.agency}
+                                                            value={candidate?.agency}
                                                             name="agencies"
-                                                            onChange={(e) => setData('agency', e)}
+                                                            onChange={(e) => handleChangeSelects('agency',e)}
                                                         />
                                                     </div>
                                                 </div>
@@ -757,9 +986,9 @@ export default function RegistrationEdit(props) {
                                                         <label className='form-label'>Country</label>
                                                         <Select
                                                             options={props.countries}
-                                                            value={data.country}
+                                                            value={candidate?.country}
                                                             name="country"
-                                                            onChange={(e) => setData('country', e)}
+                                                            onChange={(e) => handleChangeSelects('country',e)}
                                                         />
                                                     </div>
                                                 </div>
@@ -770,22 +999,22 @@ export default function RegistrationEdit(props) {
                                                         <label className='form-label'>Profession</label>
                                                         <Select
                                                             options={props.professions}
-                                                            value={data.profession}
+                                                            value={candidate?.profession}
                                                             name="profession"
-                                                            onChange={(e) => setData('profession', e)}
+                                                            onChange={(e) => handleChangeSelects('profession',e)}
                                                         />
                                                     </div>
                                                 </div>
                                                 <div className="col-3">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Fees</label>
-                                                        <input className="form-control" name="fees" type="text" value={data.fees} onChange={handleChange} />
+                                                        <input className="form-control" name="fee_charged" type="text" value={candidate?.fee_charged} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-3">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Discount</label>
-                                                        <input className="form-control" name="discount" type="text" value={data.discount} onChange={handleChange} />
+                                                        <input className="form-control" name="discount" type="text" value={candidate?.discount} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -810,7 +1039,7 @@ export default function RegistrationEdit(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Relation</label>
-                                                        <select className="form-select" name="relation_type" value={data.relation_type} onChange={handleChange}>
+                                                        <select className="form-select" name="relation_type" value={candidate?.relation_type} onChange={handleChange}>
                                                             <option value="">Select Relation</option>
                                                             <option value="S/O">S/O</option>
                                                             <option value="W/O">W/O</option>
@@ -821,7 +1050,7 @@ export default function RegistrationEdit(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Relative Name</label>
-                                                        <input type="text" className="form-control" name="relative_name" value={data.relative_name} onChange={handleChange} />
+                                                        <input type="text" className="form-control" name="relative_name" value={candidate?.relative_name} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -829,13 +1058,13 @@ export default function RegistrationEdit(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Phone 1</label>
-                                                        <input type="text" className="form-control" name="phone_1" value={data.phone_1} onChange={handleChange} />
+                                                        <input type="text" className="form-control" name="phone_1" value={candidate?.phone_1} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Phone 2</label>
-                                                        <input type="text" className="form-control" name="phone_2" value={data.phone_2} onChange={handleChange}/>
+                                                        <input type="text" className="form-control" name="phone_2" value={candidate?.phone_2} onChange={handleChange}/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -843,7 +1072,7 @@ export default function RegistrationEdit(props) {
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Pregnancy Check</label>
-                                                        <select className="form-select" disabled={data.gender == 'Male'} name="pregnancy_test" value={data.pregnancy_test} onChange={handleChange}>
+                                                        <select className="form-select" disabled={candidate?.gender == 'Male'} name="pregnancy_test" value={candidate?.pregnancy_test} onChange={handleChange}>
                                                             <option value="1">Pregnant</option>
                                                             <option value="0">Not Pregnant</option>
                                                         </select>
@@ -852,7 +1081,7 @@ export default function RegistrationEdit(props) {
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Marital Status</label>
-                                                        <select className="form-select" name="marital_status" value={data.marital_status} onChange={handleChange}>
+                                                        <select className="form-select" name="marital_status" value={candidate?.marital_status} onChange={handleChange}>
                                                             <option value="">Select Marital Status</option>
                                                             <option value="Single">Single</option>
                                                             <option value="Married">Married</option>
@@ -864,15 +1093,18 @@ export default function RegistrationEdit(props) {
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Remarks</label>
-                                                        <textarea className="form-control" name="remarks" value={data.remarks} onChange={handleChange}></textarea>
+                                                        <textarea className="form-control" name="remarks" value={candidate?.remarks} onChange={handleChange}></textarea>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="card-body">
                                             <div className='row g-5'>
-                                                <div className="col-12">
-                                                    <button className="btn btn-outline-success" disabled={currToken == 'None'} onClick={submit}>Submit</button>
+                                                <div className="col-4">
+                                                    <button className="btn btn-outline-success" disabled={candidate == null} onClick={handleSubmit}>Update Registration</button>
+                                                </div>
+                                                <div className='col-3'>
+                                                <button className="btn btn-outline-purple" data-bs-toggle="modal" data-bs-target="#reg-report" disabled={candidate == null} onClick={handlePrint}>Print Report</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -881,8 +1113,30 @@ export default function RegistrationEdit(props) {
                             </div>
                         </div>
                     </div>
+                    )}
                 </div>
             </div>
+
+            {/* Registration Report Modal */}
+            <div className={`modal modal-blur fade`} id="reg-report" tabindex="-1" role="dialog" aria-hidden="true">
+                <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Registration Slip</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    <div className="modal-body">
+                        <iframe src={report} style={{height: '300px', width: '100%'}}></iframe>
+                    </div>
+                    <div className="modal-footer">
+                        <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
+                            Close
+                        </a>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            {/* Registration Report Modal */}
 
         </AuthenticatedLayout>
     );

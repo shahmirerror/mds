@@ -73,6 +73,8 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'centre'], function () {
 
         Route::resource('registration-desk', App\Http\Controllers\LabModules\RegistrationsController::class);
+        Route::post('registration-desk/update', [App\Http\Controllers\LabModules\RegistrationsController::class, 'update'])->name('registration-desk.update');
+        Route::post('registration-desk/store', [App\Http\Controllers\LabModules\RegistrationsController::class, 'store'])->name('registration-desk.store');
 
         Route::get('/passport-verification', function () {
             return Inertia::render('LabModules/PassportVerification');
@@ -102,13 +104,15 @@ Route::middleware('auth')->group(function () {
             return Inertia::render('LabModules/PrintReport');
         })->name('print-report.index');
 
+        Route::get('/report-issuance', function () {
+            return Inertia::render('LabModules/ReportIssuance');
+        })->name('report-issuance.index');
+
         Route::get('/duplicate-lab-stickers', function () {
             return Inertia::render('LabModules/DuplicateLabStickers');
         })->name('duplicate-lab-stickers.index');
 
-        Route::get('/token-status', function () {
-            return Inertia::render('LabModules/TokenStatus');
-        })->name('token-status.index');
+        Route::resource('token-status', App\Http\Controllers\LabModules\TokenStatusController::class);
 
         Route::resource('xray-verification', App\Http\Controllers\LabModules\XRAYVerificationController::class);
 

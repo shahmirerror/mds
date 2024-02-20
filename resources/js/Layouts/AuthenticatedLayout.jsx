@@ -17,7 +17,8 @@ export default function Authenticated({ user, header, children }) {
     const [modules, setModules] = useState([]);
     const [labs, setLabs] = useState([]);
 
-    const [logoImg, setLogo] = useState();
+    const [logoImgMain, setLogoMain] = useState();
+    const [logoImgSecondary, setLogoSecondary] = useState();
 
     function mods_list() {
         if(user?.role_id == 1)
@@ -64,13 +65,10 @@ export default function Authenticated({ user, header, children }) {
                 newImageName += splits[i];
             }
             const importedImage = await import(`./../../../storage/app/public/centres/logos/${newImageName}.${ext}`);
-            setLogo(importedImage.default);
+            setLogoSecondary(importedImage.default);
         }
-        else
-        {
             const importedImage = await import(`@/../../assets/static/logo-mds.svg`);
-            setLogo(importedImage.default);
-        }
+            setLogoMain(importedImage.default);
     };
 
     useEffect(() => {
@@ -87,8 +85,8 @@ export default function Authenticated({ user, header, children }) {
             <div className="sticky-top">
             <Header2 modules={modules} labs={labs}/>
             </div> */}
-            <VerticalNav logo={logoImg} modules={modules} labs={labs}/>
-            <NavBar user={user} />
+            <VerticalNav logo={logoImgMain} modules={modules} labs={labs}/>
+            <NavBar user={user} logo={logoImgSecondary} />
             <div className="page-wrapper">
 
                 <main>{children}</main>

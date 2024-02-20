@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class XrayVerification extends Model
 {
     use HasFactory;
+
+    protected $table = 'xray_verification';
 }

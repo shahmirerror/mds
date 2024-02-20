@@ -106,15 +106,30 @@ Route::post('fetch-passport', [App\Http\Controllers\API\PPScannerController::cla
 //Lab Modules API Routes
 
             //XRAY Result
-            Route::get('lab-modules/xray/fetch-result', [App\Http\Controllers\API\LabModulesController::class, 'fetch_xray_result'])->name('xray.fetch_result');
+            Route::post('lab-modules/xray/fetch-result', [App\Http\Controllers\API\LabModulesController::class, 'fetch_xray_result'])->name('xray.fetch_result');
             //Registration Desk
             Route::post('lab-modules/fetch-registration', [App\Http\Controllers\API\LabModulesController::class, 'fetch_registration'])->name('lab.fetch_registration');
+            Route::post('lab-modules/fetch-registration-edit', [App\Http\Controllers\API\LabModulesController::class, 'fetch_registration_edit'])->name('lab.fetch_registration_edit');
+            Route::post('lab-modules/fetch-registration-repeat', [App\Http\Controllers\API\LabModulesController::class, 'fetch_registration_repeat'])->name('lab.fetch_registration_repeat');
+            Route::post('lab-modules/store-registration', [App\Http\Controllers\API\LabModulesController::class, 'store_registration'])->name('lab.store_registration');
+            Route::post('lab-modules/repeat-case-registration', [App\Http\Controllers\API\LabModulesController::class, 'repeat_case_registration'])->name('lab.repeat_case_registration');
+            Route::post('lab-modules/update-registration', [App\Http\Controllers\API\LabModulesController::class, 'update_registration'])->name('lab.update_registration');
+            Route::post('lab-modules/export-reg-report', [App\Http\Controllers\API\LabModulesController::class, 'export_reg_report'])->name('lab.export_reg_report');
+            //Report
+            Route::post('lab-modules/fetch-registration-print-normal', [App\Http\Controllers\API\LabModulesController::class, 'fetch_registration_print_normal'])->name('lab.fetch_registration_print_normal');
+            Route::post('lab-modules/fetch-registration-print-passport', [App\Http\Controllers\API\LabModulesController::class, 'fetch_registration_print_passport'])->name('lab.fetch_registration_print_passport');
             //Barcode
             Route::post('lab-modules/barcode/fetch', [App\Http\Controllers\API\LabModulesController::class, 'fetch_barcode'])->name('barcode.new');
             //Biometric
             Route::post('lab-modules/biometric/fetch', [App\Http\Controllers\API\LabModulesController::class, 'fetch_by_fingerprint'])->name('lab.fetch_by_fingerprint');
             //Passport Verification
             Route::post('lab-modules/verify-passport', [App\Http\Controllers\API\LabModulesController::class, 'verify_passport'])->name('lab.verify_passport');
+            //Xray
+            Route::post('lab-modules/verify-xray', [App\Http\Controllers\API\LabModulesController::class, 'verify_xray'])->name('lab.verify_xray');
+            Route::post('lab-modules/store-xray-result', [App\Http\Controllers\API\LabModulesController::class, 'store_xray_result'])->name('lab.store_xray_result');
+            Route::post('lab-modules/update-xray-result', [App\Http\Controllers\API\LabModulesController::class, 'update_xray_result'])->name('lab.update_xray_result');
+            //Report Issue
+            Route::post('lab-modules/report-issue', [App\Http\Controllers\API\LabModulesController::class, 'report_issue'])->name('lab.report_issue');
 
 //Centre Staff API Routes
 

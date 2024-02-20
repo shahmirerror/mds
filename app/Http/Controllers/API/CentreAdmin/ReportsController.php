@@ -190,44 +190,105 @@ class ReportsController extends Controller
 
             if($all->datafreq == 'Daily')
             {
-                $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
-                                        ->where('reg_date', $all->dailydate)
-                                        ->where('country', '!=', 'CASE CANCELLED')
-                                        ->where('center_id', $all->centreID)
-                                        ->groupBy("country",'fee_charged')
-                                        ->selectRaw('FORMAT(count(country) * fee_charged, 0) as amount')
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                                            ->where('reg_date', $all->dailydate)
+                                            ->where('country', '!=', 'CASE CANCELLED')
+                                            ->where('center_id', $all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->groupBy("country",'fee_charged')
+                                            ->selectRaw('FORMAT(count(country) * fee_charged, 0) as amount')
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                                            ->where('reg_date', $all->dailydate)
+                                            ->where('country', '!=', 'CASE CANCELLED')
+                                            ->where('center_id', $all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->groupBy("country",'fee_charged')
+                                            ->selectRaw('FORMAT(count(country) * fee_charged, 0) as amount')
+                                            ->get();
+                }
             }
             elseif($all->datafreq == 'Monthly')
             {
-                $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
-                                        ->whereMonth('reg_date',$all->monthlydate)
-                                        ->where('country','!=','CASE CANCELLED')
-                                        ->where('center_id',$all->centreID)
-                                        ->groupBy("country",'fee_charged')
-                                        ->selectRaw('FORMAT(count(country) * fee_charged, 0) as amount')
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                                            ->whereMonth('reg_date',$all->monthlydate)
+                                            ->where('country','!=','CASE CANCELLED')
+                                            ->where('center_id',$all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->groupBy("country",'fee_charged')
+                                            ->selectRaw('FORMAT(count(country) * fee_charged, 0) as amount')
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                                            ->whereMonth('reg_date',$all->monthlydate)
+                                            ->where('country','!=','CASE CANCELLED')
+                                            ->where('center_id',$all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->groupBy("country",'fee_charged')
+                                            ->selectRaw('FORMAT(count(country) * fee_charged, 0) as amount')
+                                            ->get();
+                }
             }
             elseif($all->datafreq == 'Yearly')
             {
-                $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
-                                        ->whereYear('reg_date',$all->yearlydate)
-                                        ->where('country','!=','CASE CANCELLED')
-                                        ->where('center_id',$all->centreID)
-                                        ->groupBy("country",'fee_charged')
-                                        ->selectRaw('FORMAT(count(country) * fee_charged, 0) as amount')
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                                            ->whereYear('reg_date',$all->yearlydate)
+                                            ->where('country','!=','CASE CANCELLED')
+                                            ->where('center_id',$all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->groupBy("country",'fee_charged')
+                                            ->selectRaw('FORMAT(count(country) * fee_charged, 0) as amount')
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                                            ->whereYear('reg_date',$all->yearlydate)
+                                            ->where('country','!=','CASE CANCELLED')
+                                            ->where('center_id',$all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->groupBy("country",'fee_charged')
+                                            ->selectRaw('FORMAT(count(country) * fee_charged, 0) as amount')
+                                            ->get();
+                }
             }
             elseif($all->datafreq == 'Custom Date Range')
             {
-                $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
-                                        ->where('reg_date','>=',$all->fromRange)
-                                        ->where('reg_date','<=',$all->toRange)
-                                        ->where('country','!=','CASE CANCELLED')
-                                        ->where('center_id',$all->centreID)
-                                        ->groupBy("country",'fee_charged')
-                                        ->selectRaw('FORMAT(count(country) * fee_charged, 0) as amount')
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                                            ->where('reg_date','>=',$all->fromRange)
+                                            ->where('reg_date','<=',$all->toRange)
+                                            ->where('country','!=','CASE CANCELLED')
+                                            ->where('center_id',$all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->groupBy("country",'fee_charged')
+                                            ->selectRaw('FORMAT(count(country) * fee_charged, 0) as amount')
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                                            ->where('reg_date','>=',$all->fromRange)
+                                            ->where('reg_date','<=',$all->toRange)
+                                            ->where('country','!=','CASE CANCELLED')
+                                            ->where('center_id',$all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->groupBy("country",'fee_charged')
+                                            ->selectRaw('FORMAT(count(country) * fee_charged, 0) as amount')
+                                            ->get();
+                }
             }
 
             return response()->json(['data' => $data,'keys' => $keys],200);
@@ -268,51 +329,107 @@ class ReportsController extends Controller
 
             if($all->datafreq == 'Daily')
             {
-                $data = Registrations::select("reg_date as date", "serial_no as s.no", "candidates.passport_no as pp.no", "candidates.candidate_name as name", "eno.eno as e.no")
-                                        ->join('eno','eno.reg_id','registrations.reg_id')
-                                        ->where('eno.created_at',$all->dailydate)
-                                        ->where('center_id', $all->centreID)
-                                        ->where('eno.centre_id', $all->centreID)
-                                        ->whereNotIn('country',['repeat','repeat x-ray','CASE CANCELLED','REPEAT XRAY','Repeat ALT','Repeat ANTI HCV','Repeat VDRL','REPEAT BLOOD','REPEAT U.SUGAR, B.SUGAR + BLOOD','Repeat Full Blood','Repeat HBsAg + Anti HCV','RePEAT HBSAG','REPEAT ALT + ANTI HCV','REPEEAT ALT + HBSAG','REPEAT FULL BLOOD + X-RAY','REPEAT FULL BLOOD OPD + X-RAY'])
-                                        ->orderBy('serial_no',"ASC")
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select("reg_date as date", "serial_no as s.no", "candidates.passport_no as pp.no", "candidates.candidate_name as name", "eno.eno as e.no")
+                                            ->join('eno','eno.reg_id','registrations.reg_id')
+                                            ->where('eno.created_at',$all->dailydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('eno.centre_id', $all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select("reg_date as date", "serial_no as s.no", "candidates.passport_no as pp.no", "candidates.candidate_name as name", "eno.eno as e.no")
+                                            ->join('eno','eno.reg_id','registrations.reg_id')
+                                            ->where('eno.created_at',$all->dailydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('eno.centre_id', $all->centreID)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
             }
             elseif($all->datafreq == 'Monthly')
             {
-                $data = Registrations::select("reg_date as date", "serial_no as s.no", "candidates.passport_no as pp.no", "candidates.candidate_name as name", "eno.eno as e.no")
-                                        ->join('candidates','candidates.id','registrations.candidate_id')
-                                        ->join('eno','eno.reg_id','registrations.reg_id')
-                                        ->whereMonth('eno.created_at',$all->monthlydate)
-                                        ->where('center_id', $all->centreID)
-                                        ->where('eno.centre_id', $all->centreID)
-                                        ->whereNotIn('country',['repeat','repeat x-ray','CASE CANCELLED','REPEAT XRAY','Repeat ALT','Repeat ANTI HCV','Repeat VDRL','REPEAT BLOOD','REPEAT U.SUGAR, B.SUGAR + BLOOD','Repeat Full Blood','Repeat HBsAg + Anti HCV','RePEAT HBSAG','REPEAT ALT + ANTI HCV','REPEEAT ALT + HBSAG','REPEAT FULL BLOOD + X-RAY','REPEAT FULL BLOOD OPD + X-RAY'])
-                                        ->orderBy('serial_no',"ASC")
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select("reg_date as date", "serial_no as s.no", "candidates.passport_no as pp.no", "candidates.candidate_name as name", "eno.eno as e.no")
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->join('eno','eno.reg_id','registrations.reg_id')
+                                            ->whereMonth('eno.created_at',$all->monthlydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('eno.centre_id', $all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select("reg_date as date", "serial_no as s.no", "candidates.passport_no as pp.no", "candidates.candidate_name as name", "eno.eno as e.no")
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->join('eno','eno.reg_id','registrations.reg_id')
+                                            ->whereMonth('eno.created_at',$all->monthlydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('eno.centre_id', $all->centreID)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
             }
             elseif($all->datafreq == 'Yearly')
             {
-                $data = Registrations::select("reg_date as date", "serial_no as s.no", "candidates.passport_no as pp.no", "candidates.candidate_name as name", "eno.eno as e.no")
-                                        ->join('candidates','candidates.id','registrations.candidate_id')
-                                        ->join('eno','eno.reg_id','registrations.reg_id')
-                                        ->whereYear('eno.created_at',$all->yearlydate)
-                                        ->where('center_id', $all->centreID)
-                                        ->where('eno.centre_id', $all->centreID)
-                                        ->whereNotIn('country',['repeat','repeat x-ray','CASE CANCELLED','REPEAT XRAY','Repeat ALT','Repeat ANTI HCV','Repeat VDRL','REPEAT BLOOD','REPEAT U.SUGAR, B.SUGAR + BLOOD','Repeat Full Blood','Repeat HBsAg + Anti HCV','RePEAT HBSAG','REPEAT ALT + ANTI HCV','REPEEAT ALT + HBSAG','REPEAT FULL BLOOD + X-RAY','REPEAT FULL BLOOD OPD + X-RAY'])
-                                        ->orderBy('serial_no',"ASC")
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select("reg_date as date", "serial_no as s.no", "candidates.passport_no as pp.no", "candidates.candidate_name as name", "eno.eno as e.no")
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->join('eno','eno.reg_id','registrations.reg_id')
+                                            ->whereYear('eno.created_at',$all->yearlydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('eno.centre_id', $all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select("reg_date as date", "serial_no as s.no", "candidates.passport_no as pp.no", "candidates.candidate_name as name", "eno.eno as e.no")
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->join('eno','eno.reg_id','registrations.reg_id')
+                                            ->whereYear('eno.created_at',$all->yearlydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('eno.centre_id', $all->centreID)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
             }
             elseif($all->datafreq == 'Custom Date Range')
             {
-                $data = Registrations::select("reg_date as date", "serial_no as s.no", "candidates.passport_no as pp.no", "candidates.candidate_name as name", "eno.eno as e.no")
-                                        ->join('candidates','candidates.id','registrations.candidate_id')
-                                        ->join('eno','eno.reg_id','registrations.reg_id')
-                                        ->where('eno.created_at','>=',$all->fromRange)
-                                        ->where('eno.created_at','<=',$all->toRange)
-                                        ->where('center_id', $all->centreID)
-                                        ->where('eno.centre_id', $all->centreID)
-                                        ->whereNotIn('country',['repeat','repeat x-ray','CASE CANCELLED','REPEAT XRAY','Repeat ALT','Repeat ANTI HCV','Repeat VDRL','REPEAT BLOOD','REPEAT U.SUGAR, B.SUGAR + BLOOD','Repeat Full Blood','Repeat HBsAg + Anti HCV','RePEAT HBSAG','REPEAT ALT + ANTI HCV','REPEEAT ALT + HBSAG','REPEAT FULL BLOOD + X-RAY','REPEAT FULL BLOOD OPD + X-RAY'])
-                                        ->orderBy('serial_no',"ASC")
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select("reg_date as date", "serial_no as s.no", "candidates.passport_no as pp.no", "candidates.candidate_name as name", "eno.eno as e.no")
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->join('eno','eno.reg_id','registrations.reg_id')
+                                            ->where('eno.created_at','>=',$all->fromRange)
+                                            ->where('eno.created_at','<=',$all->toRange)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('eno.centre_id', $all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select("reg_date as date", "serial_no as s.no", "candidates.passport_no as pp.no", "candidates.candidate_name as name", "eno.eno as e.no")
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->join('eno','eno.reg_id','registrations.reg_id')
+                                            ->where('eno.created_at','>=',$all->fromRange)
+                                            ->where('eno.created_at','<=',$all->toRange)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('eno.centre_id', $all->centreID)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
             }
 
             return response()->json(['data' => $data,'keys' => $keys],200);
@@ -357,40 +474,93 @@ class ReportsController extends Controller
 
             if($all->datafreq == 'Daily')
             {
-                $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
-                                        ->join('candidates','candidates.id','registrations.candidate_id')
-                                        ->where('reg_date',$all->dailydate)
-                                        ->where('center_id', $all->centreID)
-                                        ->orderBy('print_report_portion',"DESC")
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->where('reg_date',$all->dailydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->orderBy('print_report_portion',"DESC")
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->where('reg_date',$all->dailydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->orderBy('print_report_portion',"DESC")
+                                            ->get();
+                }
             }
             elseif($all->datafreq == 'Monthly')
             {
-                $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
-                                        ->join('candidates','candidates.id','registrations.candidate_id')
-                                        ->whereMonth('reg_date',$all->monthlydate)
-                                        ->where('center_id', $all->centreID)
-                                        ->orderBy('print_report_portion',"DESC")
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->whereMonth('reg_date',$all->monthlydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->orderBy('print_report_portion',"DESC")
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->whereMonth('reg_date',$all->monthlydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->orderBy('print_report_portion',"DESC")
+                                            ->get();
+                }
             }
             elseif($all->datafreq == 'Yearly')
             {
-                $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
-                                        ->join('candidates','candidates.id','registrations.candidate_id')
-                                        ->whereYear('reg_date',$all->yearlydate)
-                                        ->where('center_id', $all->centreID)
-                                        ->orderBy('print_report_portion',"DESC")
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->whereYear('reg_date',$all->yearlydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->orderBy('print_report_portion',"DESC")
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->whereYear('reg_date',$all->yearlydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->orderBy('print_report_portion',"DESC")
+                                            ->get();
+                }
             }
             elseif($all->datafreq == 'Custom Date Range')
             {
-                $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
-                                        ->join('candidates','candidates.id','registrations.candidate_id')
-                                        ->where('reg_date','>=',$all->fromRange)
-                                        ->where('reg_date','<=',$all->toRange)
-                                        ->where('center_id', $all->centreID)
-                                        ->orderBy('print_report_portion',"DESC")
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->where('reg_date','>=',$all->fromRange)
+                                            ->where('reg_date','<=',$all->toRange)
+                                            ->where('center_id', $all->centreID)
+                                            ->whereIn('country', $countries)
+                                            ->orderBy('print_report_portion',"DESC")
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->where('reg_date','>=',$all->fromRange)
+                                            ->where('reg_date','<=',$all->toRange)
+                                            ->where('center_id', $all->centreID)
+                                            ->orderBy('print_report_portion',"DESC")
+                                            ->get();
+                }
             }
 
             return response()->json(['data' => $data,'keys' => $keys],200);
@@ -535,76 +705,157 @@ class ReportsController extends Controller
 
             if($all->datafreq == 'Daily')
             {
-                $data = Registrations::select(DB::raw('SUBSTRING(lab_result.barcode,1,4) as code'),
-                                                'serial_no as s.no',
-                                                'candidates.candidate_name as name',
-                                                'hcv as anti_hcv','hbsag','hiv as hiv1,2',DB::raw("CONCAT(vdrl,'/',tpha) as vdrl_tpha"),
-                                                'rbs','bil','alt as alt_u/l','alk as alk_u/l','ast','creatinine','blood_group','haemoglobin',
-                                                'malaria as malarial_parasite','micro_filariae as micro-filariae','sugar','albumin',
-                                                'helminthes','ova','cyst','tb as tb_test','pregnancy as pregnancy_test_(females_only)')
-                                        ->join('candidates','candidates.id','registrations.candidate_id')
-                                        ->join('lab_result','lab_result.reg_id','registrations.reg_id')
-                                        ->where('reg_date',$all->dailydate)
-                                        ->where('country','!=','CASE CANCELLED')
-                                        ->where('center_id', $all->centreID)
-                                        ->where('lab_result.centre_id', $all->centreID)
-                                        ->orderBy('serial_no',"ASC")
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select(DB::raw('SUBSTRING(lab_result.barcode,1,4) as code'),
+                                                    'serial_no as s.no',
+                                                    'candidates.candidate_name as name',
+                                                    'hcv as anti_hcv','hbsag','hiv as hiv1,2',DB::raw("CONCAT(vdrl,'/',tpha) as vdrl_tpha"),
+                                                    'rbs','bil','alt as alt_u/l','alk as alk_u/l','ast','creatinine','blood_group','haemoglobin',
+                                                    'malaria as malarial_parasite','micro_filariae as micro-filariae','sugar','albumin',
+                                                    'helminthes','ova','cyst','tb as tb_test','pregnancy as pregnancy_test_(females_only)')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->join('lab_result','lab_result.reg_id','registrations.reg_id')
+                                            ->where('reg_date',$all->dailydate)
+                                            ->whereIn('country',$countries)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('lab_result.centre_id', $all->centreID)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select(DB::raw('SUBSTRING(lab_result.barcode,1,4) as code'),
+                                                    'serial_no as s.no',
+                                                    'candidates.candidate_name as name',
+                                                    'hcv as anti_hcv','hbsag','hiv as hiv1,2',DB::raw("CONCAT(vdrl,'/',tpha) as vdrl_tpha"),
+                                                    'rbs','bil','alt as alt_u/l','alk as alk_u/l','ast','creatinine','blood_group','haemoglobin',
+                                                    'malaria as malarial_parasite','micro_filariae as micro-filariae','sugar','albumin',
+                                                    'helminthes','ova','cyst','tb as tb_test','pregnancy as pregnancy_test_(females_only)')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->join('lab_result','lab_result.reg_id','registrations.reg_id')
+                                            ->where('reg_date',$all->dailydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('lab_result.centre_id', $all->centreID)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
             }
             elseif($all->datafreq == 'Monthly')
             {
-                $data = Registrations::select(DB::raw('SUBSTRING(lab_result.barcode,1,4) as code'),
-                                                'serial_no as s.no',
-                                                'candidates.candidate_name as name',
-                                                'hcv as anti_hcv','hbsag','hiv as hiv1,2',DB::raw("CONCAT(vdrl,'/',tpha) as vdrl_tpha"),
-                                                'rbs','bil','alt as alt_u/l','alk as alk_u/l','ast','creatinine','blood_group','haemoglobin',
-                                                'malaria as malarial_parasite','micro_filariae as micro-filariae','sugar','albumin',
-                                                'helminthes','ova','cyst','tb as tb_test','pregnancy as pregnancy_test_(females_only)')
-                                        ->join('candidates','candidates.id','registrations.candidate_id')
-                                        ->join('lab_result','lab_result.reg_id','registrations.reg_id')
-                                        ->whereMonth('reg_date',$all->monthlydate)
-                                        ->where('country','!=','CASE CANCELLED')
-                                        ->where('center_id', $all->centreID)
-                                        ->where('lab_result.centre_id', $all->centreID)
-                                        ->orderBy('serial_no',"ASC")
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select(DB::raw('SUBSTRING(lab_result.barcode,1,4) as code'),
+                                                    'serial_no as s.no',
+                                                    'candidates.candidate_name as name',
+                                                    'hcv as anti_hcv','hbsag','hiv as hiv1,2',DB::raw("CONCAT(vdrl,'/',tpha) as vdrl_tpha"),
+                                                    'rbs','bil','alt as alt_u/l','alk as alk_u/l','ast','creatinine','blood_group','haemoglobin',
+                                                    'malaria as malarial_parasite','micro_filariae as micro-filariae','sugar','albumin',
+                                                    'helminthes','ova','cyst','tb as tb_test','pregnancy as pregnancy_test_(females_only)')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->join('lab_result','lab_result.reg_id','registrations.reg_id')
+                                            ->whereMonth('reg_date',$all->monthlydate)
+                                            ->whereIn('country',$countries)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('lab_result.centre_id', $all->centreID)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select(DB::raw('SUBSTRING(lab_result.barcode,1,4) as code'),
+                                                    'serial_no as s.no',
+                                                    'candidates.candidate_name as name',
+                                                    'hcv as anti_hcv','hbsag','hiv as hiv1,2',DB::raw("CONCAT(vdrl,'/',tpha) as vdrl_tpha"),
+                                                    'rbs','bil','alt as alt_u/l','alk as alk_u/l','ast','creatinine','blood_group','haemoglobin',
+                                                    'malaria as malarial_parasite','micro_filariae as micro-filariae','sugar','albumin',
+                                                    'helminthes','ova','cyst','tb as tb_test','pregnancy as pregnancy_test_(females_only)')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->join('lab_result','lab_result.reg_id','registrations.reg_id')
+                                            ->whereMonth('reg_date',$all->monthlydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('lab_result.centre_id', $all->centreID)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
             }
             elseif($all->datafreq == 'Yearly')
             {
-                $data = Registrations::select(DB::raw('SUBSTRING(lab_result.barcode,1,4) as code'),
-                                                'serial_no as s.no',
-                                                'candidates.candidate_name as name',
-                                                'hcv as anti_hcv','hbsag','hiv as hiv1,2',DB::raw("CONCAT(vdrl,'/',tpha) as vdrl_tpha"),
-                                                'rbs','bil','alt as alt_u/l','alk as alk_u/l','ast','creatinine','blood_group','haemoglobin',
-                                                'malaria as malarial_parasite','micro_filariae as micro-filariae','sugar','albumin',
-                                                'helminthes','ova','cyst','tb as tb_test','pregnancy as pregnancy_test_(females_only)')
-                                        ->join('candidates','candidates.id','registrations.candidate_id')
-                                        ->join('lab_result','lab_result.reg_id','registrations.reg_id')
-                                        ->whereYear('reg_date',$all->yearlydate)
-                                        ->where('country','!=','CASE CANCELLED')
-                                        ->where('center_id', $all->centreID)
-                                        ->where('lab_result.centre_id', $all->centreID)
-                                        ->orderBy('serial_no',"ASC")
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select(DB::raw('SUBSTRING(lab_result.barcode,1,4) as code'),
+                                                    'serial_no as s.no',
+                                                    'candidates.candidate_name as name',
+                                                    'hcv as anti_hcv','hbsag','hiv as hiv1,2',DB::raw("CONCAT(vdrl,'/',tpha) as vdrl_tpha"),
+                                                    'rbs','bil','alt as alt_u/l','alk as alk_u/l','ast','creatinine','blood_group','haemoglobin',
+                                                    'malaria as malarial_parasite','micro_filariae as micro-filariae','sugar','albumin',
+                                                    'helminthes','ova','cyst','tb as tb_test','pregnancy as pregnancy_test_(females_only)')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->join('lab_result','lab_result.reg_id','registrations.reg_id')
+                                            ->whereYear('reg_date',$all->yearlydate)
+                                            ->whereIn('country',$countries)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('lab_result.centre_id', $all->centreID)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select(DB::raw('SUBSTRING(lab_result.barcode,1,4) as code'),
+                                                    'serial_no as s.no',
+                                                    'candidates.candidate_name as name',
+                                                    'hcv as anti_hcv','hbsag','hiv as hiv1,2',DB::raw("CONCAT(vdrl,'/',tpha) as vdrl_tpha"),
+                                                    'rbs','bil','alt as alt_u/l','alk as alk_u/l','ast','creatinine','blood_group','haemoglobin',
+                                                    'malaria as malarial_parasite','micro_filariae as micro-filariae','sugar','albumin',
+                                                    'helminthes','ova','cyst','tb as tb_test','pregnancy as pregnancy_test_(females_only)')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->join('lab_result','lab_result.reg_id','registrations.reg_id')
+                                            ->whereYear('reg_date',$all->yearlydate)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('lab_result.centre_id', $all->centreID)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
             }
             elseif($all->datafreq == 'Custom Date Range')
             {
-                $data = Registrations::select(DB::raw('SUBSTRING(lab_result.barcode,1,4) as code'),
-                                                'serial_no as s.no',
-                                                'candidates.candidate_name as name',
-                                                'hcv as anti_hcv','hbsag','hiv as hiv1,2',DB::raw("CONCAT(vdrl,'/',tpha) as vdrl_tpha"),
-                                                'rbs','bil','alt as alt_u/l','alk as alk_u/l','ast','creatinine','blood_group','haemoglobin',
-                                                'malaria as malarial_parasite','micro_filariae as micro-filariae','sugar','albumin',
-                                                'helminthes','ova','cyst','tb as tb_test','pregnancy as pregnancy_test_(females_only)')
-                                        ->join('candidates','candidates.id','registrations.candidate_id')
-                                        ->join('lab_result','lab_result.reg_id','registrations.reg_id')
-                                        ->where('reg_date','>=',$all->fromRange)
-                                        ->where('reg_date','<=',$all->toRange)
-                                        ->where('country','!=','CASE CANCELLED')
-                                        ->where('center_id', $all->centreID)
-                                        ->where('lab_result.centre_id', $all->centreID)
-                                        ->orderBy('serial_no',"ASC")
-                                        ->get();
+                if(count($countries) > 0)
+                {
+                    $data = Registrations::select(DB::raw('SUBSTRING(lab_result.barcode,1,4) as code'),
+                                                    'serial_no as s.no',
+                                                    'candidates.candidate_name as name',
+                                                    'hcv as anti_hcv','hbsag','hiv as hiv1,2',DB::raw("CONCAT(vdrl,'/',tpha) as vdrl_tpha"),
+                                                    'rbs','bil','alt as alt_u/l','alk as alk_u/l','ast','creatinine','blood_group','haemoglobin',
+                                                    'malaria as malarial_parasite','micro_filariae as micro-filariae','sugar','albumin',
+                                                    'helminthes','ova','cyst','tb as tb_test','pregnancy as pregnancy_test_(females_only)')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->join('lab_result','lab_result.reg_id','registrations.reg_id')
+                                            ->where('reg_date','>=',$all->fromRange)
+                                            ->where('reg_date','<=',$all->toRange)
+                                            ->whereIn('country',$countries)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('lab_result.centre_id', $all->centreID)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
+                else
+                {
+                    $data = Registrations::select(DB::raw('SUBSTRING(lab_result.barcode,1,4) as code'),
+                                                    'serial_no as s.no',
+                                                    'candidates.candidate_name as name',
+                                                    'hcv as anti_hcv','hbsag','hiv as hiv1,2',DB::raw("CONCAT(vdrl,'/',tpha) as vdrl_tpha"),
+                                                    'rbs','bil','alt as alt_u/l','alk as alk_u/l','ast','creatinine','blood_group','haemoglobin',
+                                                    'malaria as malarial_parasite','micro_filariae as micro-filariae','sugar','albumin',
+                                                    'helminthes','ova','cyst','tb as tb_test','pregnancy as pregnancy_test_(females_only)')
+                                            ->join('candidates','candidates.id','registrations.candidate_id')
+                                            ->join('lab_result','lab_result.reg_id','registrations.reg_id')
+                                            ->where('reg_date','>=',$all->fromRange)
+                                            ->where('reg_date','<=',$all->toRange)
+                                            ->where('center_id', $all->centreID)
+                                            ->where('lab_result.centre_id', $all->centreID)
+                                            ->orderBy('serial_no',"ASC")
+                                            ->get();
+                }
             }
 
             return response()->json(['data' => $data,'keys' => $keys],200);

@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\XrayVerification;
+use App\Models\QueueManager;
 
 use Inertia\Inertia;
+
+use Auth;
 
 class XRAYVerificationController extends Controller
 {
@@ -16,7 +19,26 @@ class XRAYVerificationController extends Controller
      */
     public function index()
     {
-        return Inertia::render('LabModules/XRAYVerification');
+        $token = QueueManager::where('center_id',Auth::user()->centre->centre_id)
+                            ->where('process_id',5)
+                            ->where('process_date',date('Y-m-d'))
+                            ->where('status','In Process')
+                            ->where('cancelled',NULL)
+                            ->first();
+
+        $queue = QueueManager::select("token_no","id")
+                                        ->where("process_id",5)
+                                        ->where("center_id",Auth::user()->centre->centre_id)
+                                        ->where('status','Pending')
+                                        ->where('cancelled',NULL)
+                                        ->where('process_date',date('Y-m-d'))
+                                        ->where('counter_id',NULL)
+                                        ->orderBy('id', 'ASC')
+                                        ->count();
+
+        $token_no = ($token) ? $token->token_no : 'None';
+
+        return Inertia::render('LabModules/XRAYVerification', ['token_no' => $token_no, 'in_queue' => $queue,]);
     }
 
     /**

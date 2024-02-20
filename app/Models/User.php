@@ -76,4 +76,34 @@ class User extends Authenticatable
     {
         return LabModules::my_lab_modules($centre_id, $user_id);
     }
+
+    public static function check_permission($module_id, $right_name)
+    {
+        if(Auth::user()->role_id != 2)
+        {
+            $mod_per = LabModulePermissions::where('lab_module_id',$module_id)->where('name',$right_name)->first();
+
+            if($mod_per)
+            {
+                $check = StaffLabRights::where('permission_id',$mod_per->id)->where('user_id',Auth::user()->id)->first();
+
+                if($check)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return "500";
+            }
+        }
+        else
+        {
+            return true;
+        }
+    }
 }

@@ -1,6 +1,6 @@
 
 import {useForm} from "@inertiajs/react";
-export default function NavBar({user}) {
+export default function NavBar({user, logo}) {
     const {post} = useForm();
     const handleDelete = (e) =>
     {
@@ -59,6 +59,11 @@ export default function NavBar({user}) {
                             <input type="text" value="" className="form-control" placeholder="Search…" aria-label="Search in website" />
                         </div>
                     </form>
+                    </div>
+                </div>
+                <div className="collapse navbar-collapse" id="navbar-menu">
+                    <div>
+                    <img src={logo} width="110" height="32" alt="Tabler" className="navbar-brand-image" />
                     </div>
                 </div>
                 </div>

@@ -63,6 +63,7 @@ export default function PassportVerification(props) {
                 document.getElementById('fingerPrint').src = "data:image/bmp;base64," + result.BMPBase64;
             }
             setData('biometric_fingerprint', result.TemplateBase64);
+            console.log(result.TemplateBase64);
             fetchReg(result.TemplateBase64);
         }
         else {
@@ -99,7 +100,7 @@ export default function PassportVerification(props) {
         CallSGIFPGetData(FingerSuccessFunc, FingerErrorFunc);
     }
 
-    const fetchReg = (finger) => {
+    const fetchReg = async (finger) => {
 
         setCandidate(null);
 
@@ -111,9 +112,12 @@ export default function PassportVerification(props) {
         const requestJson = JSON.stringify(requestData);
 
         try {
-            const response = fetch(route("lab.fetch_by_fingerprint"), {
+            const response = await toast.promise(fetch(route("lab.fetch_by_fingerprint"), {
                 method: "POST",
                 body: requestJson,
+            }),
+            {
+                pending: 'Fetching Candidate'
             })
                 .then(res => res.json())
                 .then(
@@ -194,7 +198,7 @@ export default function PassportVerification(props) {
         }
     }
 
-    const handleSearch = (e) =>
+    const handleSearch = async (e) =>
     {
         setCandidate(null);
 
@@ -202,7 +206,8 @@ export default function PassportVerification(props) {
             centre_id: props.auth.user.centre.centre_id,
             barcode: barcode,
             serial_no: serial_no,
-            reg_date: date
+            reg_date: date,
+            process_id: 3
         };
 
         const requestJson = JSON.stringify(requestData);
@@ -224,9 +229,12 @@ export default function PassportVerification(props) {
         {
 
             try {
-                const response = fetch(route("lab.fetch_registration"), {
+                const response = await toast.promise(fetch(route("lab.fetch_registration"), {
                     method: "POST",
                     body: requestJson,
+                }),
+                {
+                    pending: 'Fetching Candidate'
                 })
                     .then(res => res.json())
                     .then(
@@ -252,6 +260,7 @@ export default function PassportVerification(props) {
                                     setToken('M'+result.registration.token_no);
                                     if(result.verified)
                                     {
+                                        setVerified(result.verified)
                                         toast.warning('Candidate Passport Already Verified!', {
                                             position: "top-right",
                                             autoClose: 5000,
@@ -308,7 +317,7 @@ export default function PassportVerification(props) {
         }
     };
 
-    const handleSubmit = (e) =>
+    const handleSubmit = async (e) =>
     {
         const requestData = {
             centre_id: props.auth.user.centre.centre_id,
@@ -321,9 +330,12 @@ export default function PassportVerification(props) {
         const requestJson = JSON.stringify(requestData);
 
         try {
-            const response = fetch(route("lab.verify_passport"), {
+            const response = await toast.promise(fetch(route("lab.verify_passport"), {
                 method: "POST",
                 body: requestJson,
+            }),
+            {
+                pending: 'Submitting Form'
             })
                 .then(res => res.json())
                 .then(
@@ -372,10 +384,11 @@ export default function PassportVerification(props) {
 
     const handleReset = (e) =>
     {
+        document.getElementById('fingerPrint').src = "./../assets/static/photos/ThumbPrint.png";
         setCandidate(null);
-        setBarcode(null);
-        setRegDate(null);
-        setSerialNo(null);
+        setBarcode('');
+        setRegDate('');
+        setSerialNo('');
         setSearched(false);
     };
 
@@ -408,13 +421,12 @@ export default function PassportVerification(props) {
                             <h2 className="page-title" style={{float: 'left'}}>
                                 Passport Verification
                             </h2>
-                            {/* <h3 className="badge bg-success text-white" style={{float: 'right'}}>Counter 1</h3> */}
                         </div>
                         <div className="col-md-3 align-items-center" style={{float: 'right'}}>
                             <h2 className="page-title">
-                                {/* <button className="btn btn-secondary btn-sm mr-5 btn-pill" onClick={handleToken}>
+                                <button className="btn btn-secondary btn-sm mr-5 btn-pill" onClick={handleReset}>
                                     <IconRefresh />
-                                </button> */}
+                                </button>
                                 <span className="badge">Current Token: {currToken}</span>
                             </h2>
                         </div>
@@ -439,7 +451,7 @@ export default function PassportVerification(props) {
                                                 <div className="row g-3 align-items-center">
                                                     <img id="fingerPrint" src={"./../assets/static/photos/ThumbPrint.png"} style={{width : 500}}/>
                                                     <div className="col-md-12 text-center">
-                                                        <button className="btn btn-purple btn-md w-50" onClick={handleFinger}>Scan fingerprint</button>
+                                                        <button className="btn btn-purple btn-md" onClick={handleFinger}>Scan & Verify fingerprint</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -463,7 +475,7 @@ export default function PassportVerification(props) {
                                                         <textarea name="notes" className="form-control" onChange={(e) => setData('notes',e.target.value)}>{data.notes}</textarea>
                                                     </div>
                                                     <div className="row g-3 align-items-center">
-                                                        <button className='btn btn-info' disabled={verification} onClick={handleSubmit}>Verify Passsport</button>
+                                                        <button className='btn btn-info' disabled={verified} onClick={handleSubmit}>Verify Passsport</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -493,21 +505,21 @@ export default function PassportVerification(props) {
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Barcode</label>
-                                                        <input type="password" className="form-control" name="barcode" onChange={(e) => setBarcode(e.target.value)}/>
+                                                        <input type="password" className="form-control" name="barcode" value={barcode} onChange={(e) => setBarcode(e.target.value)}/>
                                                     </div>
                                                 </div>
 
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Date</label>
-                                                        <input type="date" className="form-control" name="reg_date" onChange={(e) => setRegDate(e.target.value)}/>
+                                                        <input type="date" className="form-control" name="reg_date" value={date} onChange={(e) => setRegDate(e.target.value)}/>
                                                     </div>
                                                 </div>
 
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Serial Number</label>
-                                                        <input type="text" className="form-control" name="serial_no" onChange={(e) => setSerialNo(e.target.value)}/>
+                                                        <input type="text" className="form-control" name="serial_no" value={serial_no} onChange={(e) => setSerialNo(e.target.value)}/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -540,13 +552,13 @@ export default function PassportVerification(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Candidate Name</label>
-                                                        <input type="text" className="form-control" name="reg_date" readonly value={candidate?.candidate_name} />
+                                                        <input type="text" className="form-control" name="reg_date" disabled value={candidate?.candidate_name} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Passport Number</label>
-                                                        <input type="text" className="form-control" name="serial_no" readonly value={candidate?.passport_no}/>
+                                                        <input type="text" className="form-control" name="serial_no" disabled value={candidate?.passport_no}/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -554,13 +566,13 @@ export default function PassportVerification(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Passport Issue Date</label>
-                                                        <input type="date" className="form-control" name="reg_date" readonly value={candidate?.passport_issue_date}/>
+                                                        <input type="date" className="form-control" name="reg_date" disabled value={candidate?.passport_issue_date}/>
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Passport Expiry Date</label>
-                                                        <input type="date" className="form-control" name="serial_no" readonly value={candidate?.passport_expiry_date}/>
+                                                        <input type="date" className="form-control" name="serial_no" disabled value={candidate?.passport_expiry_date}/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -568,13 +580,13 @@ export default function PassportVerification(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Registration Date</label>
-                                                        <input type="date" className="form-control" name="reg_date" readonly value={candidate?.reg_date}/>
+                                                        <input type="date" className="form-control" name="reg_date" disabled value={candidate?.reg_date}/>
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Serial Number</label>
-                                                        <input type="text" className="form-control" name="serial_no" readonly value={candidate?.serial_no}/>
+                                                        <input type="text" className="form-control" name="serial_no" disabled value={candidate?.serial_no}/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -582,13 +594,13 @@ export default function PassportVerification(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Agency</label>
-                                                        <input type="text" className="form-control" name="serial_no" readonly value={candidate?.agency}/>
+                                                        <input type="text" className="form-control" name="serial_no" disabled value={candidate?.agency}/>
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Country</label>
-                                                        <input type="text" className="form-control" name="serial_no" readonly value={candidate?.country}/>
+                                                        <input type="text" className="form-control" name="serial_no" disabled value={candidate?.country}/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -596,19 +608,19 @@ export default function PassportVerification(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Profession</label>
-                                                        <input type="text" className="form-control" name="serial_no" readonly value={candidate?.profession}/>
+                                                        <input type="text" className="form-control" name="serial_no" disabled value={candidate?.profession}/>
                                                     </div>
                                                 </div>
                                                 <div className="col-3">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Fees</label>
-                                                        <input className="form-control" name="fees" type="text" readonly value={candidate?.fee_charged}/>
+                                                        <input className="form-control" name="fees" type="text" disabled value={candidate?.fee_charged}/>
                                                     </div>
                                                 </div>
                                                 <div className="col-3">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Discount</label>
-                                                        <input className="form-control" name="discount" type="text" readonly value={candidate?.discount}/>
+                                                        <input className="form-control" name="discount" type="text" disabled value={candidate?.discount}/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -616,13 +628,13 @@ export default function PassportVerification(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Relation</label>
-                                                        <input className="form-control" name="discount" type="text" readonly value={candidate?.relation_type}/>
+                                                        <input className="form-control" name="discount" type="text" disabled value={candidate?.relation_type}/>
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Relative Name</label>
-                                                        <input type="text" className="form-control" name="relative_name" readonly value={candidate?.relative_name}/>
+                                                        <input type="text" className="form-control" name="relative_name" disabled value={candidate?.relative_name}/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -630,13 +642,13 @@ export default function PassportVerification(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Phone 1</label>
-                                                        <input type="text" className="form-control" name="phone_1" readonly value={candidate?.phone_1}/>
+                                                        <input type="text" className="form-control" name="phone_1" disabled value={candidate?.phone_1}/>
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Phone 2</label>
-                                                        <input type="text" className="form-control" name="phone_2" readonly value={candidate?.phone_2}/>
+                                                        <input type="text" className="form-control" name="phone_2" disabled value={candidate?.phone_2}/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -644,13 +656,13 @@ export default function PassportVerification(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Marital Status</label>
-                                                        <input type="text" className="form-control" name="phone_2" readonly value={candidate?.marital_status}/>
+                                                        <input type="text" className="form-control" name="phone_2" disabled value={candidate?.marital_status}/>
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Remarks</label>
-                                                        <textarea className="form-control" readonly>{candidate?.remarks}</textarea>
+                                                        <textarea className="form-control" disabled>{candidate?.remarks}</textarea>
                                                     </div>
                                                 </div>
                                             </div>

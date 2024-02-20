@@ -15,12 +15,30 @@ import Select from 'react-select';
 
 export default function Registration(props) {
 
-    const [currToken, setToken] = useState('None');
+    const [currToken, setToken] = useState(props.token_no);
+    const [Queue, setQueue] = useState(props.in_queue);
+    const [prevBarcode, setPrevBarcode] = useState(props.prevBarcode);
+    const [report, setReport] = useState(null);
+    const [manualPP, setManualPP] = useState(true);
+    const [ppFormat, setPPFormat] = useState(false);
+
+    const todayDate = new Date();
+    const [today, setToday] = useState(null);
+
+    const [camera, setCamera] = useState(false);
+    const [centre, setCentre] = useState(null);
+
+    const [manual, setManual] = useState(false);
+    const [secugen_lic, setSecugenLic] = useState("");
+
+    const [stream, setStream] = useState(null);
+    const [imageSrc, setImageSrc] = useState(null);
+    const [showModal, setModal] = useState(false);
 
     const {data, setData, post, processing, errors, reset} = useForm({
         passport_no: '',
-        passport_issue_date: '',
-        passport_expiry_date: '',
+        passport_issue_date: null,
+        passport_expiry_date: null,
         candidate_name: '',
         candidate_image: null,
         passport_image: null,
@@ -30,11 +48,11 @@ export default function Registration(props) {
         cnic: '',
         gender: '',
         finger_type: '',
-        dob: '',
+        dob: null,
         place_of_issue: '',
-        reg_date: '',
-        ref_slip_issue_date: '',
-        ref_slip_expiry_date: '',
+        reg_date: todayDate.getMonth()+1 >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate(),
+        ref_slip_issue_date: null,
+        ref_slip_expiry_date: null,
         barcode: props.barcode,
         serial_no: '',
         relation_type: '',
@@ -44,7 +62,7 @@ export default function Registration(props) {
         nationality: '',
         marital_status: '',
         biometric_fingerprint: '',
-        fee_charged: '',
+        fees: '',
         discount: '',
         remarks: '',
         pregnancy_test: 0,
@@ -92,15 +110,6 @@ export default function Registration(props) {
         });
     }
 
-    const [camera, setCamera] = useState(false);
-    const [centre, setCentre] = useState(null);
-
-    const [manual, setManual] = useState(false);
-    const [secugen_lic, setSecugenLic] = useState("");
-
-    const [stream, setStream] = useState(null);
-    const [imageSrc, setImageSrc] = useState(null);
-
     const handleCamera = (e) => {
         if(camera)
         {
@@ -122,42 +131,29 @@ export default function Registration(props) {
             e.target.classList.value = 'btn btn-danger btn-md';
 
             findElementPromise("#video")
-            .then((element) => {
+            .then(async(element) => {
                 let video = document.getElementById('video');
                 let ph = document.getElementById('photo-placeholder');
-                navigator.mediaDevices.enumerateDevices()
-                .then(devices => {
-                    const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                    if (videoDevices.length > 0) {
-                        const selectedDevice = videoDevices[0]; // You can choose the desired device based on your criteria
-                        const constraints = {
-                            video: {
-                                deviceId: selectedDevice.deviceId
-                            }
-                        };
-
-                        return navigator.mediaDevices.getUserMedia(constraints);
-                    } else {
-                        throw new Error('No video input devices found.');
-                    }
-                })
-                .then(stream => {
-                    // Success: Access to the webcam stream
-                    setStream(stream);
-                    ph.style.display = 'none';
-                    video.style.display = 'block';
-                    video.srcObject = stream;
-                })
-                .catch(error => {
-                    // Error handling
-                    console.error('Error accessing webcam:', error);
-                });
+                const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                setStream(mediaStream);
+                ph.style.display = 'none';
+                video.style.display = 'block';
+                video.srcObject = mediaStream;
             })
             .catch((error) => {
-              console.error(error);
+                console.log(error)
+                toast.error("Something went wrong! Can't access your camera :(", {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    });
             });
         }
-
     }
 
     const handleCapture = (e) => {
@@ -183,13 +179,16 @@ export default function Registration(props) {
             const filename = 'webcam_photo_' + Date.now() + '.png';
             const file = new File([blob], filename, { type: 'image/png' });
 
-            setData('candidate_image',file);
+            data.candidate_image = canvas.toDataURL('image/png');
+            console.log(file);
         }
         else if(e.target.value == 'retake')
         {
             setData('candidate_image',null);
             video.style.display = 'block';
             ph.style.display = 'none';
+
+            data.candidate_image = NULL;
         }
     }
 
@@ -212,7 +211,23 @@ export default function Registration(props) {
                     (result) => {
                         // $('#preloader').hide();
                         setToken(result.new_token)
+                        setQueue(result.in_queue)
 
+                        if(result.new_token == 'None')
+                        {
+                            toast.warning('No Tokens found in Queue!', {
+                                position: "top-right",
+                                autoClose: 5000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                                progress: undefined,
+                                theme: "light",
+                                });
+                        }
+                        else
+                        {
                             toast.success('New Token has been set!', {
                                 position: "top-right",
                                 autoClose: 5000,
@@ -223,6 +238,7 @@ export default function Registration(props) {
                                 progress: undefined,
                                 theme: "light",
                                 });
+                        }
                     },
                     (error) => {
 
@@ -255,6 +271,11 @@ export default function Registration(props) {
 
     const fetchBarcode = () => {
 
+        if(data.barcode != '' && data.barcode != null)
+        {
+            setPrevBarcode(data.barcode);
+        }
+
         const requestData = {
             centre_id: props.auth.user.centre.centre_id
         };
@@ -283,11 +304,75 @@ export default function Registration(props) {
         }
     }
 
+    const handlePrint = async () => {
+
+        const requestData = {
+            centre_id: props.auth.user.centre.centre_id,
+            barcode_no: prevBarcode
+        };
+
+        const requestJson = JSON.stringify(requestData);
+
+        try {
+            setReport(null);
+            const response = await toast.promise(fetch(route("lab.export_reg_report"), {
+                method: "POST",
+                body: requestJson,
+            }),
+            {
+                pending: "Fetching Report"
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+
+                        toast.success('Report has been generated!', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+
+                            setReport(result.filename);
+                            setModal(true);
+                    },
+                    (error) => {
+
+                        toast.error('Something went wrong! Please try again :(', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    }
+                );
+        } catch (ex) {
+
+            toast.error('Something went wrong! Please try again :(', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+        }
+    }
+
     const handleToken = () => {
         // e.preventDefault();
 
         fetchToken();
-        reset();
         fetchBarcode();
         if(stream !== null)
         {
@@ -307,6 +392,9 @@ export default function Registration(props) {
         setManual(false);
         setStream(false);
         setImageSrc(null);
+        setManualPP(true);
+        reset();
+        resetData();
     }
 
     function CallSGIFPGetData(successCall, failCall) {
@@ -377,26 +465,36 @@ export default function Registration(props) {
         CallSGIFPGetData(FingerSuccessFunc, FingerErrorFunc);
     }
 
-    const handleImport = (e) => {
+    const handleImport = async (e) => {
+
         const requestData = {
             centre_id: props.auth.user.centre.centre_id,
-            counter_id: 1
+            counter_id: 1,
+            username: props.username
         };
 
         const requestJson = JSON.stringify(requestData);
 
         try {
-            const response = fetch(route("ppscan.new"), {
-                method: "POST",
-                body: requestJson,
-            })
+
+            const response = await toast.promise(
+                fetch(route("ppscan.new"),{
+                    method: "POST",
+                    body: requestJson,
+                }),
+                {
+                  pending: 'Importing Passport',
+                })
                 .then(res => res.json())
                 .then(
                     (result) => {
                         // $('#preloader').hide();
-                        if(result.pp_info.length == 0)
+                        if(result.pp_info == null)
                         {
-                            toast.warning('No Passport Found!', {
+                            setManualPP(false);
+                            setPPFormat(false);
+                            setData('passport_image',result.filename);
+                            toast.warning(result.message, {
                                 position: "top-right",
                                 autoClose: 5000,
                                 hideProgressBar: false,
@@ -409,6 +507,18 @@ export default function Registration(props) {
                         }
                         else
                         {
+                            setManualPP(false);
+                            setPPFormat(true);
+                            data.passport_image = result.filename;
+                            data.passport_no = result.pp_info.pp_no;
+                            data.nationality = result.pp_info.nationality;
+                            data.candidate_name = result.pp_info.first_name+' '+result.pp_info.last_name;
+                            data.cnic = result.pp_info.cnic;
+                            data.dob = result.pp_info.dob;
+                            data.place_of_issue = result.pp_info.pp_issue_state;
+                            data.passport_expiry_date = result.pp_info.pp_expiry_date;
+                            setData('gender', result.pp_info.gender);
+
                             toast.success('Passport Found!', {
                                 position: "top-right",
                                 autoClose: 5000,
@@ -419,6 +529,8 @@ export default function Registration(props) {
                                 progress: undefined,
                                 theme: "light",
                                 });
+
+                                console.log(data);
                         }
                     },
                     (error) => {
@@ -436,7 +548,7 @@ export default function Registration(props) {
                     }
                 );
         } catch (ex) {
-
+            console.log(ex);
             toast.error('Something went wrong! Please try again :(', {
                 position: "top-right",
                 autoClose: 5000,
@@ -454,17 +566,153 @@ export default function Registration(props) {
         if(e.target.name == 'gender')
         {
             setData('pregnancy_test',0);
+            setData('gender',e.target.value);
         }
-        setData(e.target.name, e.target.value);
+        else
+        {
+            setData(e.target.name, e.target.value.toUpperCase());
+        }
     }
 
-    const submit = (e) => {
-        post(route('registration-desk.store'));
+    const handleSubmit = async (e) => {
+
+        let verify = handleFormRequired();
+
+        if(verify == true)
+        {
+            const requestData = {
+                data: data,
+                passport_image: data.passport_image,
+                candidate_image: data.candidate_image,
+                centre_id: props?.auth?.user?.centre?.centre_id
+            };
+
+            const requestJson = JSON.stringify(requestData);
+
+                try {
+                    const response = await toast.promise(fetch(route("lab.store_registration"), {
+                        method: "POST",
+                        body: requestJson,
+                    }),
+                    {
+                    pending: 'Submitting Form',
+                    })
+                        .then(res => res.json())
+                        .then(
+                            (result) => {
+                                        toast.success('Candidate has been Registered!', {
+                                            position: "top-right",
+                                            autoClose: 5000,
+                                            hideProgressBar: false,
+                                            closeOnClick: true,
+                                            pauseOnHover: true,
+                                            draggable: true,
+                                            progress: undefined,
+                                            theme: "light",
+                                            });
+
+                                            location.reload();
+                            },
+                            (error) => {
+
+                                toast.error('Something went wrong! Please try again :(', {
+                                    position: "top-right",
+                                    autoClose: 5000,
+                                    hideProgressBar: false,
+                                    closeOnClick: true,
+                                    pauseOnHover: true,
+                                    draggable: true,
+                                    progress: undefined,
+                                    theme: "light",
+                                    });
+                            }
+                        );
+                } catch (ex) {
+
+                    toast.error('Something went wrong! Please try again :(', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                        });
+                }
+        }
+        else
+        {
+            toast.warning(verify, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+        }
+    }
+
+    const resetData = () => {
+        // Reset additional data variables here
+        setData({
+            passport_no: '',
+            passport_issue_date: '',
+            passport_expiry_date: '',
+            candidate_name: '',
+            candidate_image: null,
+            passport_image: null,
+            agency: '',
+            country: '',
+            profession: '',
+            cnic: '',
+            gender: '',
+            finger_type: '',
+            dob: '',
+            place_of_issue: '',
+            reg_date: '',
+            ref_slip_issue_date: '',
+            ref_slip_expiry_date: '',
+            barcode: props?.barcode_no,
+            serial_no: '',
+            relation_type: '',
+            relative_name: '',
+            phone_1: '',
+            phone_2: '',
+            nationality: '',
+            marital_status: '',
+            biometric_fingerprint: '',
+            fees: '',
+            discount: '',
+            remarks: '',
+            pregnancy_test: 0,
+            repeat: false,
+            token_no: currToken
+        });
+    };
+
+    const handleFormRequired = () =>
+    {
+        let message = true;
+        Object.entries(data).map(([key, value]) => {
+            if((key == 'biometric_fingerprint' || key == 'serial_no') && (value == null || value == ''))
+            {
+                message = 'Please input '+key.replaceAll('_',' ')+' before submitting form!';
+            }
+            else if((key == 'candidate_image' || key == 'passport_image' || key == 'passport_no' || key == 'gender') && (value == null || value == ''))
+            {
+                message = 'Please input candidate details before submitting form!';
+            }
+        });
+
+        return message;
     }
 
     useEffect(() => {
-        // reset();
-        handleToken();
+
     }, []);
 
     return (
@@ -496,12 +744,14 @@ export default function Registration(props) {
                             </h2>
                             {/* <h3 className="badge bg-success text-white" style={{float: 'right'}}>Counter 1</h3> */}
                         </div>
-                        <div className="col-md-3 align-items-center" style={{float: 'right'}}>
-                            <h2 className="page-title">
+                        <div className="col-md-6 align-items-center" style={{float: 'right'}}>
+                            <h2 className="page-title" style={{float: 'right'}}>
                                 <button className="btn btn-secondary btn-sm mr-5 btn-pill" onClick={handleToken}>
                                     <IconRefresh />
                                 </button>
                                 <span className="badge">Current Token: {currToken != 'None' ? 'M'+currToken : 'None'}</span>
+                                |
+                                <span className="badge">In Queue: {Queue}</span>
                             </h2>
                         </div>
                     </div>
@@ -532,7 +782,7 @@ export default function Registration(props) {
                                                         <button className="btn btn-purple btn-md w-50" onClick={handleFinger}>Scan fingerprint</button>
                                                     </div>
                                                     <div className="col-md-12 text-center">
-                                                        <select className="form-select" name="finger_type" onChange={handleChange}>
+                                                        <select className="form-select" required name="finger_type" onChange={handleChange}>
                                                             <option>--</option>
                                                             {fingers.map((finger, index) => (
                                                                 <option value={finger.value}>{finger.label}</option>
@@ -572,52 +822,108 @@ export default function Registration(props) {
                                     <div className="card">
                                         <div className="card-header">
                                             <div className="col-md-12 flex align-items-center">
-                                                <div className='col-md-6' style={{float: 'left'}}>
+                                                <div className='col-md-6' style={{float: 'left', display: 'flex', justifyContent: 'space-between'}}>
                                                     {!manual ?
-                                                    (<button className="btn btn-sm btn-yellow" onClick={handleImport}>Import Passport</button>)
+                                                    (
+                                                        <>
+                                                        <button className="btn btn-sm btn-yellow" onClick={handleImport}>Import Passport</button>
+                                                        <a className="btn btn-outline-danger btn-sm" type="button" href={currToken != 'None' ? route('registration-desk.show','repeat-case?token_no='+currToken) : '#'}>Repeat Case</a>
+                                                        </>
+                                                    )
                                                     :
                                                     (<h3>Passport Information</h3>)}
                                                 </div>
                                                 <div className='col-md-6' style={{float: 'right'}}>
-                                                <label class="form-check form-switch" style={{float: 'right'}}>
-                                                    <input class="form-check-input" type="checkbox" checked={manual} onChange={(e) => setManual(e.target.checked)}/>
-                                                    <span class="form-check-label">Manual Entry</span>
-                                                </label>
+                                                {props?.auth?.modules?.[0]?.rights?.[2]?.permission_name == 'manual_entry' && props?.auth?.modules?.[2]?.rights?.[0]?.status == true ?
+                                                    <label class="form-check form-switch" style={{float: 'right'}}>
+                                                        <input class="form-check-input" type="checkbox" disabled={data.passport_image != null && data.passport_image != '' && ppFormat} checked={manual} onChange={(e) => setManual(e.target.checked)}/>
+                                                        <span class="form-check-label">Manual Entry</span>
+                                                    </label>
+                                                :
+                                                <></>
+                                                }
                                                 </div>
                                             </div>
                                         </div>
                                         {!manual ?
                                         (<div className="card-body" id="auto_import">
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Place of Issue</label>
-                                                        <Select
-                                                            options={props.places}
-                                                            value={data.place_of_issue}
-                                                            name="place_of_issue"
-                                                            onChange={(e) => setData('place_of_issue', e)}
-                                                        />
+                                            {!manualPP && (
+                                                <>
+                                                <div className="row g-5 mb-3">
+                                                    <div className="col-6">
+                                                        <div className="row g-3 align-items-center">
+                                                            <label className='form-label'>Candidate Name</label>
+                                                            <input type="text" className="form-control" name="candidate_name" value={data.candidate_name} onChange={handleChange} />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-6">
+                                                        <div className="row g-3 align-items-center">
+                                                            <label className='form-label'>Passport Number</label>
+                                                            <input type="text" disabled className="form-control" name="passport_no" value={data.passport_no} onChange={handleChange} />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-4">
+                                                        <div className="row g-3 align-items-center">
+                                                            <label className='form-label'>PP Expiry Date</label>
+                                                            <input type="date" disabled className="form-control" name="passport_expiry_date" value={data.passport_expiry_date} onChange={handleChange} />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-4">
+                                                        <div className="row g-3 align-items-center">
+                                                            <label className='form-label'>DOB</label>
+                                                            <input type="date" disabled className="form-control" name="dob" value={data.dob} onChange={handleChange} />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-4">
+                                                        <div className="row g-3 align-items-center">
+                                                            <label className='form-label'>Gender</label>
+                                                            <select className="form-control" disabled name="gender" value={data.gender} onChange={handleChange}>
+                                                                <option value="">Select Gender</option>
+                                                                <option value="Male">Male</option>
+                                                                <option value="Female">Female</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6">
+                                                <div className="row g-5 mb-3">
+                                                    <div className="col-4">
+                                                        <div className="row g-3 align-items-center">
+                                                            <label className='form-label'>Nationality</label>
+                                                            <input type="text" className="form-control" disabled name="nationality" value={data.nationality} onChange={handleChange} />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-4">
+                                                        <div className="row g-3 align-items-center">
+                                                            <label className='form-label'>CNIC</label>
+                                                            <input type="text" className="form-control" disabled name="cnic" value={data.cnic} onChange={handleChange} />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-4">
+                                                        <div className="row g-3 align-items-center">
+                                                            <label className='form-label'>Place of Issue</label>
+                                                            <input type="text" className="form-control" disabled name="cnic" value={data.place_of_issue} onChange={handleChange} />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                </>
+                                            )}
+                                            <div className="row g-5 mb-3">
+                                                <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>PP Issue Date</label>
-                                                        <input type="date" className="form-control" name="passport_issue_date" onChange={handleChange} />
+                                                        <input type="date" required={manual == false} className="form-control" name="passport_issue_date" onChange={handleChange} />
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div className="row g-5">
-                                                <div className="col-6">
+                                                <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Reference Slip Issue Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_issue_date" value={data.ref_slip_issue_date} onChange={handleChange} />
+                                                        <input type="date" required={manual == false} className="form-control" name="ref_slip_issue_date" value={data.ref_slip_issue_date} onChange={handleChange} />
                                                     </div>
                                                 </div>
-                                                <div className="col-6">
+                                                <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Reference Slip Expiry Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_expiry_date" value={data.ref_slip_expiry_date} onChange={handleChange} />
+                                                        <input type="date" required={manual == false} className="form-control" name="ref_slip_expiry_date" value={data.ref_slip_expiry_date} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -628,61 +934,63 @@ export default function Registration(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Candidate Name</label>
-                                                        <input type="text" className="form-control" name="candidate_name" value={data.candidate_name} onChange={handleChange} />
+                                                        <input type="text" required={manual} className="form-control" name="candidate_name" value={data.candidate_name} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Passport Number</label>
-                                                        <input type="text" className="form-control" name="passport_no" value={data.passport_no} onChange={handleChange} />
+                                                        <input type="text" required={manual} className="form-control" name="passport_no" value={data.passport_no} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>PP Issue Date</label>
-                                                        <input type="date" className="form-control" name="passport_issue_date" value={data.passport_issue_date} onChange={handleChange} />
+                                                        <input type="date" required={manual} className="form-control" name="passport_issue_date" value={data.passport_issue_date} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>PP Expiry Date</label>
-                                                        <input type="date" className="form-control" name="passport_expiry_date" value={data.passport_expiry_date} onChange={handleChange} />
+                                                        <input type="date" required={manual} className="form-control" name="passport_expiry_date" value={data.passport_expiry_date} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>DOB</label>
-                                                        <input type="date" className="form-control" name="dob" value={data.dob} onChange={handleChange} />
+                                                        <input type="date" required={manual} className="form-control" name="dob" value={data.dob} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Gender</label>
-                                                        <select className="form-control" name="gender" onChange={handleChange}>
+                                                        <select className="form-control" required={manual} name="gender" value={data.gender} onChange={handleChange}>
                                                             <option value="">Select Gender</option>
                                                             <option value="Male">Male</option>
                                                             <option value="Female">Female</option>
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div className="col-4">
+                                                {manualPP &&(
+                                                <div className="col-4" id="passport_manual_image">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Passport Image</label>
-                                                        <input type="file" className="form-control" name="passport_image" onChange={(e) => setData('passport_image',e.target.files[0])} />
+                                                        <input type="file" className="form-control" required={manual} name="passport_image" onChange={(e) => setData('passport_image',e.target.files[0])} />
                                                     </div>
                                                 </div>
+                                                )}
                                             </div>
                                             <div className="row g-5 mb-3">
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Nationality</label>
-                                                        <input type="text" className="form-control" name="nationality" value={data.nationality} onChange={handleChange} />
+                                                        <input type="text" className="form-control" required={manual} name="nationality" value={data.nationality} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>CNIC</label>
-                                                        <input type="text" className="form-control" name="cnic" value={data.cnic} onChange={handleChange} />
+                                                        <input type="text" className="form-control" required={manual} name="cnic" value={data.cnic} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
@@ -691,6 +999,7 @@ export default function Registration(props) {
                                                         <Select
                                                             options={props.places}
                                                             value={data.place_of_issue}
+                                                            required={manual}
                                                             name="place_of_issue"
                                                             onChange={(e) => setData('place_of_issue', e)}
                                                         />
@@ -701,18 +1010,25 @@ export default function Registration(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Reference Slip Issue Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_issue_date" value={data.ref_slip_issue_date} onChange={handleChange} />
+                                                        <input type="date" required={manual} className="form-control" name="ref_slip_issue_date" value={data.ref_slip_issue_date} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Reference Slip Expiry Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_expiry_date" value={data.ref_slip_expiry_date} onChange={handleChange} />
+                                                        <input type="date" required={manual} className="form-control" name="ref_slip_expiry_date" value={data.ref_slip_expiry_date} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>)
                                         }
+                                        {!manualPP && (
+                                            <div className="card-body">
+                                                <div className="row g-5 mb-3">
+                                                    <img src={data.passport_image != null || data.passport_image != '' ? data.passport_image : '#'} />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -728,6 +1044,9 @@ export default function Registration(props) {
                                                 <div className='col-md-6' style={{float: 'left'}}>
                                                     <h3>General Information</h3>
                                                 </div>
+                                                <div className='col-md-6' style={{float: 'right'}}>
+                                                    <h3 style={{textAlign: 'right'}}>{data.reg_date?.replaceAll('-','')+data.serial_no}</h3>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="card-body">
@@ -735,13 +1054,13 @@ export default function Registration(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Registration Date</label>
-                                                        <input type="date" className="form-control" name="reg_date" value={data.reg_date} onChange={handleChange} />
+                                                        <input type="date" required className="form-control" name="reg_date" value={data.reg_date} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Serial Number</label>
-                                                        <input type="text" className="form-control" name="serial_no" value={data.serial_no} onChange={handleChange} />
+                                                        <input type="text" required className="form-control" name="serial_no" value={data.serial_no} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -834,7 +1153,7 @@ export default function Registration(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Phone 1</label>
-                                                        <input type="text" className="form-control" name="phone_1" value={data.phone_1} onChange={handleChange} />
+                                                        <input type="text" required className="form-control" name="phone_1" value={data.phone_1} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
@@ -846,7 +1165,7 @@ export default function Registration(props) {
                                             </div>
                                             <div className="row g-5">
                                                 <div className="col-4">
-                                                    <div className="row g-3 align-items-center">
+                                                    <div className={data.gender == 'Male' ? "row g-3 align-items-center d-none" : "row g-3 align-items-center"}>
                                                         <label className='form-label'>Pregnancy Check</label>
                                                         <select className="form-select" disabled={data.gender == 'Male'} name="pregnancy_test" value={data.pregnancy_test} onChange={handleChange}>
                                                             <option value="1">Pregnant</option>
@@ -876,8 +1195,18 @@ export default function Registration(props) {
                                         </div>
                                         <div className="card-body">
                                             <div className='row g-5'>
-                                                <div className="col-12">
-                                                    <button className="btn btn-outline-success" disabled={currToken == 'None'} onClick={submit}>Submit</button>
+                                                <div className="col-3">
+                                                    <button className="btn btn-outline-success" disabled={currToken == 'None'} onClick={handleSubmit}>Submit Form</button>
+                                                </div>
+                                                {props?.auth?.modules?.[0]?.rights?.[0]?.permission_name == 'edit' && props?.auth?.modules?.[0]?.rights?.[0]?.status == true ?
+                                                <div className="col-3">
+                                                    <a className="btn btn-outline-info" type="button" href={route('registration-desk.show','edit')}>Edit Registration</a>
+                                                </div>
+                                                :
+                                                <>{}</>
+                                                }
+                                                <div className="col-3">
+                                                    <button className="btn btn-outline-purple" data-bs-toggle="modal" data-bs-target="#reg-report" disabled={prevBarcode == null} onClick={handlePrint}>Print Report</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -888,6 +1217,27 @@ export default function Registration(props) {
                     </div>
                 </div>
             </div>
+
+            {/* Registration Report Modal */}
+            <div className={`modal modal-blur fade`} id="reg-report" tabindex="-1" role="dialog" aria-hidden="true">
+                <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Registration Slip</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    <div className="modal-body">
+                        <iframe src={report} style={{height: '300px', width: '100%'}}></iframe>
+                    </div>
+                    <div className="modal-footer">
+                        <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
+                            Close
+                        </a>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            {/* Registration Report Modal */}
 
         </AuthenticatedLayout>
     );

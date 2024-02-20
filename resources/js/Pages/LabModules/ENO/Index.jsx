@@ -60,10 +60,9 @@ export default function Index({auth}) {
                         </div>
                         <div className="col-md-3 align-items-center" style={{float: 'right'}}>
                             <h2 className="page-title">
-                                {/* <button className="btn btn-secondary btn-sm mr-5 btn-pill" onClick={handleToken}>
+                                <button className="btn btn-secondary btn-sm mr-5 btn-pill" onClick={() => location.reload()}>
                                     <IconRefresh />
-                                </button> */}
-                                {/* <span className="badge">Current Token: {currToken}</span> */}
+                                </button>
                             </h2>
                         </div>
                     </div>

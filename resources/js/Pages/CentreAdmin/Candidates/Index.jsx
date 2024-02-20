@@ -9,9 +9,22 @@ export default function Index(props) {
 
     const { delete: deleteResource, put } = useForm();
     const [ id, setId ] = useState();
+    const [results, setResults] = useState(props.candidates);
+    const [query, setQuery] = useState(null);
+
+    const handleInputChange = (event) => {
+        const newQuery = event.target.value;
+        setQuery(newQuery);
+        const filteredResults = props.candidates.filter(item =>
+          Object.values(item).some(val =>
+            typeof val === 'string' && val.toLowerCase().includes(newQuery.toLowerCase())
+          )
+        );
+        setResults(filteredResults);
+      };
 
     useEffect(() => {
-      console.log(props.candidates, 'hello');
+
     }, [])
 
 
@@ -49,7 +62,7 @@ export default function Index(props) {
                         <div class="ms-auto text-secondary">
                             Search:
                             <div class="ms-2 d-inline-block">
-                            <input type="text" class="form-control form-control-sm" aria-label="Search candidate" />
+                            <input type="text" class="form-control form-control-sm" aria-label="Search candidate" value={query} onChange={handleInputChange} />
                             </div>
                         </div>
                     </div>
@@ -67,7 +80,7 @@ export default function Index(props) {
                         </tr>
                       </thead>
                       <tbody>
-                        {props.candidates.map((cand, index) => (
+                        {results.map((cand, index) => (
                         <tr>
                             <td>
                                 <Link href={route('candidates.show', cand?.candidate_id)}>{cand?.candidate_name}</Link>
