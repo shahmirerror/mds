@@ -128,6 +128,9 @@ Route::post('fetch-passport', [App\Http\Controllers\API\PPScannerController::cla
             Route::post('lab-modules/verify-xray', [App\Http\Controllers\API\LabModulesController::class, 'verify_xray'])->name('lab.verify_xray');
             Route::post('lab-modules/store-xray-result', [App\Http\Controllers\API\LabModulesController::class, 'store_xray_result'])->name('lab.store_xray_result');
             Route::post('lab-modules/update-xray-result', [App\Http\Controllers\API\LabModulesController::class, 'update_xray_result'])->name('lab.update_xray_result');
+            //Medical
+            Route::post('lab-modules/store-medical-result', [App\Http\Controllers\API\LabModulesController::class, 'store_medical_result'])->name('lab.store_medical_result');
+            Route::post('lab-modules/update-medical-result', [App\Http\Controllers\API\LabModulesController::class, 'update_medical_result'])->name('lab.update_medical_result');
             //Report Issue
             Route::post('lab-modules/report-issue', [App\Http\Controllers\API\LabModulesController::class, 'report_issue'])->name('lab.report_issue');
 

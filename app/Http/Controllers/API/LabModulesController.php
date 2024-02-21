@@ -91,12 +91,20 @@ class LabModulesController extends Controller
             {
                 $check2 = XrayVerification::where('centre_id',$all->centre_id)->where('reg_id',$check->reg_id)->first();
             }
+            elseif($all->process_id == 2)
+            {
+                $check2 = Medical::where('centre_id',$all->centre_id)->where('reg_id',$check->reg_id)->first();
+            }
 
             $check->candidate_image = asset('storage/app/public/candidate_image/'.strtotime($check->created_at).'.png');
 
-            if($check2)
+            if($check2 && $all->process_id != 2)
             {
                 return response()->json(['registration' => $check, 'verified' => true], 200);
+            }
+            elseif($check2 && $all->process_id == 2)
+            {
+                return response()->json(['registration' => $check, 'medical' => $check2], 200);
             }
             else
             {
@@ -517,6 +525,10 @@ class LabModulesController extends Controller
 
                     if($new->save())
                     {
+                        QueueManager::where('token_no',$check->token_no)
+                                ->where('center_id',$all->centre_id)
+                                ->where('process_id',3)
+                                ->update(array('status' => 'Completed'));
                         return response()->json(['message' => 'XRAY Result has been saved'], 200);
                     }
                     else
@@ -597,6 +609,182 @@ class LabModulesController extends Controller
             else
             {
                 return response()->json(['message' => 'XRAY Verification not found!'], 404);
+            }
+
+        }
+        else
+        {
+            return response()->json(['message' => 'Registration Not Found'], 404);
+        }
+    }
+
+    public function store_medical_result(Request $request)
+    {
+        $all = json_decode($request->getContent());
+
+        $check = Registrations::where('center_id',$all->centre_id)
+                              ->where('serial_no',$all->serial_no)
+                              ->where('reg_date',$all->date)
+                              ->first();
+        if($check)
+        {
+            $check2 = Medical::where('centre_id',$all->centre_id)
+                              ->where('reg_id',$check->reg_id)
+                              ->first();
+
+            if($check2)
+            {
+                return response()->json(['message' => 'Medical Result already exists!'], 200);
+            }
+            else
+            {
+                $new = new Medical;
+                $new->centre_id = $all->centre_id;
+                $new->reg_id = $check->reg_id;
+                $new->height = $all->data->height;
+                $new->weight = $all->data->weight;
+                $new->bmi = $all->data->bmi;
+                $new->bp = $all->data->bp;
+                $new->pulse = $all->data->pulse;
+                $new->rr = $all->data->rr;
+                $new->visual_aided_right_eye = $all->data->visual_aided_right_eye;
+                $new->visual_aided_left_eye = $all->data->visual_aided_left_eye;
+                $new->visual_unaided_right_eye = $all->data->visual_unaided_right_eye;
+                $new->visual_unaided_left_eye = $all->data->visual_unaided_left_eye;
+                $new->distant_aided_right_eye = $all->data->distant_aided_right_eye;
+                $new->distant_aided_left_eye = $all->data->distant_aided_left_eye;
+                $new->distant_unaided_right_eye = $all->data->distant_unaided_right_eye;
+                $new->distant_unaided_left_eye = $all->data->distant_unaided_left_eye;
+                $new->near_aided_right_eye = $all->data->near_aided_right_eye;
+                $new->near_aided_left_eye = $all->data->near_aided_left_eye;
+                $new->near_unaided_right_eye = $all->data->near_unaided_right_eye;
+                $new->near_unaided_left_eye = $all->data->near_unaided_left_eye;
+                $new->color_vision = $all->data->color_vision;
+                $new->hearing_right_ear = $all->data->hearing_right_ear;
+                $new->hearing_left_ear = $all->data->hearing_left_ear;
+                $new->appearance = $all->data->appearance;
+                $new->speech = $all->data->speech;
+                $new->behavior = $all->data->behavior;
+                $new->cognition = $all->data->cognition;
+                $new->orientation = $all->data->orientation;
+                $new->memory = $all->data->memory;
+                $new->concentration = $all->data->concentration;
+                $new->mood = $all->data->mood;
+                $new->thoughts = $all->data->thoughts;
+                $new->other = $all->data->other;
+                $new->general_appearance = $all->data->general_appearance;
+                $new->cardiovascular = $all->data->cardiovascular;
+                $new->respiratory = $all->data->respiratory;
+                $new->abdomen = $all->data->abdomen;
+                $new->hernia = $all->data->hernia;
+                $new->hydrocele = $all->data->hydrocele;
+                $new->extremities = $all->data->extremities;
+                $new->back = $all->data->back;
+                $new->skin = $all->data->skin;
+                $new->cns = $all->data->cns;
+                $new->deformities = $all->data->deformities;
+                $new->remarks = $all->data->remarks;
+                $new->ent = $all->data->ent;
+                $new->status = $all->data->status;
+
+                if($new->save())
+                {
+                    QueueManager::where('token_no',$check->token_no)
+                                ->where('center_id',$all->centre_id)
+                                ->where('process_id',2)
+                                ->update(array('status' => 'Completed'));
+                    return response()->json(['message' => 'Medical Result has been saved!'], 200);
+                }
+                else
+                {
+                    return response()->json(['message' => 'Medical Result has not been saved'], 500);
+                }
+            }
+
+        }
+        else
+        {
+            return response()->json(['message' => 'Registration Not Found'], 404);
+        }
+    }
+
+    public function update_medical_result(Request $request)
+    {
+        $all = json_decode($request->getContent());
+
+        $check = Registrations::where('center_id',$all->centre_id)
+                              ->where('serial_no',$all->serial_no)
+                              ->where('reg_date',$all->date)
+                              ->first();
+        if($check)
+        {
+            $check2 = Medical::where('centre_id',$all->centre_id)
+                              ->where('reg_id',$check->reg_id)
+                              ->first();
+
+            if(!$check2)
+            {
+                return response()->json(['message' => 'Medical Result does not exist!'], 200);
+            }
+            else
+            {
+                $new = Medical::find($check->id);
+                $new->centre_id = $all->centre_id;
+                $new->reg_id = $check->reg_id;
+                $new->height = $all->data->height;
+                $new->weight = $all->data->weight;
+                $new->bmi = $all->data->bmi;
+                $new->bp = $all->data->bp;
+                $new->pulse = $all->data->pulse;
+                $new->rr = $all->data->rr;
+                $new->visual_aided_right_eye = $all->data->visual_aided_right_eye;
+                $new->visual_aided_left_eye = $all->data->visual_aided_left_eye;
+                $new->visual_unaided_right_eye = $all->data->visual_unaided_right_eye;
+                $new->visual_unaided_left_eye = $all->data->visual_unaided_left_eye;
+                $new->distant_aided_right_eye = $all->data->distant_aided_right_eye;
+                $new->distant_aided_left_eye = $all->data->distant_aided_left_eye;
+                $new->distant_unaided_right_eye = $all->data->distant_unaided_right_eye;
+                $new->distant_unaided_left_eye = $all->data->distant_unaided_left_eye;
+                $new->near_aided_right_eye = $all->data->near_aided_right_eye;
+                $new->near_aided_left_eye = $all->data->near_aided_left_eye;
+                $new->near_unaided_right_eye = $all->data->near_unaided_right_eye;
+                $new->near_unaided_left_eye = $all->data->near_unaided_left_eye;
+                $new->color_vision = $all->data->color_vision;
+                $new->hearing_right_ear = $all->data->hearing_right_ear;
+                $new->hearing_left_ear = $all->data->hearing_left_ear;
+                $new->appearance = $all->data->appearance;
+                $new->speech = $all->data->speech;
+                $new->behavior = $all->data->behavior;
+                $new->cognition = $all->data->cognition;
+                $new->orientation = $all->data->orientation;
+                $new->memory = $all->data->memory;
+                $new->concentration = $all->data->concentration;
+                $new->mood = $all->data->mood;
+                $new->thoughts = $all->data->thoughts;
+                $new->other = $all->data->other;
+                $new->general_appearance = $all->data->general_appearance;
+                $new->cardiovascular = $all->data->cardiovascular;
+                $new->respiratory = $all->data->respiratory;
+                $new->abdomen = $all->data->abdomen;
+                $new->hernia = $all->data->hernia;
+                $new->hydrocele = $all->data->hydrocele;
+                $new->extremities = $all->data->extremities;
+                $new->back = $all->data->back;
+                $new->skin = $all->data->skin;
+                $new->cns = $all->data->cns;
+                $new->deformities = $all->data->deformities;
+                $new->remarks = $all->data->remarks;
+                $new->ent = $all->data->ent;
+                $new->status = $all->data->status;
+
+                if($new->update())
+                {
+                    return response()->json(['message' => 'Medical Result has been updated!!'], 200);
+                }
+                else
+                {
+                    return response()->json(['message' => 'Medical Result has not been updated!'], 500);
+                }
             }
 
         }

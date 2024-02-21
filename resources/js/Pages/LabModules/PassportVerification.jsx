@@ -63,7 +63,6 @@ export default function PassportVerification(props) {
                 document.getElementById('fingerPrint').src = "data:image/bmp;base64," + result.BMPBase64;
             }
             setData('biometric_fingerprint', result.TemplateBase64);
-            console.log(result.TemplateBase64);
             fetchReg(result.TemplateBase64);
         }
         else {
