@@ -124,6 +124,8 @@ Route::post('fetch-passport', [App\Http\Controllers\API\PPScannerController::cla
             Route::post('lab-modules/biometric/fetch', [App\Http\Controllers\API\LabModulesController::class, 'fetch_by_fingerprint'])->name('lab.fetch_by_fingerprint');
             //Passport Verification
             Route::post('lab-modules/verify-passport', [App\Http\Controllers\API\LabModulesController::class, 'verify_passport'])->name('lab.verify_passport');
+            //Sample Collection
+            Route::post('lab-modules/collect-sample', [App\Http\Controllers\API\LabModulesController::class, 'collect_sample'])->name('lab.collect_sample');
             //Xray
             Route::post('lab-modules/verify-xray', [App\Http\Controllers\API\LabModulesController::class, 'verify_xray'])->name('lab.verify_xray');
             Route::post('lab-modules/store-xray-result', [App\Http\Controllers\API\LabModulesController::class, 'store_xray_result'])->name('lab.store_xray_result');

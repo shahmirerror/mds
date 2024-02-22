@@ -11,7 +11,7 @@ import { IconRefresh } from '@tabler/icons-react';
 import { toast, ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 
-import Inertia from '@inertiajs/inertia';
+import {Inertia} from '@inertiajs/inertia';
 
 import Select from 'react-select';
 
@@ -610,12 +610,13 @@ export default function RegistrationRepeat(props) {
     };
 
     const handleSubmit = async (e) => {
-
+        e.target.disabled = true;
         const requestData = {
             data: candidate,
             candidate_image: data.candidate_image,
             centre_id: props?.auth?.user?.centre?.centre_id,
-            fingerprint: data.biometric_fingerprint
+            fingerprint: data.biometric_fingerprint,
+            token_no: currToken
         };
 
         const requestJson = JSON.stringify(requestData);
@@ -645,7 +646,7 @@ export default function RegistrationRepeat(props) {
                                         Inertia.visit(route('registration-desk.index'));
                         },
                         (error) => {
-
+                            e.target.disabled = false;
                             toast.error('Something went wrong! Please try again :(', {
                                 position: "top-right",
                                 autoClose: 5000,
@@ -659,7 +660,7 @@ export default function RegistrationRepeat(props) {
                         }
                     );
             } catch (ex) {
-
+                e.target.disabled = false;
                 toast.error('Something went wrong! Please try again :(', {
                     position: "top-right",
                     autoClose: 5000,
@@ -863,7 +864,7 @@ export default function RegistrationRepeat(props) {
                                                     <div className="col-4">
                                                         <div className="row g-3 align-items-center">
                                                             <label className='form-label'>Place of Issue</label>
-                                                            <input type="text" className="form-control" disabled name="cnic" value={candidate?.place_of_issue} onChange={handleChange} />
+                                                            <input type="text" className="form-control" disabled name="cnic" value={candidate?.place_of_issue?.value} onChange={handleChange} />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -877,7 +878,7 @@ export default function RegistrationRepeat(props) {
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Reference Slip Issue Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_issue_date" value={cadndiate?.slip_issue_date} onChange={handleChange} />
+                                                        <input type="date" className="form-control" name="ref_slip_issue_date" value={candidate?.slip_issue_date} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
@@ -960,7 +961,7 @@ export default function RegistrationRepeat(props) {
                                                 <div className="col-3">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Fees</label>
-                                                        <input className="form-control" name="fees" type="text" value={candidate?.fee_charged} onChange={handleChange} />
+                                                        <input className="form-control" name="fee_charged" type="text" value={candidate?.fee_charged} onChange={handleChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-3">

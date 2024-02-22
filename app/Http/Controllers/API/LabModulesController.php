@@ -95,6 +95,10 @@ class LabModulesController extends Controller
             {
                 $check2 = Medical::where('centre_id',$all->centre_id)->where('reg_id',$check->reg_id)->first();
             }
+            elseif($all->process_id == 4)
+            {
+                $check2 = SampleCollection::where('centre_id',$all->centre_id)->where('reg_id',$check->reg_id)->first();
+            }
 
             $check->candidate_image = asset('storage/app/public/candidate_image/'.strtotime($check->created_at).'.png');
 
@@ -270,6 +274,30 @@ class LabModulesController extends Controller
             QueueManager::where('token_no',$all->token_no)
                             ->where('center_id',$all->centre_id)
                             ->where('process_id',5)
+                            ->update(array('status' => 'Completed'));
+        }
+
+        return response()->json(['message' => 'Verified'], 200);
+    }
+
+    public function collect_sample(request $request)
+    {
+        $all = json_decode($request->getContent());
+
+        $check = SampleCollection::where('centre_id',$all->centre_id)->where('reg_id',$all->reg_id)->first();
+
+        if(!$check)
+        {
+
+            $insert = new SampleCollection;
+            $insert->centre_id = $all->centre_id;
+            $insert->reg_id = $all->reg_id;
+            $insert->notes = $all->notes;
+            $insert->save();
+
+            QueueManager::where('token_no',$all->token_no)
+                            ->where('center_id',$all->centre_id)
+                            ->where('process_id',4)
                             ->update(array('status' => 'Completed'));
         }
 
@@ -913,12 +941,14 @@ class LabModulesController extends Controller
 
             $pdf->SetX(110);
             $d = new DNS1D();
-            $barcodeBase = $d->getBarcodePNG($reg->barcode_no, 'C39+', 2,60,array(2,2,2), true);
+            $barcodeBase = $d->getBarcodePNG($reg->barcode_no, 'C39+', 2,60,array(2,2,2));
             $base64_data = $barcodeBase;
             $decoded_data = base64_decode($base64_data);
 
             file_put_contents("temp_image.png", $decoded_data);
             $pdf->Cell(110,7,$pdf->Image("temp_image.png"),70,22);
+            $pdf->SetX(140);
+            $pdf->Cell(1,7,$reg->barcode_no,70,22);
             $pdf->SetX(15);
             $pdf->Ln(15);
             $pdf->Cell(4,10,".............................................................................................................................................................................", 0, 1);
@@ -1002,24 +1032,24 @@ class LabModulesController extends Controller
         $new2->reg_id = $new_reg->reg_id+1;
         $new2->candidate_id = $candidate_id;
         $new2->center_id = $all->centre_id;
-        $new2->agency = $all->data->agency->value;
-        $new2->country = $all->data->country->value;
-        $new2->profession = $all->data->profession->value;
+        $new2->agency = (isset($all->data->agency->value)) ? $all->data->agency->value : NULL;
+        $new2->country = (isset($all->data->country->value)) ? $all->data->country->value : NULL;
+        $new2->profession = (isset($all->data->profession->value)) ? $all->data->profession->value : NULL;
         $new2->cnic = $all->data->cnic;
-        $new2->place_of_issue = $all->data->place_of_issue->value;
+        $new2->place_of_issue = (isset($all->data->place_of_issue->value)) ? $all->data->place_of_issue->value : NULL;
         $new2->reg_date = $all->data->reg_date;
-        $new2->barcode_no = $all->data->barcode;
+        $new2->barcode_no = $all->data->barcode_no;
         $new2->serial_no = $all->data->serial_no;
         $new2->relation_type = $all->data->relation_type;
         $new2->relative_name = $all->data->relative_name;
-        $new2->slip_issue_date = $all->data->ref_slip_issue_date;
-        $new2->slip_expiry_date = $all->data->ref_slip_expiry_date;
+        $new2->slip_issue_date = $all->data->slip_issue_date;
+        $new2->slip_expiry_date = $all->data->slip_expiry_date;
         $new2->phone_1 = $all->data->phone_1;
         $new2->phone_2 = $all->data->phone_2;
         $new2->nationality = $all->data->nationality;
         $new2->marital_status = $all->data->marital_status;
         $new2->biometric_fingerprint = $all->fingerprint;
-        $new2->fee_charged = $all->data->fees;
+        $new2->fee_charged = $all->data->fee_charged;
         $new2->discount = $all->data->discount;
         $new2->remarks = $all->data->remarks;
         $new2->pregnancy_test = $all->data->pregnancy_test;
@@ -1045,7 +1075,7 @@ class LabModulesController extends Controller
                 $image->move(storage_path('app/public/candidate_passport'), $imageName);
             }
 
-            QueueManager::where('token_no',$all->data->token_no)
+            QueueManager::where('token_no',$all->token_no)
                         ->where('center_id',$all->centre_id)
                         ->where('process_id',1)
                         ->update(array('status' => 'Completed'));

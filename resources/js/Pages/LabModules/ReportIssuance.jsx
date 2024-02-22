@@ -18,7 +18,7 @@ export default function ReportIssuance(props) {
     const [barcode, setBarcode] = useState(null);
     const [issued, setIssued] = useState(false);
 
-    const handleSearch = (e) =>
+    const handleSearch = async (e) =>
     {
         setCandidate(null);
 
@@ -47,9 +47,12 @@ export default function ReportIssuance(props) {
         {
 
             try {
-                const response = fetch(route("lab.fetch_registration"), {
+                const response = await toast.promise(fetch(route("lab.fetch_registration"), {
                     method: "POST",
                     body: requestJson,
+                }),
+                {
+                    pending: 'Fetching Candidate'
                 })
                     .then(res => res.json())
                     .then(
@@ -131,7 +134,7 @@ export default function ReportIssuance(props) {
         }
     };
 
-    const handleSubmit = (e) =>
+    const handleSubmit = async (e) =>
     {
         const requestData = {
             centre_id: props.auth.user.centre.centre_id,
@@ -143,9 +146,12 @@ export default function ReportIssuance(props) {
         const requestJson = JSON.stringify(requestData);
 
         try {
-            const response = fetch(route("lab.report_issue"), {
+            const response = await toast.promise(fetch(route("lab.report_issue"), {
                 method: "POST",
                 body: requestJson,
+            }),
+            {
+                pending: 'Fetching Candidate'
             })
                 .then(res => res.json())
                 .then(
