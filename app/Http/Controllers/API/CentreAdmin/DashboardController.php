@@ -16,12 +16,18 @@ class DashboardController extends Controller
     public function stats($centreID)
     {
         $today = date('Y-m-d');
-        $country_cases = Registrations::select("country as particulars", DB::raw("count(country) as cases"))
+        $country_cases = Registrations::select("country", DB::raw("count(country) as cases"))
                                         ->where('reg_date', $today)
                                         ->where('country', '!=', 'CASE CANCELLED')
                                         ->where('center_id', $centreID)
                                         ->groupBy("country")
                                         ->get();
+
+        $total_cases = Registrations::where('reg_date', $today)
+                                        ->where('country', '!=', 'CASE CANCELLED')
+                                        ->where('center_id', $centreID)
+                                        ->groupBy("country")
+                                        ->count();
 
         $cancelled_cases = Registrations::where('reg_date', $today)
                                         ->where('country', '=', 'CASE CANCELLED')
@@ -71,6 +77,7 @@ class DashboardController extends Controller
                                   'reports_in_hand' => $reports_in_hand,
                                   'last_lab_update' => $ll_update,
                                   'fit' => $fit,
+                                  'total_cases' => $total_cases,
                                   'unfit' => $unfit], 200);
     }
 }

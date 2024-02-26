@@ -15,6 +15,9 @@ export default function Create(props) {
         city: '',
         country: '',
         address: '',
+        email: '',
+        fax: '',
+        code: '',
         logo: '',
         users: rows,
         modules: mods[0][0]
@@ -134,26 +137,38 @@ export default function Create(props) {
                     <div className="row mb-3">
                       <div className="col-md">
                         <div className="form-label">Name</div>
-                        <input type="text" className="form-control"  name="name" onChange={handleChange} />
+                        <input type="text" className="form-control" value={data.name}  name="name" onChange={handleChange} />
                       </div>
                       <div className="col-md">
-                        <div className="form-label">City</div>
-                        <input type="text" className="form-control"  name="city" onChange={handleChange} />
+                        <div className="form-label">Centre Code</div>
+                        <input type="text" className="form-control" value={data.code}  name="code" onChange={handleChange} />
                       </div>
                       <div className="col-md">
-                        <div className="form-label">Country</div>
-                        <input type="text" className="form-control" name="country" onChange={handleChange} />
+                        <div className="form-label">Fax No.</div>
+                        <input type="text" className="form-control" value={data.fax}  name="fax" onChange={handleChange} />
+                      </div>
+                      <div className="col-md">
+                        <div className="form-label">Phone</div>
+                        <input type="text" className="form-control" value={data.phone} name="phone" onChange={handleChange}/>
                       </div>
                     </div>
                     <div className="row g-3">
-                      <div className="col-md">
-                        <div className="form-label">Phone</div>
-                        <input type="text" className="form-control" name="phone" onChange={handleChange}/>
-                      </div>
-                      <div className="col-md">
-                        <div className="form-label">Address</div>
-                        <input type="text" className="form-control" name="address" onChange={handleChange} />
-                      </div>
+                        <div className="col-md">
+                            <div className="form-label">Email Address</div>
+                            <input type="email" className="form-control" value={data.email} name="email" onChange={handleChange}/>
+                        </div>
+                        <div className="col-md">
+                            <div className="form-label">City</div>
+                            <input type="text" className="form-control" value={data.city}  name="city" onChange={handleChange} />
+                        </div>
+                        <div className="col-md">
+                            <div className="form-label">Country</div>
+                            <input type="text" className="form-control" value={data.country} name="country" onChange={handleChange} />
+                        </div>
+                        <div className="col-md">
+                            <div className="form-label">Address</div>
+                            <textarea className={'form-control'} onChange={handleChange} name="address">{data.address}</textarea>
+                        </div>
                     </div>
                   </div>
 

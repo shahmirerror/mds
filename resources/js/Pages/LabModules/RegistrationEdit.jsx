@@ -453,7 +453,7 @@ export default function RegistrationEdit(props) {
         const { name, value } = e.target;
         setCandidate(prevCandidate => ({
             ...prevCandidate,
-            [name]: value.toUpperCase()
+            [name]: name == 'marital_status' || name == 'pregnancy_check' || name == 'gender' ? value : value.toUpperCase()
         }));
     }
 
@@ -570,12 +570,10 @@ export default function RegistrationEdit(props) {
     const handleReset = (e) =>
     {
         setCandidate(null);
-        setBarcode(null);
-        setRegDate(null);
-        setSerialNo(null);
+        setBarcode('');
+        setRegDate('');
+        setSerialNo('');
         setSearched(false);
-
-        location.reload();
     };
 
     const handleSubmit = async (e) => {
@@ -763,21 +761,21 @@ export default function RegistrationEdit(props) {
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Passport Number</label>
-                                                        <input type="password" className="form-control" name="barcode" onChange={(e) => setBarcode(e.target.value)}/>
+                                                        <input type="text" className="form-control" name="barcode"  value={barcode} onChange={(e) => setBarcode(e.target.value.toUpperCase())}/>
                                                     </div>
                                                 </div>
 
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Date</label>
-                                                        <input type="date" className="form-control" name="reg_date" onChange={(e) => setRegDate(e.target.value)}/>
+                                                        <input type="date" className="form-control" name="reg_date" value={date} onChange={(e) => setRegDate(e.target.value)}/>
                                                     </div>
                                                 </div>
 
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Serial Number</label>
-                                                        <input type="text" className="form-control" name="serial_no" onChange={(e) => setSerialNo(e.target.value)}/>
+                                                        <input type="text" className="form-control" name="serial_no" value={serial_no} onChange={(e) => setSerialNo(e.target.value.toUpperCase())}/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -788,7 +786,7 @@ export default function RegistrationEdit(props) {
                                                     <button className={'btn btn-md btn-outline-secondary'} disabled={searched ? false : true} onClick={handleReset}>Reset Form</button>
                                                 </div>
                                                 <div className="col-4">
-                                                    <button className={'btn btn-md btn-outline-info'} disabled={searched ? true : false} onClick={handleSearch}>Search for Candidate</button>
+                                                    <button className={'btn btn-md btn-outline-info'} disabled={searched} onClick={handleSearch}>Search for Candidate</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -903,39 +901,50 @@ export default function RegistrationEdit(props) {
                             <div className="row row-cards">
                                 <div className="col-12">
                                     <div className="card">
-                                    <div className="card-header">
-                                        <div className="col-md-12 flex align-items-center">
+                                        <div className="card-header">
+                                            <div className="col-md-12 flex align-items-center">
 
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="card-body">
-                                        <div className="row g-3">
-                                            <div className="col-6">
-                                                <div className="row g-3 align-items-center">
-                                                    <video id="video" autoPlay muted style={{height: '280px', display: 'none'}}/>
-                                                    <img src={null} id="taken_photo" style={{width : 300, display: 'none', marginTop: '55px'}} className="mb-5" />
-                                                    <img src={"./../../assets/static/photos/Photo.png"} className="mb-4" id="photo-placeholder" style={{width : 274}} />
-                                                    <div className="col-md-6">
-                                                    { camera && data?.candidate_image == null ?
-                                                        (<button className="btn btn-warning btn-md" value="take" onClick={handleCapture}>Take Photo</button>)
-                                                    : camera && data?.candidate_image != null ?
-                                                        (<button className="btn btn-warning btn-md" value="retake" onClick={handleCapture}>Re-Take Photo</button>)
-                                                    :
-                                                        (<></>)
-                                                    }
+                                        <div className="card-body">
+                                            <div className="row g-3">
+                                                <div className="col-6">
+                                                    <div className="row g-3 align-items-center">
+                                                        <video id="video" autoPlay muted style={{height: '280px', display: 'none'}}/>
+                                                        <img src={null} id="taken_photo" style={{width : 300, display: 'none', marginTop: '55px'}} className="mb-5" />
+                                                        <img src={"./../../assets/static/photos/Photo.png"} className="mb-4" id="photo-placeholder" style={{width : 274}} />
+                                                        <div className="col-md-6">
+                                                        { camera && data?.candidate_image == null ?
+                                                            (<button className="btn btn-warning btn-md" value="take" onClick={handleCapture}>Take Photo</button>)
+                                                        : camera && data?.candidate_image != null ?
+                                                            (<button className="btn btn-warning btn-md" value="retake" onClick={handleCapture}>Re-Take Photo</button>)
+                                                        :
+                                                            (<></>)
+                                                        }
+                                                        </div>
+                                                        <div className="col-md-6">
+                                                            <button className="btn btn-success btn-md" id="cameraToggle" disabled={data?.candidate_image != null} onClick={handleCamera}>Turn Camera On</button>
+                                                        </div>
                                                     </div>
-                                                    <div className="col-md-6">
-                                                        <button className="btn btn-success btn-md" id="cameraToggle" disabled={data?.candidate_image != null} onClick={handleCamera}>Turn Camera On</button>
+                                                </div>
+                                                <div className="col-6">
+                                                    <div className="row g-3 align-items-center">
+                                                        <img src={candidate?.candidate_image} style={{width : 300, marginTop: '55px'}} className="mb-5" />
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="col-6">
-                                                <div className="row g-3 align-items-center">
-                                                    <img src={candidate?.candidate_image} style={{width : 300, marginTop: '55px'}} className="mb-5" />
+                                        </div>
+                                        {candidate && (
+                                        <div className="card-body">
+                                            <div className="row g-3">
+                                                <div className="col-12">
+                                                    <div className="row g-3 align-items-center">
+                                                        <img src={candidate?.passport_image} />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -1049,7 +1058,7 @@ export default function RegistrationEdit(props) {
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Relative Name</label>
+                                                        <label className='form-label'>S/O or W/O or D/O</label>
                                                         <input type="text" className="form-control" name="relative_name" value={candidate?.relative_name} onChange={handleChange} />
                                                     </div>
                                                 </div>
@@ -1070,6 +1079,7 @@ export default function RegistrationEdit(props) {
                                             </div>
                                             <div className="row g-5">
                                                 <div className="col-4">
+                                                    {candidate?.gender == 'Female' ?
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Pregnancy Check</label>
                                                         <select className="form-select" disabled={candidate?.gender == 'Male'} name="pregnancy_test" value={candidate?.pregnancy_test} onChange={handleChange}>
@@ -1077,6 +1087,9 @@ export default function RegistrationEdit(props) {
                                                             <option value="0">Not Pregnant</option>
                                                         </select>
                                                     </div>
+                                                    :
+                                                    <></>
+                                                    }
                                                 </div>
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">

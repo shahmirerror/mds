@@ -108,7 +108,6 @@ export default function MedicalExamination(props) {
                 document.getElementById('fingerPrint').src = "data:image/bmp;base64," + result.BMPBase64;
             }
             setData('biometric_fingerprint', result.TemplateBase64);
-            fetchReg(result.TemplateBase64);
         }
         else {
             // alert("Fingerprint Capture Error Code:  " + result.ErrorCode + ".\nDescription:  " + ErrorCodeToString(result.ErrorCode) + ".");
@@ -138,105 +137,6 @@ export default function MedicalExamination(props) {
             });
     }
 
-    const fetchReg = async (finger) => {
-
-        setCandidate(null);
-
-        const requestData = {
-            centre_id: props.auth.user.centre.centre_id,
-            biometric_fingerprint: finger
-        };
-
-        const requestJson = JSON.stringify(requestData);
-
-        try {
-            const response = await toast.promise(fetch(route("lab.fetch_by_fingerprint"), {
-                method: "POST",
-                body: requestJson,
-            }),
-            {
-                pending: 'Fetching Candidate'
-            })
-                .then(res => res.json())
-                .then(
-                    (result) => {
-
-                            if(result.registration?.length == 0)
-                            {
-                                toast.warning('No Registration Found!', {
-                                    position: "top-right",
-                                    autoClose: 5000,
-                                    hideProgressBar: false,
-                                    closeOnClick: true,
-                                    pauseOnHover: true,
-                                    draggable: true,
-                                    progress: undefined,
-                                    theme: "light",
-                                    });
-                            }
-                            else
-                            {
-                                setCandidate(result.registration);
-                                setToken('M'+result.registration.token_no);
-                                if(result.medical?.length > 0)
-                                {
-                                    setResult(result.medical);
-                                    handleEdit();
-                                    toast.warning('Candidate Medical Result Already Exists!', {
-                                        position: "top-right",
-                                        autoClose: 5000,
-                                        hideProgressBar: false,
-                                        closeOnClick: true,
-                                        pauseOnHover: true,
-                                        draggable: true,
-                                        progress: undefined,
-                                        theme: "light",
-                                        });
-                                }
-                                else
-                                {
-                                    toast.success('Candidate Found!', {
-                                        position: "top-right",
-                                        autoClose: 5000,
-                                        hideProgressBar: false,
-                                        closeOnClick: true,
-                                        pauseOnHover: true,
-                                        draggable: true,
-                                        progress: undefined,
-                                        theme: "light",
-                                        });
-                                }
-                            }
-                    },
-                    (error) => {
-
-                        toast.error('Something went wrong! Please try again :(', {
-                            position: "top-right",
-                            autoClose: 5000,
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                            progress: undefined,
-                            theme: "light",
-                            });
-                    }
-                );
-        } catch (ex) {
-
-            toast.error('Something went wrong! Please try again :(', {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                });
-        }
-    }
-
     const handleFinger = (e) => {
         e.preventDefault();
 
@@ -257,9 +157,9 @@ export default function MedicalExamination(props) {
 
         const requestJson = JSON.stringify(requestData);
 
-        if(serial_no == null && date == null && barcode == null)
+        if((serial_no == null && date == null && barcode == null) || data.biometric_fingerprint == '')
         {
-            toast.warning('Please select date & serial number or input barcode number to proceed!', {
+            toast.warning('Please select date & serial number or input barcode number and scan finger print to proceed!', {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -300,36 +200,7 @@ export default function MedicalExamination(props) {
                                 }
                                 else
                                 {
-                                    setCandidate(result.registration);
-                                    setToken('M'+result.registration.token_no);
-                                    if(result.medical?.length > 0)
-                                    {
-                                        setResult(result.medical);
-                                        handleEdit();
-                                        toast.warning('Candidate Medical Result Already Exists!', {
-                                            position: "top-right",
-                                            autoClose: 5000,
-                                            hideProgressBar: false,
-                                            closeOnClick: true,
-                                            pauseOnHover: true,
-                                            draggable: true,
-                                            progress: undefined,
-                                            theme: "light",
-                                            });
-                                    }
-                                    else
-                                    {
-                                        toast.success('Candidate Found!', {
-                                            position: "top-right",
-                                            autoClose: 5000,
-                                            hideProgressBar: false,
-                                            closeOnClick: true,
-                                            pauseOnHover: true,
-                                            draggable: true,
-                                            progress: undefined,
-                                            theme: "light",
-                                            });
-                                    }
+                                    matchScore(result.registration, result.medical);
                                 }
                         },
                         (error) => {
@@ -360,6 +231,103 @@ export default function MedicalExamination(props) {
             }
         }
     };
+
+    const matchScore = (registration, medical) => {
+
+        let db_template = registration?.biometric_fingerprint;
+            var uri = "https://localhost:8443/SGIMatchScore";
+
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    let fpobject = JSON.parse(xmlhttp.responseText);
+                    if(fpobject.ErrorCode == 0)
+                    {
+                        if(fpobject.MatchingScore >= 100)
+                        {
+                            setCandidate(registration);
+                            setToken('M'+registration.token_no);
+                            if(medical?.length > 0)
+                            {
+                                setResult(medical);
+                                handleEdit();
+                                toast.warning('Candidate Medical Result Already Exists!', {
+                                    position: "top-right",
+                                    autoClose: 5000,
+                                    hideProgressBar: false,
+                                    closeOnClick: true,
+                                    pauseOnHover: true,
+                                    draggable: true,
+                                    progress: undefined,
+                                    theme: "light",
+                                    });
+                            }
+                            else
+                            {
+                                toast.success('Candidate Found!', {
+                                    position: "top-right",
+                                    autoClose: 5000,
+                                    hideProgressBar: false,
+                                    closeOnClick: true,
+                                    pauseOnHover: true,
+                                    draggable: true,
+                                    progress: undefined,
+                                    theme: "light",
+                                    });
+                            }
+                        }
+                        else
+                        {
+                            toast.error('Finger does not match!', {
+                                position: "top-right",
+                                autoClose: 5000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                                progress: undefined,
+                                theme: "light",
+                                });
+                        }
+                    }
+                }
+                else if (xmlhttp.status == 404) {
+                    setCandidate(null);
+                    toast.warning('Check Finger Print Matching Function!', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                        });
+                }
+            }
+
+            xmlhttp.onerror = function () {
+                // failFunction(xmlhttp.status);
+                console.log(xmlhttp);
+                toast.error('Finger Print Matching Failed!', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    });
+            }
+
+            var params = "template1=" + encodeURIComponent(data.biometric_fingerprint); //user scanned template
+            params += "&template2=" + encodeURIComponent(registration?.biometric_fingerprint); //db template
+            params += "&licstr=" + encodeURIComponent(secugen_lic);
+            params += "&templateFormat=" + "ISO";
+            xmlhttp.open("POST", uri, true);
+            xmlhttp.send(params);
+    }
 
     const handleSubmit = async (e) =>
     {
@@ -668,7 +636,7 @@ export default function MedicalExamination(props) {
                                                 <div className="row g-3 align-items-center justify-content-center">
                                                     <img id="fingerPrint" src={"./../assets/static/photos/ThumbPrint.png"} style={{width : 500}}/>
                                                     <div className="col-md-12 text-center">
-                                                        <button className="btn btn-purple btn-md" onClick={handleFinger} disabled={searched}>Scan & Verify Fingerprint</button>
+                                                        <button className="btn btn-purple btn-md" onClick={handleFinger} disabled={searched}>Scan Fingerprint</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1056,7 +1024,7 @@ export default function MedicalExamination(props) {
                                                     <button className={'btn btn-md btn-outline-secondary'} disabled={searched ? false : true} onChange={handleReset}>Reset Form</button>
                                                 </div>
                                                 <div className="col-4">
-                                                    <button className={'btn btn-md btn-outline-info'} disabled={searched} onClick={handleSearch}>Search for Candidate</button>
+                                                    <button className={'btn btn-md btn-outline-info'} disabled={searched} onClick={handleSearch}>Fetch & Verify Candidate</button>
                                                 </div>
                                             </div>
                                         </div>

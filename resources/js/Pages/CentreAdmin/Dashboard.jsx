@@ -11,6 +11,7 @@ export default function Dashboard(props) {
     const [unfit, setUnfit] = useState('Fetching...');
 
     const [country_cases, setCountryCases] = useState(null);
+    const [total_cases, setTotalCases] = useState(0);
 
     const [cancelled_cases, setCancelledCases] = useState('Fetching...');
     const [reports_issued, setReportsIssued] = useState('Fetching...');
@@ -35,6 +36,7 @@ export default function Dashboard(props) {
                     (result) => {
                         // $('#preloader').hide();
                         setCountryCases(result.country_cases);
+                        setTotalCases(result.total_cases);
                         setCancelledCases(result.cancelled_cases);
                         setReportsIssued(result.reports_issued);
                         setReportsInHand(result.reports_in_hand);
@@ -259,7 +261,11 @@ export default function Dashboard(props) {
                                 <td>{cases?.cases}</td>
                                 <td className="w-50">
                                 <div className="progress progress-xs">
-                                    <div className="progress-bar bg-primary" style={{width: "71.0%"}}></div>
+                                    {cases.cases == total_cases ?
+                                        <div className="progress-bar bg-primary" style={{width: `100%`}}></div>
+                                    :
+                                        <div className="progress-bar bg-primary" style={{width: `(${cases.cases}/${total_cases})*${100}%`}}></div>
+                                    }
                                 </div>
                                 </td>
                             </tr>

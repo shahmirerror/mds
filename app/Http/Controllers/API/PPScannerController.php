@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Models\PassportInfo;
+use App\Models\Registrations;
 use App\Traits\PPScanner;
 
 use DB;
@@ -18,7 +19,7 @@ class PPScannerController extends Controller
     {
         $all = json_decode($request->getContent());
         $desktopPath = '\\\\'.$all->username.'\\SharedFolder\\';
-        // $desktopPath = 'C:\SharedFolder/';
+        // $desktopPath = 'C:\Users/shahm/Pictures/passports/';
         $date = date('Y-m-d-H-i', strtotime('+5 hours'));
         Log::info($desktopPath);
         for($i = 0; $i <= 59; $i++)
@@ -47,7 +48,7 @@ class PPScannerController extends Controller
                 {
                     $imageFilename .= '-'.$k.'.jpg';
                 }
-
+                Log::info($desktopPath.$imageFilename);
                 $fileHandle = @fopen($desktopPath.$imageFilename, 'r');
 
                 if($fileHandle !== false)
@@ -69,15 +70,23 @@ class PPScannerController extends Controller
                                                     ->where('counter_no',$all->counter_id)
                                                     ->orderBy('id','DESC')
                                                     ->first();
+
+                        $prev = Registrations::select('reg_date','serial_no','country','status')->where('cnic',$get_ppinfo->cnic)->where('center_id',$all->centre_id)->orderBy('id','DESC')->first();
+
+                        if(!$prev)
+                        {
+                            $prev = NULL;
+                        }
                     }
                     else
                     {
                         $get_ppinfo = [];
+                        $prev = NULL;
                     }
 
-                    unlink($desktopPath.$imageFilename);
+                    // unlink($desktopPath.$imageFilename);
 
-                    return response()->json(['pp_info' => $get_ppinfo, 'message' => $result, 'filename' => asset('storage/app/public/temp_passports/'.$imageFilename)], 200);
+                    return response()->json(['pp_info' => $get_ppinfo, 'message' => $result, 'prev' => $prev, 'filename' => asset('storage/app/public/temp_passports/'.$imageFilename)], 200);
                 }
             }
         }

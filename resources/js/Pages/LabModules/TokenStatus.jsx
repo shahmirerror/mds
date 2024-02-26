@@ -22,7 +22,7 @@ export default function TokenStatus(props) {
         setQueryPending(newQuery);
         const filteredResults = props.pending.filter(item =>
           Object.values(item).some(val =>
-            typeof val === 'string' && val.toLowerCase().includes(newQuery.toLowerCase())
+            typeof val === 'string' && val.toLowerCase().includes(newQuery.toLowerCase()) || typeof val === 'number' && val == newQuery
           )
         );
         setPending(filteredResults);
@@ -33,7 +33,7 @@ export default function TokenStatus(props) {
         setQueryCompleted(newQuery);
         const filteredResults = props.completed.filter(item =>
           Object.values(item).some(val =>
-            typeof val === 'string' && val.toLowerCase().includes(newQuery.toLowerCase())
+            typeof val === 'string' && val.toLowerCase().includes(newQuery.toLowerCase()) || typeof val === 'number' && val == newQuery
           )
         );
         setCompleted(filteredResults);
@@ -44,7 +44,7 @@ export default function TokenStatus(props) {
         setQueryProcess(newQuery);
         const filteredResults = props.in_process.filter(item =>
           Object.values(item).some(val =>
-            typeof val === 'string' && val.toLowerCase().includes(newQuery.toLowerCase())
+            typeof val === 'string' && val.toLowerCase().includes(newQuery.toLowerCase()) || typeof val === 'number' && val == newQuery
           )
         );
         setProcess(filteredResults);
@@ -98,7 +98,7 @@ export default function TokenStatus(props) {
                                 <table class="table card-table table-vcenter text-nowrap datatable">
                                 <thead>
                                     <tr>
-                                    <th>#</th>
+                                    <th>Token No</th>
                                     <th>Process Name</th>
                                     <th>Status</th>
                                     </tr>

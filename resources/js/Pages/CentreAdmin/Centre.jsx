@@ -30,6 +30,9 @@ export default function Centre(props) {
         city: props.centre.city,
         country: props.centre.country,
         address: props.centre.address,
+        email: props.centre.email,
+        fax: props.centre.fax,
+        code: props.centre.code,
         logo: '',
     });
 
@@ -492,7 +495,7 @@ export default function Centre(props) {
                             <h3 className="card-title">Current Logo</h3>
                             <div className="row align-items-center">
                                 <div className="col-auto">
-                                    <span className="avatar avatar-xl rounded" style={{backgroundImage: "url(./../storage/app/public/centres/logos/"+props.centre?.image+")"}}></span>
+                                    <img class="mb-3 rounded" style={{width: "5.5rem"}} src={"./../storage/app/public/centres/logos/"+props.centre?.image+""}/>
                                 </div>
                             </div>
                         </div>
@@ -507,23 +510,35 @@ export default function Centre(props) {
                         <input type="text" className="form-control" value={data.name}  name="name" onChange={handleChange} />
                       </div>
                       <div className="col-md">
-                        <div className="form-label">City</div>
-                        <input type="text" className="form-control" value={data.city}  name="city" onChange={handleChange} />
+                        <div className="form-label">Centre Code</div>
+                        <input type="text" className="form-control" value={data.code}  name="code" onChange={handleChange} />
                       </div>
                       <div className="col-md">
-                        <div className="form-label">Country</div>
-                        <input type="text" className="form-control" value={data.country} name="country" onChange={handleChange} />
+                        <div className="form-label">Fax No.</div>
+                        <input type="text" className="form-control" value={data.fax}  name="fax" onChange={handleChange} />
                       </div>
-                    </div>
-                    <div className="row g-3">
                       <div className="col-md">
                         <div className="form-label">Phone</div>
                         <input type="text" className="form-control" value={data.phone} name="phone" onChange={handleChange}/>
                       </div>
-                      <div className="col-md">
-                        <div className="form-label">Address</div>
-                        <input type="text" className="form-control" value={data.address} name="address" onChange={handleChange} />
-                      </div>
+                    </div>
+                    <div className="row g-3">
+                        <div className="col-md">
+                            <div className="form-label">Email Address</div>
+                            <input type="email" className="form-control" value={data.email} name="email" onChange={handleChange}/>
+                        </div>
+                        <div className="col-md">
+                            <div className="form-label">City</div>
+                            <input type="text" className="form-control" value={data.city}  name="city" onChange={handleChange} />
+                        </div>
+                        <div className="col-md">
+                            <div className="form-label">Country</div>
+                            <input type="text" className="form-control" value={data.country} name="country" onChange={handleChange} />
+                        </div>
+                        <div className="col-md">
+                            <div className="form-label">Address</div>
+                            <textarea className={'form-control'} onChange={handleChange} name="address">{data.address}</textarea>
+                        </div>
                     </div>
                   </div>
 

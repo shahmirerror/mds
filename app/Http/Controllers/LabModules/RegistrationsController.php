@@ -157,7 +157,7 @@ class RegistrationsController extends Controller
     {
         if($id == 'edit')
         {
-            if(User::check_permission(1, 'index') == true)
+            if(User::check_permission(1, 'edit') == true)
             {
                 return Inertia::render('LabModules/RegistrationEdit',
                                     ['countries' => Country::select('name as value','name as label')->where('centre_id',Auth::user()->centre->centre_id)->get(),
@@ -176,14 +176,19 @@ class RegistrationsController extends Controller
                                         ->where("process_id",1)
                                         ->where("center_id",Auth::user()->centre->centre_id)
                                         ->where('status','Pending')
-                                        ->where('cancelled','!=','Yes')
+                                        ->where('cancelled',NULL)
                                         ->where('process_date',date('Y-m-d'))
                                         ->where('counter_id',NULL)
                                         ->orderBy('id', 'ASC')
                                         ->count();
 
+            $code = BarcodeSetup::where('centre_id',Auth::user()->centre->centre_id)->orderBy('id','DESC')->first();
+
+            $barcode = ($code) ? $code->barcode+1 : 100001;
+            BarcodeSetup::insert(array('centre_id' => Auth::user()->centre->centre_id, 'barcode' => $barcode));
+
             return Inertia::render('LabModules/RegistrationRepeat',
-                                ['token_no' => $request->token_no, 'in_queue' => $queue, 'countries' => Country::select('name as value','name as label')->where('centre_id',Auth::user()->centre->centre_id)->get(),
+                                ['token_no' => $request->token_no, 'in_queue' => $queue, 'barcode' => $barcode, 'countries' => Country::select('name as value','name as label')->where('centre_id',Auth::user()->centre->centre_id)->get(),
                                 'agencies' => Agency::select('name as value','name as label')->where('centre_id',Auth::user()->centre->centre_id)->get(),
                                 'places' => PlaceOfIssue::select('name as value','name as label')->where('centre_id',Auth::user()->centre->centre_id)->get(),
                                 'professions' => Profession::select('name as value','name as label')->where('centre_id',Auth::user()->centre->centre_id)->get()]);

@@ -48,12 +48,12 @@ export default function Reports({ auth }) {
     }
     const lMDate = new Date(lastDate);
 
-    const [dailydate, setDailyDate] = useState(todayDate.getFullYear()+"-"+todayDate.getMonth()+1+"-"+todayDate.getDate());
+    const [dailydate, setDailyDate] = useState(todayDate.getMonth()+1 >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate());
     const [yearlydate, setYearlyDate] = useState(todayDate.getFullYear());
     const [monthlydate, setMonthlyDate] = useState(todayDate.getMonth()+1);
 
-    const [toRange, setToRange] = useState(todayDate.getFullYear()+"-"+todayDate.getMonth()+1+"-"+todayDate.getDate());
-    const [fromRange, setFromRange] = useState(lMDate.getFullYear()+"-"+lMDate.getMonth()+1+"-"+lMDate.getDate());
+    const [toRange, setToRange] = useState(todayDate.getMonth()+1 >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate());
+    const [fromRange, setFromRange] = useState(lMDate.getMonth()+1 >= 10 ? lMDate.getFullYear()+"-"+(lMDate.getMonth()+1)+"-"+lMDate.getDate() : lMDate.getFullYear()+"-0"+(lMDate.getMonth()+1)+"-"+lMDate.getDate());
 
     const [report_type, setReportType] = useState(null);
     const [centreID, setCentre] = useState(0);
@@ -132,12 +132,12 @@ export default function Reports({ auth }) {
         setGenerated(null);
         setDataFreq(null);
 
-        setDailyDate(todayDate.getFullYear()+"-"+todayDate.getMonth()+1+"-"+todayDate.getDate());
+        setDailyDate(todayDate.getMonth()+1 >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate());
         setYearlyDate(todayDate.getFullYear());
         setMonthlyDate(todayDate.getMonth()+1);
 
-        setToRange(todayDate.getFullYear()+"-"+todayDate.getMonth()+1+"-"+todayDate.getDate());
-        setFromRange(lMDate.getFullYear()+"-"+lMDate.getMonth()+1+"-"+lMDate.getDate());
+        setToRange(todayDate.getMonth()+1 >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate());
+        setFromRange(lMDate.getMonth()+1 >= 10 ? lMDate.getFullYear()+"-"+(lMDate.getMonth()+1)+"-"+lMDate.getDate() : lMDate.getFullYear()+"-0"+(lMDate.getMonth()+1)+"-"+lMDate.getDate());
 
         setCentre(0);
         setReportType(0);

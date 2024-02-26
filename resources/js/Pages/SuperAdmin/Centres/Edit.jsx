@@ -30,6 +30,9 @@ export default function Edit(props) {
         city: props.centre.city,
         country: props.centre.country,
         address: props.centre.address,
+        email: props.centre.email,
+        fax: props.centre.fax,
+        code: props.centre.code,
         logo: '',
     });
 

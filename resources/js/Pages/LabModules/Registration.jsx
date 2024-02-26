@@ -21,6 +21,8 @@ export default function Registration(props) {
     const [report, setReport] = useState(null);
     const [manualPP, setManualPP] = useState(true);
     const [ppFormat, setPPFormat] = useState(false);
+    const [counterID, setCounter] = useState(props.auth.user.role_id == 2 ? 1 : 0);
+    const [prevReg, setPrevReg] = useState(null);
 
     const todayDate = new Date();
     const [today, setToday] = useState(null);
@@ -196,7 +198,8 @@ export default function Registration(props) {
 
         const requestData = {
             centre_id: props.auth.user.centre.centre_id,
-            process_id: 1
+            process_id: 1,
+            counter_no: counterID
         };
 
         const requestJson = JSON.stringify(requestData);
@@ -270,11 +273,6 @@ export default function Registration(props) {
     }
 
     const fetchBarcode = () => {
-
-        if(data.barcode != '' && data.barcode != null)
-        {
-            setPrevBarcode(data.barcode);
-        }
 
         const requestData = {
             centre_id: props.auth.user.centre.centre_id
@@ -393,7 +391,7 @@ export default function Registration(props) {
         setStream(false);
         setImageSrc(null);
         setManualPP(true);
-        reset();
+        setPrevReg(null);
         resetData();
     }
 
@@ -469,9 +467,23 @@ export default function Registration(props) {
 
         const requestData = {
             centre_id: props.auth.user.centre.centre_id,
-            counter_id: 1,
+            counter_id: counterID,
             username: props.username
         };
+
+        setManualPP(true);
+        setPPFormat(false);
+        setPrevReg(null);
+
+        data.passport_image = null;
+        data.passport_no = '';
+        data.nationality = '';
+        data.candidate_name = '';
+        data.cnic = '';
+        data.dob = '';
+        data.place_of_issue = '';
+        data.passport_expiry_date = '';
+        setData('gender', '');
 
         const requestJson = JSON.stringify(requestData);
 
@@ -489,9 +501,8 @@ export default function Registration(props) {
                 .then(
                     (result) => {
                         // $('#preloader').hide();
-                        if(result.pp_info == null)
+                        if(result.message == 'No Passport Found!' || result.message == 'Passport is Invalid')
                         {
-                            setManualPP(false);
                             setPPFormat(false);
                             setData('passport_image',result.filename);
                             toast.warning(result.message, {
@@ -509,6 +520,20 @@ export default function Registration(props) {
                         {
                             setManualPP(false);
                             setPPFormat(true);
+                            setPrevReg(result.prev);
+                            if(result.prev !== null)
+                            {
+                                toast.info('A previous registration was found!', {
+                                    position: "top-right",
+                                    autoClose: 5000,
+                                    hideProgressBar: false,
+                                    closeOnClick: true,
+                                    pauseOnHover: true,
+                                    draggable: true,
+                                    progress: undefined,
+                                    theme: "light",
+                                    });
+                            }
                             data.passport_image = result.filename;
                             data.passport_no = result.pp_info.pp_no;
                             data.nationality = result.pp_info.nationality;
@@ -562,6 +587,89 @@ export default function Registration(props) {
         }
     }
 
+    const handlePrev = async (e) => {
+
+        const requestData = {
+            centre_id: props.auth.user.centre.centre_id,
+            cnic: data.cnic
+        };
+
+        setPrevReg(null);
+
+        const requestJson = JSON.stringify(requestData);
+
+        try {
+
+            const response = await toast.promise(
+                fetch(route("lab.fetch_prev_registration"),{
+                    method: "POST",
+                    body: requestJson,
+                }),
+                {
+                  pending: 'Checking for any previous registrations',
+                })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        // $('#preloader').hide();
+                        if(result.prev == null)
+                        {
+                            setPrevReg(null);
+                            toast.info('Candidate is new to the centre', {
+                                position: "top-right",
+                                autoClose: 5000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                                progress: undefined,
+                                theme: "light",
+                                });
+                        }
+                        else
+                        {
+                            setPrevReg(result.prev);
+                            toast.info('A previous registration was found!', {
+                                position: "top-right",
+                                autoClose: 5000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                                progress: undefined,
+                                theme: "light",
+                                });
+                        }
+                    },
+                    (error) => {
+
+                        toast.error('Something went wrong! Please try again :(', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    }
+                );
+        } catch (ex) {
+            console.log(ex);
+            toast.error('Something went wrong! Please try again :(', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+        }
+    }
+
     const handleChange = (e) => {
         if(e.target.name == 'gender')
         {
@@ -570,7 +678,15 @@ export default function Registration(props) {
         }
         else
         {
-            setData(e.target.name, e.target.value.toUpperCase());
+            if(e.target.name == 'marital_status' || e.target.name == 'pregnancy_test')
+            {
+                setData(e.target.name, e.target.value);
+            }
+            else
+            {
+                setData(e.target.name, e.target.value.toUpperCase());
+            }
+
         }
     }
 
@@ -657,41 +773,35 @@ export default function Registration(props) {
     }
 
     const resetData = () => {
-        // Reset additional data variables here
-        setData({
-            passport_no: '',
-            passport_issue_date: '',
-            passport_expiry_date: '',
-            candidate_name: '',
-            candidate_image: null,
-            passport_image: null,
-            agency: '',
-            country: '',
-            profession: '',
-            cnic: '',
-            gender: '',
-            finger_type: '',
-            dob: '',
-            place_of_issue: '',
-            reg_date: '',
-            ref_slip_issue_date: '',
-            ref_slip_expiry_date: '',
-            barcode: props?.barcode_no,
-            serial_no: '',
-            relation_type: '',
-            relative_name: '',
-            phone_1: '',
-            phone_2: '',
-            nationality: '',
-            marital_status: '',
-            biometric_fingerprint: '',
-            fees: '',
-            discount: '',
-            remarks: '',
-            pregnancy_test: 0,
-            repeat: false,
-            token_no: currToken
-        });
+        data.passport_no = '';
+        data.passport_issue_date = '';
+        data.passport_expiry_date = '';
+        data.candidate_name = '';
+        data.candidate_image = null;
+        data.passport_image = null;
+        data.agency = '';
+        data.country = '';
+        data.profession = '';
+        data.cnic = '';
+        data.gender = '';
+        data.finger_type = '';
+        data.dob = '';
+        data.place_of_issue = '';
+        data.reg_date = todayDate.getMonth()+1 >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate();
+        data.slip_issue_date = '';
+        data.ref_slip_expiry_date = '';
+        data.serial_no = '';
+        data.relation_type = '';
+        data.relative_name = '';
+        data.phone_1 = '';
+        data.phone_2 = '';
+        data.nationality = '';
+        data.marital_status = '';
+        data.biometric_fingerprint = '';
+        data.fees = '';
+        data.discount = '';
+        data.remarks = '';
+        data.pregnancy_test = 0;
     };
 
     const handleFormRequired = () =>
@@ -710,10 +820,6 @@ export default function Registration(props) {
 
         return message;
     }
-
-    useEffect(() => {
-
-    }, []);
 
     return (
         <AuthenticatedLayout
@@ -738,11 +844,16 @@ export default function Registration(props) {
                 <div className="container-xl">
                     <div className="row g-2 align-items-center">
                     <div className="col align-items-center">
-                        <div className="col-md-3" style={{float: 'left'}}>
+                        <div className="col-md-5" style={{float: 'left'}}>
                             <h2 className="page-title" style={{float: 'left'}}>
                                 Registration Desk
                             </h2>
-                            {/* <h3 className="badge bg-success text-white" style={{float: 'right'}}>Counter 1</h3> */}
+                            <h4 style={{float: 'right'}}>
+                                <select className="form-select" name="counter_no" value={counterID} onChange={(e) => setCounter(e.target.value)}>
+                                    <option value={1}>Counter 1</option>
+                                    <option value={2}>Counter 2</option>
+                                </select>
+                            </h4>
                         </div>
                         <div className="col-md-6 align-items-center" style={{float: 'right'}}>
                             <h2 className="page-title" style={{float: 'right'}}>
@@ -901,7 +1012,12 @@ export default function Registration(props) {
                                                     <div className="col-4">
                                                         <div className="row g-3 align-items-center">
                                                             <label className='form-label'>Place of Issue</label>
-                                                            <input type="text" className="form-control" disabled name="cnic" value={data.place_of_issue} onChange={handleChange} />
+                                                            <Select
+                                                                options={props.places}
+                                                                value={data.place_of_issue}
+                                                                name="place_of_issue"
+                                                                onChange={(e) => setData('place_of_issue', e)}
+                                                            />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -990,7 +1106,7 @@ export default function Registration(props) {
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>CNIC</label>
-                                                        <input type="text" className="form-control" required={manual} name="cnic" value={data.cnic} onChange={handleChange} />
+                                                        <input type="text" className="form-control" required={manual} name="cnic" value={data.cnic} onChange={handleChange} onBlur={handlePrev} />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
@@ -1034,8 +1150,52 @@ export default function Registration(props) {
                             </div>
                         </div>
                     </div>
+                    {prevReg && (
+                    <div className={'row row-cards'}>
+                        <div className="col-md-6">
+                            <div className="row row-cards">
+                                <div className="col-12">
+                                    <div className="card">
+                                        <div className="card-header">
+                                            <div className="col-md-12 flex align-items-center">
+                                                <div className='col-md-6' style={{float: 'left'}}>
+                                                    <h3>Previous Registration</h3>
+                                                </div>
+                                                <div className='col-md-6' style={{float: 'right'}}>
+                                                    <h3 style={{textAlign: 'right'}}>{prevReg?.reg_date?.replaceAll('-','')+prevReg?.serial_no?.replaceAll('/','')}</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="card-body">
+                                            <div className="row g-5 mb-3">
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Registration Date</label>
+                                                        <input type="date" required className="form-control" name="reg_date" value={prevReg?.reg_date} disabled />
+                                                    </div>
+                                                </div>
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Serial Number</label>
+                                                        <input type="text" required className="form-control" name="serial_no" value={prevReg?.serial_no} disabled />
+                                                    </div>
+                                                </div>
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Status</label>
+                                                        <input type="text" required className="form-control" name="serial_no" value={prevReg?.status} disabled />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    )}
                     <div className="row row-cards">
-                    <div className="col-md-6">
+                        <div className="col-md-6">
                             <div className="row row-cards">
                                 <div className="col-12">
                                     <div className="card">
@@ -1045,7 +1205,7 @@ export default function Registration(props) {
                                                     <h3>General Information</h3>
                                                 </div>
                                                 <div className='col-md-6' style={{float: 'right'}}>
-                                                    <h3 style={{textAlign: 'right'}}>{data.reg_date?.replaceAll('-','')+data.serial_no}</h3>
+                                                    <h3 style={{textAlign: 'right'}}>{data.reg_date?.replaceAll('-','')+data.serial_no?.replaceAll('/','')}</h3>
                                                 </div>
                                             </div>
                                         </div>
@@ -1144,7 +1304,7 @@ export default function Registration(props) {
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Relative Name</label>
+                                                        <label className='form-label'>S/O or W/O or D/O</label>
                                                         <input type="text" className="form-control" name="relative_name" value={data.relative_name} onChange={handleChange} />
                                                     </div>
                                                 </div>

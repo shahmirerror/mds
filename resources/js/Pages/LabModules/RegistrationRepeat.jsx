@@ -53,7 +53,7 @@ export default function RegistrationRepeat(props) {
         reg_date: '',
         ref_slip_issue_date: '',
         ref_slip_expiry_date: '',
-        barcode: '',
+        barcode: props.barcode,
         serial_no: '',
         relation_type: '',
         relative_name: '',
@@ -521,9 +521,9 @@ export default function RegistrationRepeat(props) {
 
         const requestJson = JSON.stringify(requestData);
 
-        if(passport_no == null)
+        if(passport_no == null || data.biometric_fingerprint == '')
         {
-            toast.warning('Please input Passport Number to proceed!', {
+            toast.warning('Please input Passport Number and Scan Finger Print to proceed!', {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -564,23 +564,11 @@ export default function RegistrationRepeat(props) {
                                 }
                                 else
                                 {
-                                    setSearched(true);
-                                    setCandidate(result.registration);
-
-                                    toast.success('Candidate Found!', {
-                                        position: "top-right",
-                                        autoClose: 5000,
-                                        hideProgressBar: false,
-                                        closeOnClick: true,
-                                        pauseOnHover: true,
-                                        draggable: true,
-                                        progress: undefined,
-                                        theme: "light",
-                                        });
+                                    matchScore(result.registration);
                                 }
                         },
                         (error) => {
-
+                            console.log(error)
                             toast.error('Something went wrong! Please try again :(', {
                                 position: "top-right",
                                 autoClose: 5000,
@@ -594,7 +582,7 @@ export default function RegistrationRepeat(props) {
                         }
                     );
             } catch (ex) {
-
+                console.log(ex)
                 toast.error('Something went wrong! Please try again :(', {
                     position: "top-right",
                     autoClose: 5000,
@@ -609,10 +597,90 @@ export default function RegistrationRepeat(props) {
         }
     };
 
+    const matchScore = (registration) => {
+
+        let db_template = candidate?.biometric_fingerprint;
+            var uri = "https://localhost:8443/SGIMatchScore";
+
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    let fpobject = JSON.parse(xmlhttp.responseText);
+                    if(fpobject.ErrorCode == 0)
+                    {
+                        if(fpobject.MatchingScore >= 100)
+                        {
+                            setCandidate(registration);
+                            setSearched(true);
+                            toast.success('Candidate Found!', {
+                                position: "top-right",
+                                autoClose: 5000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                                progress: undefined,
+                                theme: "light",
+                                });
+                        }
+                        else
+                        {
+                            toast.error('Finger does not match!', {
+                                position: "top-right",
+                                autoClose: 5000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                                progress: undefined,
+                                theme: "light",
+                                });
+                        }
+                    }
+                }
+                else if (xmlhttp.status == 404) {
+                    setCandidate(null);
+                    toast.warning('Check Finger Print Matching Function!', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                        });
+                }
+            }
+
+            xmlhttp.onerror = function () {
+                // failFunction(xmlhttp.status);
+                console.log(xmlhttp);
+                toast.error('Finger Print Matching Failed!', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    });
+            }
+
+            var params = "template1=" + encodeURIComponent(data.biometric_fingerprint); //user scanned template
+            params += "&template2=" + encodeURIComponent(registration?.biometric_fingerprint); //db template
+            params += "&licstr=" + encodeURIComponent(secugen_lic);
+            params += "&templateFormat=" + "ISO";
+            xmlhttp.open("POST", uri, true);
+            xmlhttp.send(params);
+    }
+
     const handleSubmit = async (e) => {
         e.target.disabled = true;
         const requestData = {
             data: candidate,
+            barcode: data.barcode,
             candidate_image: data.candidate_image,
             centre_id: props?.auth?.user?.centre?.centre_id,
             fingerprint: data.biometric_fingerprint,
@@ -679,7 +747,7 @@ export default function RegistrationRepeat(props) {
         const { name, value } = e.target;
         setCandidate(prevCandidate => ({
             ...prevCandidate,
-            [name]: value.toUpperCase()
+            [name]: name == 'marital_status' || name == 'pregnancy_check' ? value : value.toUpperCase()
         }));
     }
 
@@ -763,14 +831,6 @@ export default function RegistrationRepeat(props) {
                                                     <div className="col-md-12 text-center">
                                                         <button className="btn btn-purple btn-md w-50" onClick={handleFinger}>Scan fingerprint</button>
                                                     </div>
-                                                    <div className="col-md-12 text-center">
-                                                        <select className="form-select" name="finger_type" value={candidate?.finger_type} onChange={handleChange}>
-                                                            <option>--</option>
-                                                            {fingers.map((finger, index) => (
-                                                                <option value={finger.value}>{finger.label}</option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
                                                 </div>
                                             </div>
                                             <div className="col-6">
@@ -780,6 +840,15 @@ export default function RegistrationRepeat(props) {
                                             </div>
                                         </div>
                                     </div>
+                                    </div>
+                                </div>
+                                <div className={'col-12'}>
+                                    <div className={'card'}>
+                                        <div className={'card-body'}>
+                                            <div className="row g-3">
+                                                <img id="passportImage" src={candidate?.passport_image}/>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -800,12 +869,12 @@ export default function RegistrationRepeat(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Enter Passport Number</label>
-                                                        <input type="text" className="form-control" name="passport_issue_date" onChange={(e) => setPassportNo(e.target.value)} />
+                                                        <input type="text" className="form-control" name="passport_issue_date" value={passport_no} onChange={(e) => setPassportNo(e.target.value.toUpperCase())} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center mt-4">
-                                                        <button className={'btn btn-md btn-outline-info'} disabled={searched ? true : false} onClick={handleSearch}>Search for Candidate</button>
+                                                        <button className={'btn btn-md btn-outline-info'} disabled={searched ? true : false} onClick={handleSearch}>Fetch Candidate & Verify</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -905,6 +974,9 @@ export default function RegistrationRepeat(props) {
                                                 <div className='col-md-6' style={{float: 'left'}}>
                                                     <h3>General Information</h3>
                                                 </div>
+                                                <div className='col-md-6' style={{float: 'right'}}>
+                                                    <h3 style={{textAlign: 'right'}}>{candidate?.reg_date?.replaceAll('-','')+candidate?.serial_no?.replaceAll('/','')}</h3>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="card-body">
@@ -1002,7 +1074,7 @@ export default function RegistrationRepeat(props) {
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Relative Name</label>
+                                                        <label className='form-label'>S/O or W/O or D/O</label>
                                                         <input type="text" className="form-control" name="relative_name" value={candidate?.relative_name} onChange={handleChange} />
                                                     </div>
                                                 </div>

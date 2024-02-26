@@ -41,6 +41,9 @@ class CentreManagementController extends Controller
     {
         $new = Centres::find($id);
         $new->name = $request->name;
+        $new->code = $request->code;
+        $new->fax = $request->fax;
+        $new->email = $request->email;
         $new->phone = $request->phone;
         $new->address = $request->address;
         $new->city = $request->city;

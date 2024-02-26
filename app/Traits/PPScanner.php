@@ -51,27 +51,34 @@ trait PPScanner
             $first = str_replace(" ","<",$first);
             $last = str_replace(" ","",$last);
             $last_less_than_position = strrpos($first, "<");
-            for($i = 1; $i <= $last_less_than_position; $i++)
-            {
-                if (ctype_alpha($first[strlen($first)-$i]) &&
-                    ($first[strlen($first)-$i] !== "<" &&
-                    ($first[strlen($first)-$i-1] == "<" &&
-                    $first[strlen($first)-$i-2] == "<" && $first[strlen($first)-$i-3] == "<")))
-                {
-                    $first[strlen($first)-$i] = "<";
-                }
-            }
-            $last_less_than_position = strrpos($first, "<<<");
-            for($i = 1; $i <= $last_less_than_position; $i++)
-            {
-                    $first[strlen($first)-$i] = "<";
-            }
+            // for($i = 1; $i <= $last_less_than_position; $i++)
+            // {
+            //     if (ctype_alpha($first[strlen($first)-$i]) &&
+            //         ($first[strlen($first)-$i] !== "<" &&
+            //         ($first[strlen($first)-$i-1] == "<" &&
+            //         $first[strlen($first)-$i-2] == "<" && $first[strlen($first)-$i-3] == "<")))
+            //     {
+            //         $first[strlen($first)-$i] = "<";
+            //     }
+            // }
+            // $last_less_than_position = strrpos($first, "<<<");
+            // for($i = 1; $i <= $last_less_than_position; $i++)
+            // {
+            //         $first[strlen($first)-$i] = "<";
+            // }
             if(strlen($first) > 44)
             {
                 $first = substr($first, 0, 44);
             }
-
-            $last[0] = (is_numeric($last[0])) ? 'G' : $last[0];
+            if(strlen($last) == 44)
+            {
+                $last[0] = (is_numeric($last[0])) ? 'G' : $last[0];
+                $last[0] = ($last[0] == ':') ? '' : $last[0];
+            }
+            elseif(strlen($last) > 44)
+            {
+                unset($last[0]);
+            }
                 Log::info($first."\n".$last);
 
                 $data = MrzParser::parse($first."\n".$last);
@@ -104,7 +111,7 @@ trait PPScanner
 
         } catch (\Exception $e) {
             Log::info($e);
-            return 'Passport Format is Invalid';
+            return 'Passport is Invalid';
         }
     }
 }

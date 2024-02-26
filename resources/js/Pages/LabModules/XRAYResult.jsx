@@ -27,10 +27,6 @@ export default function XRAYResult(props) {
         images: ''
     });
 
-
-    useEffect(() => {
-    }, []);
-
     const handleChange = (e) => {
         if(e.target.name == 'images')
         {

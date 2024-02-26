@@ -57,6 +57,32 @@ class LabModulesController extends Controller
         }
     }
 
+    public function fetch_prev_registration(request $request)
+    {
+        $all = json_decode($request->getContent());
+
+        if($all->cnic != NULL && $all->cnic != '')
+        {
+            $check = Registrations::select('reg_date','serial_no','country','status')
+                                   ->where('cnic',$all->cnic)
+                                   ->where('center_id',$all->centre_id)
+                                   ->orderBy('id','DESC')
+                                   ->first();
+            if($check)
+            {
+                return response()->json(['prev' => $check], 200);
+            }
+            else
+            {
+                return response()->json(['prev' => null], 200);
+            }
+        }
+        else
+        {
+            return response()->json(['prev' => null], 200);
+        }
+    }
+
     public function fetch_registration(request $request)
     {
         $all = json_decode($request->getContent());
@@ -99,10 +125,19 @@ class LabModulesController extends Controller
             {
                 $check2 = SampleCollection::where('centre_id',$all->centre_id)->where('reg_id',$check->reg_id)->first();
             }
+            elseif($all->process_id == 'lab')
+            {
+                $check2 = LabResult::where('centre_id',$all->centre_id)->where('reg_id',$check->reg_id)->first();
+            }
 
-            $check->candidate_image = asset('storage/app/public/candidate_image/'.strtotime($check->created_at).'.png');
+            $check->candidate_image = asset('storage/app/public/candidate_image/'.strtotime($check->created_at).'.PNG');
+            $check->passport_image = asset('storage/app/public/candidate_passport/'.strtotime($check->created_at).'.JPG');
 
-            if($check2 && $all->process_id != 2)
+            if($check2 && $all->process_id == 'lab')
+            {
+                return response()->json(['registration' => $check, 'verified' => $check2], 200);
+            }
+            elseif($check2 && $all->process_id != 2)
             {
                 return response()->json(['registration' => $check, 'verified' => true], 200);
             }
@@ -143,11 +178,12 @@ class LabModulesController extends Controller
         {
 
             $check->place_of_issue = PlaceOfIssue::select('name as value','name as label')->where('name','LIKE','%'.$check->place_of_issue.'%')->first();
-            $check->country = Country::select('name as value','name as label')->where('name','LIKE','%'.$check->place_of_issue.'%')->first();
-            $check->agency = Agency::select('name as value','name as label')->where('name','LIKE','%'.$check->country.'%')->first();
+            $check->country = Country::select('name as value','name as label')->where('name','LIKE','%'.$check->country.'%')->first();
+            $check->agency = Agency::select('name as value','name as label')->where('name','LIKE','%'.$check->agency.'%')->first();
             $check->profession = Profession::select('name as value','name as label')->where('name','LIKE','%'.$check->profession.'%')->first();
 
             $check->candidate_image = asset('storage/app/public/candidate_image/'.strtotime($check->created_at).'.PNG');
+            $check->passport_image = asset('storage/app/public/candidate_passport/'.strtotime($check->created_at).'.JPG');
 
             return response()->json(['registration' => $check], 200);
         }
@@ -171,11 +207,12 @@ class LabModulesController extends Controller
         {
 
             $check->place_of_issue = PlaceOfIssue::select('name as value','name as label')->where('name','LIKE','%'.$check->place_of_issue.'%')->first();
-            $check->country = Country::select('name as value','name as label')->where('name','LIKE','%'.$check->place_of_issue.'%')->first();
-            $check->agency = Agency::select('name as value','name as label')->where('name','LIKE','%'.$check->country.'%')->first();
+            $check->country = Country::select('name as value','name as label')->where('name','LIKE','%'.$check->country.'%')->first();
+            $check->agency = Agency::select('name as value','name as label')->where('name','LIKE','%'.$check->agency.'%')->first();
             $check->profession = Profession::select('name as value','name as label')->where('name','LIKE','%'.$check->profession.'%')->first();
 
             $check->candidate_image = asset('storage/app/public/candidate_image/'.strtotime($check->created_at).'.PNG');
+            $check->passport_image = asset('storage/app/public/candidate_passport/'.strtotime($check->created_at).'.JPG');
 
             return response()->json(['registration' => $check], 200);
         }
@@ -304,6 +341,108 @@ class LabModulesController extends Controller
         return response()->json(['message' => 'Verified'], 200);
     }
 
+    public function store_lab_result(request $request)
+    {
+        $all = json_decode($request->getContent());
+
+        $check = LabResult::where('centre_id',$all->centre_id)->where('reg_id',$all->reg_id)->first();
+
+        if(!$check)
+        {
+            $insert = new LabResult;
+            $insert->centre_id = $all->centre_id;
+            $insert->reg_id = $all->reg_id;
+            $insert->sugar = $all->data->sugar;
+            $insert->albumin = $all->data->albumin;
+            $insert->helminthes = $all->data->helminthes;
+            $insert->ova = $all->data->ova;
+            $insert->cyst = $all->data->cyst;
+            $insert->tb = $all->data->tb;
+            $insert->pregnancy = $all->data->pregnancy;
+            $insert->polio = $all->data->polio;
+            $insert->polio_date = $all->data->polio_date;
+            $insert->mmr1 = $all->data->mmr1;
+            $insert->mmr1_date = $all->data->mmr1_date;
+            $insert->mmr2 = $all->data->mmr2;
+            $insert->mmr2_date = $all->data->mmr2_date;
+            $insert->meningococcal = $all->data->meningococcal;
+            $insert->meningococcal_date = $all->data->meningococcal_date;
+            $insert->hcv = $all->data->hcv;
+            $insert->hbsag = $all->data->hbsag;
+            $insert->hiv = $all->data->hiv;
+            $insert->vdrl = $all->data->vdrl;
+            $insert->tpha = $all->data->tpha;
+            $insert->rbs = $all->data->rbs;
+            $insert->bil = $all->data->bil;
+            $insert->alt = $all->data->alt;
+            $insert->ast = $all->data->ast;
+            $insert->alk = $all->data->alk;
+            $insert->creatinine = $all->data->creatinine;
+            $insert->blood_group = $all->data->blood_group;
+            $insert->haemoglobin = $all->data->haemoglobin;
+            $insert->malaria = $all->data->malaria;
+            $insert->micro_filariae = $all->data->micro_filariae;
+            $insert->save();
+        }
+        else
+        {
+            return response()->json(['message' => 'Lab Result Already Exists!'], 200);
+        }
+
+        return response()->json(['message' => 'Lab Result Stored'], 200);
+    }
+
+    public function update_lab_result(request $request)
+    {
+        $all = json_decode($request->getContent());
+
+        $check = LabResult::where('centre_id',$all->centre_id)->where('reg_id',$all->reg_id)->first();
+
+        if(!$check)
+        {
+            return response()->json(['message' => 'Lab Result Not Found!'], 200);
+        }
+        else
+        {
+            $insert = LabResult::find($check->id);
+            $insert->centre_id = $all->centre_id;
+            $insert->reg_id = $all->reg_id;
+            $insert->sugar = $all->data->sugar;
+            $insert->albumin = $all->data->albumin;
+            $insert->helminthes = $all->data->helminthes;
+            $insert->ova = $all->data->ova;
+            $insert->cyst = $all->data->cyst;
+            $insert->tb = $all->data->tb;
+            $insert->pregnancy = $all->data->pregnancy;
+            $insert->polio = $all->data->polio;
+            $insert->polio_date = $all->data->polio_date;
+            $insert->mmr1 = $all->data->mmr1;
+            $insert->mmr1_date = $all->data->mmr1_date;
+            $insert->mmr2 = $all->data->mmr2;
+            $insert->mmr2_date = $all->data->mmr2_date;
+            $insert->meningococcal = $all->data->meningococcal;
+            $insert->meningococcal_date = $all->data->meningococcal_date;
+            $insert->hcv = $all->data->hcv;
+            $insert->hbsag = $all->data->hbsag;
+            $insert->hiv = $all->data->hiv;
+            $insert->vdrl = $all->data->vdrl;
+            $insert->tpha = $all->data->tpha;
+            $insert->rbs = $all->data->rbs;
+            $insert->bil = $all->data->bil;
+            $insert->alt = $all->data->alt;
+            $insert->ast = $all->data->ast;
+            $insert->alk = $all->data->alk;
+            $insert->creatinine = $all->data->creatinine;
+            $insert->blood_group = $all->data->blood_group;
+            $insert->haemoglobin = $all->data->haemoglobin;
+            $insert->malaria = $all->data->malaria;
+            $insert->micro_filariae = $all->data->micro_filariae;
+            $insert->update();
+        }
+
+        return response()->json(['message' => 'Lab Result Updated'], 200);
+    }
+
     public function report_issue(request $request)
     {
         $all = json_decode($request->getContent());
@@ -380,7 +519,7 @@ class LabModulesController extends Controller
         $new2->pregnancy_test = $all->data->pregnancy_test;
         $new2->finger_type = $all->data->finger_type;
         $new2->token_no = $all->data->token_no;
-        $new2->save();
+
         // if($new2->save())
         // {
 
@@ -412,11 +551,13 @@ class LabModulesController extends Controller
 
                 $image->move(storage_path('app/public/candidate_passport'), $imageName);
             }
-            elseif($all->passport_image != NULL)
+            elseif(is_string($all->passport_image) && $all->passport_image != NULL)
             {
                 Storage::putFileAs('public/candidate_passport', $all->passport_image, strtotime($created).'.jpg');
                 File::delete($all->passport_image);
             }
+
+            $new2->save();
 
             QueueManager::where('token_no',$all->data->token_no)
                         ->where('center_id',$all->centre_id)
@@ -907,8 +1048,8 @@ class LabModulesController extends Controller
             $pdf->Ln(20);
             $pdf->SetFont('Arial','U',14);
             $pdf->Cell(0,6,$centre->address,0,1,'C');
-            $pdf->Cell(0,6,'Phone: '.$centre->phone.', Fax: ',0,1,'C');
-            $pdf->Cell(0,6,'Email: ',0,1,'C');
+            $pdf->Cell(0,6,'Phone: '.$centre->phone.', Fax: '.$centre->fax,0,1,'C');
+            $pdf->Cell(0,6,'Email: '.$centre->email,0,1,'C');
             $pdf->Ln(6);
             $pdf->SetFont('Arial','B',14);
             $pdf->SetX(20);
@@ -950,9 +1091,8 @@ class LabModulesController extends Controller
             $pdf->SetX(140);
             $pdf->Cell(1,7,$reg->barcode_no,70,22);
             $pdf->SetX(15);
-            $pdf->Ln(15);
+            $pdf->Ln(10);
             $pdf->Cell(4,10,".............................................................................................................................................................................", 0, 1);
-            $pdf->Ln(8);
             $pdf->SetFont('Arial','',10);
             $pdf->Cell(12,7,$reg->token_no,0,1,'R');
 
@@ -1038,7 +1178,7 @@ class LabModulesController extends Controller
         $new2->cnic = $all->data->cnic;
         $new2->place_of_issue = (isset($all->data->place_of_issue->value)) ? $all->data->place_of_issue->value : NULL;
         $new2->reg_date = $all->data->reg_date;
-        $new2->barcode_no = $all->data->barcode_no;
+        $new2->barcode_no = $all->barcode;
         $new2->serial_no = $all->data->serial_no;
         $new2->relation_type = $all->data->relation_type;
         $new2->relative_name = $all->data->relative_name;
