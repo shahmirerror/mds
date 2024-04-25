@@ -9,6 +9,8 @@ export default function Dashboard(props) {
 
     const [fit, setFit] = useState('Fetching...');
     const [unfit, setUnfit] = useState('Fetching...');
+    const [fit_unfit_freq, setFitUnfitFreq] = useState(7);
+
     const [centre, setCentre] = useState(props.centres[0]);
 
     const [country_cases, setCountryCases] = useState(null);
@@ -17,6 +19,11 @@ export default function Dashboard(props) {
     const [reports_issued, setReportsIssued] = useState('Fetching...');
     const [reports_in_hand, setReportsInHand] = useState('Fetching...');
     const [ll_update, setLLUpdate] = useState('Fetching...');
+
+    const [country_cases_freq, setCountryCasesFreq] = useState(7);
+    const [cancelled_cases_freq, setCancelledCasesFreq] = useState(7);
+    const [reports_issued_freq, setReportsIssuedFreq] = useState(7);
+    const [reports_in_hand_freq, setReportsInHandFreq] = useState(7);
 
     const handleCentre = (e) => {
         setCentre(e);
@@ -31,6 +38,12 @@ export default function Dashboard(props) {
         setReportsIssued('Fetching...');
         setReportsInHand('Fetching...');
         setLLUpdate('Fetching...');
+
+        setCountryCasesFreq(7);
+        setCancelledCasesFreq(7);
+        setReportsIssuedFreq(7);
+        setReportsInHandFreq(7);
+        setFitUnfitFreq(7);
 
         try {
             const response = fetch(route("super.centre.stats", centreID), {
@@ -79,10 +92,106 @@ export default function Dashboard(props) {
     }
 
     useEffect(() => {
-
-    handleGenerate(centre.value);
-
+        handleGenerate(centre.value);
     }, [])
+
+    const handleGenerateSep = (e,type) => {
+        // e.preventDefault();
+
+        if(type == 'cancelled_cases')
+        {
+            setCancelledCasesFreq(e.target.value)
+            setCancelledCases('Fetching...');
+        }
+        else if(type == 'country_cases')
+        {
+            setCountryCasesFreq(e.target.value)
+            setCountryCases(null);
+        }
+        else if(type == 'reports_in_hand')
+        {
+            setReportsInHandFreq(e.target.value)
+            setReportsInHand('Fetching...');
+        }
+        else if(type == 'reports_issued')
+        {
+            setReportsIssuedFreq(e.target.value)
+            setReportsIssued('Fetching...');
+        }
+        else if(type == 'fit_unfit')
+        {
+            setFit('Fetching...');
+            setUnfit('Fetching...');
+            setFitUnfitFreq(e.target.value);
+        }
+
+        const requestData = {
+            type: type,
+            rate: e.target.value
+        };
+
+        const requestJson = JSON.stringify(requestData);
+
+        try {
+            const response = fetch(route("super.centre.stats_sep", centre.value), {
+                method: "POST",
+                body: requestJson
+            })
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        // $('#preloader').hide();
+                        if(type == 'cancelled_cases')
+                        {
+                            setCancelledCases(result.result);
+                        }
+                        else if(type == 'country_cases')
+                        {
+                            setCountryCases(result.result);
+                        }
+                        else if(type == 'reports_in_hand')
+                        {
+                            setReportsInHand(result.result);
+                        }
+                        else if(type == 'reports_in_hand')
+                        {
+                            setReportsIssued(result.result);
+                        }
+                        else if(type == 'fit_unfit')
+                        {
+                            setFit(result.result1);
+                            setUnfit(result.result2);
+                        }
+
+                    },
+                    (error) => {
+
+                        toast.error('Something went wrong! Please try again :(', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                    }
+                );
+        } catch (ex) {
+
+            toast.error('Something went wrong! Please try again :(', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
+        }
+    }
 
 
     return (
@@ -137,13 +246,16 @@ export default function Dashboard(props) {
                         <div className="card card-sm">
                         <div className="card-body">
                             <div className="row align-items-center">
-                            <div className="col-auto">
-                                <span className="bg-danger text-white avatar">
-                                </span>
-                            </div>
                             <div className="col">
-                                <div className="font-weight-medium">
-                                Cancelled Cases <span className="badge bg-info text-white" style={{fontSize: '10px'}}>Today</span>
+                                <div className="font-weight-medium" style={{display: 'flex',justifyContent: 'space-between'}}>
+                                    <span>Cancelled Cases</span>
+                                    <div class="dropdown" style={{fontSize: '13px'}}>
+                                        <select class="dropdown-toggle text-secondary" aria-haspopup="true" aria-expanded="false" value={cancelled_cases_freq} onChange={(e) => handleGenerateSep(e, 'cancelled_cases')}>
+                                            <option class="dropdown-item" value={7}>Last 7 days</option>
+                                            <option class="dropdown-item" value={30}>Last 30 days</option>
+                                            <option class="dropdown-item" value={90}>Last 3 months</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div className="text-secondary">
                                 {cancelled_cases}
@@ -157,13 +269,16 @@ export default function Dashboard(props) {
                         <div className="card card-sm">
                         <div className="card-body">
                             <div className="row align-items-center">
-                            <div className="col-auto">
-                                <span className="bg-twitter text-white avatar">
-                                </span>
-                            </div>
                             <div className="col">
-                                <div className="font-weight-medium">
-                                Reports Issued <span className="badge bg-info text-white" style={{fontSize: '10px'}}>Current Month</span>
+                                <div className="font-weight-medium" style={{display: 'flex',justifyContent: 'space-between'}}>
+                                    <span>Reports Issued</span>
+                                    <div class="dropdown" style={{fontSize: '13px'}}>
+                                        <select class="dropdown-toggle text-secondary" aria-haspopup="true" aria-expanded="false" value={reports_issued_freq} onChange={(e) => handleGenerateSep(e, 'reports_issued')}>
+                                            <option class="dropdown-item" value={7}>Last 7 days</option>
+                                            <option class="dropdown-item" value={30}>Last 30 days</option>
+                                            <option class="dropdown-item" value={90}>Last 3 months</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div className="text-secondary">
                                 {reports_issued}
@@ -177,13 +292,16 @@ export default function Dashboard(props) {
                         <div className="card card-sm">
                         <div className="card-body">
                             <div className="row align-items-center">
-                            <div className="col-auto">
-                                <span className="bg-success text-white avatar">
-                                </span>
-                            </div>
                             <div className="col">
-                                <div className="font-weight-medium">
-                                Reports In-Hand <span className="badge bg-info text-white" style={{fontSize: '10px'}}>Current Month</span>
+                                <div className="font-weight-medium" style={{display: 'flex',justifyContent: 'space-between'}}>
+                                    <span>Reports In-Hand</span>
+                                    <div class="dropdown" style={{fontSize: '13px'}}>
+                                        <select class="dropdown-toggle text-secondary" aria-haspopup="true" aria-expanded="false" value={reports_in_hand_freq} onChange={(e) => handleGenerateSep(e, 'reports_in_hand')}>
+                                            <option class="dropdown-item" value={7}>Last 7 days</option>
+                                            <option class="dropdown-item" value={30}>Last 30 days</option>
+                                            <option class="dropdown-item" value={90}>Last 3 months</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div className="text-secondary">
                                 {reports_in_hand}
@@ -197,11 +315,6 @@ export default function Dashboard(props) {
                         <div className="card card-sm">
                         <div className="card-body">
                             <div className="row align-items-center">
-                            <div className="col-auto">
-                                <span className="bg-black text-white avatar">
-
-                                </span>
-                            </div>
                             <div className="col">
                                 <div className="font-weight-medium">
                                 Last Lab Result Updated At
@@ -222,7 +335,16 @@ export default function Dashboard(props) {
                     <div className="col-12">
                         <div className="card">
                         <div className="card-body">
-                            <p className="mb-3">Out of <strong>{fit == 'Fetching...'? 'Fetching...' : fit+unfit}</strong> cases this month</p>
+                            <div style={{display: 'flex'}}>
+                                <p className="mb-3" style={{marginRight: '5px'}}>Out of <strong>{fit == 'Fetching...'? 'Fetching...' : fit+unfit}</strong> cases </p>
+                                <div class="dropdown" style={{fontSize: '13px'}}>
+                                    <select class="dropdown-toggle text-secondary" aria-haspopup="true" aria-expanded="false" value={fit_unfit_freq} onChange={(e) => handleGenerateSep(e, 'fit_unfit')}>
+                                        <option class="dropdown-item" value={7}>Last 7 days</option>
+                                        <option class="dropdown-item" value={30}>Last 30 days</option>
+                                        <option class="dropdown-item" value={90}>Last 3 months</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div className="progress progress-separated mb-3">
                                 <div className="progress-bar bg-primary" role="progressbar" style={{width: `${fit/(fit+unfit)}%`}} aria-label="FIT"></div>
                                 <div className="progress-bar bg-info" role="progressbar" style={{width: `${unfit/(fit+unfit)}%`}} aria-label="UNFIT"></div>
@@ -248,8 +370,15 @@ export default function Dashboard(props) {
 
                 <div className="col-md-6 col-lg-4">
                     <div className="card">
-                    <div className="card-header">
+                    <div className="card-header" style={{justifyContent: 'space-between'}}>
                         <h3 className="card-title">Current Registered Cases</h3>
+                        <div class="dropdown" style={{fontSize: '13px'}}>
+                            <select class="dropdown-toggle text-secondary" aria-haspopup="true" aria-expanded="false" value={country_cases_freq} onChange={(e) => handleGenerateSep(e, 'country_cases')}>
+                                <option class="dropdown-item" value={7}>Last 7 days</option>
+                                <option class="dropdown-item" value={30}>Last 30 days</option>
+                                <option class="dropdown-item" value={90}>Last 3 months</option>
+                            </select>
+                        </div>
                     </div>
                     <table className="table card-table table-vcenter">
                         {country_cases?.length != undefined ?
@@ -270,13 +399,8 @@ export default function Dashboard(props) {
                         {country_cases?.length > 0 ?
                             country_cases.map((cases, index) => (
                             <tr>
-                                <td>{cases?.country}</td>
+                                <td>{cases?.particulars}</td>
                                 <td>{cases?.cases}</td>
-                                <td className="w-50">
-                                <div className="progress progress-xs">
-                                    <div className="progress-bar bg-primary" style={{width: "71.0%"}}></div>
-                                </div>
-                                </td>
                             </tr>
                             ))
                         :

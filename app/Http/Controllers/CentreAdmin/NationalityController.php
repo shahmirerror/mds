@@ -18,7 +18,7 @@ class NationalityController extends Controller
      */
     public function index()
     {
-        return Inertia::render('CentreAdmin/Nationality', ['nationality' => Nationality::where('centre_id', Auth::user()->centre->id)->where('status', 'Active')->get()], 200);
+        return Inertia::render('CentreAdmin/Nationality', ['nationality' => Nationality::where('centre_id', Auth::user()->centre->centre_id)->where('status', 'Active')->get()], 200);
     }
 
     /**
@@ -36,7 +36,7 @@ class NationalityController extends Controller
     {
         $new = new Nationality;
         $new->name = $request->name;
-        $new->centre_id = Auth::user()->centre->id;
+        $new->centre_id = Auth::user()->centre->centre_id;
 
         $new->save();
 
@@ -66,7 +66,7 @@ class NationalityController extends Controller
     {
         $new = Nationality::find($id);
         $new->name = $request->name;
-        $new->centre_id = Auth::user()->centre->id;
+        $new->centre_id = Auth::user()->centre->centre_id;
 
         $new->update();
 

@@ -30,17 +30,13 @@ export default function PlaceOfIssue(props) {
     const handleUpdate = (e) => {
         e.preventDefault();
 
-        put(route('place-of-issue-setup.update', data.id));
+        put(route('place-of-issue-setup.update', editId));
     }
 
     const handleEdit = (user) => {
 
-        setData('id',user?.id);
+        setId(user?.id);
         setData('name', user?.name);
-        setData('username',user?.username);
-        setData('email', user?.email);
-
-        console.log(user)
 
         // const modal = document.getElementById('edit-user');
         // modal.classList.toggle('show');
@@ -212,7 +208,7 @@ export default function PlaceOfIssue(props) {
                         <a href="#" className="btn btn-link link-secondary" data-bs-dismiss="modal">
                             Cancel
                         </a>
-                        <button className="btn btn-primary ms-auto" data-bs-dismiss="modal" type="button" onClick={() => handleDelete(data.id)}>
+                        <button className="btn btn-primary ms-auto" data-bs-dismiss="modal" type="button" onClick={() => handleDelete(editId)}>
 
                             {/* <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg> */}
                             Delete Place of Issue

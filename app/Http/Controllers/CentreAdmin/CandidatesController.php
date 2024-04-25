@@ -20,9 +20,9 @@ class CandidatesController extends Controller
      */
     public function index()
     {
-        $candidates = Registrations::leftjoin('candidates','candidates.id','registrations.candidate_id')
-                                      ->where('registrations.center_id', Auth::user()->centre->id)
-                                      ->limit(100)->orderBy('registrations.created_at','DESC')->get();
+        $candidates = Registrations::join('candidates','candidates.id','registrations.candidate_id')
+                                      ->where('registrations.center_id', Auth::user()->centre->centre_id)
+                                      ->limit(1000)->orderBy('registrations.created_at','DESC')->get();
         // print_r($candidates[0]);
         return Inertia::render('CentreAdmin/Candidates/Index', ['candidates' => $candidates]);
     }
@@ -60,7 +60,7 @@ class CandidatesController extends Controller
                                         ->leftjoin('xray_result','xray_result.reg_id','=','registrations.reg_id')
                                         ->leftjoin('lab_result','lab_result.reg_id','=','registrations.reg_id')
                                         ->leftjoin('medical','medical.reg_id','=','registrations.reg_id')
-                                        ->where('center_id', Auth::user()->centre->id)
+                                        ->where('center_id', Auth::user()->centre->centre_id)
                                         ->where('candidate_id',$id)
                                         ->get();
         // print_r($registrations);

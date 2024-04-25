@@ -14,6 +14,7 @@ export default function Reports({ auth }) {
     const [resultData, setResultData] = useState([]);
     const [resultKeys, setResultKeys] = useState([]);
     const [resultDataFiltered, setResultDataFiltered] = useState([]);
+    const [case_status, setCaseStatus] = useState([]);
     const [query, setQuery] = useState([]);
 
     const months = [
@@ -35,25 +36,20 @@ export default function Reports({ auth }) {
     const [reset, setReset] = useState(true);
 
     const [datafreq, setDataFreq] = useState(null);
+    const [portion, setPortion] = useState('A-B');
+    const [inclusion, setInclusion] = useState('Yes');
+    const [code_type, setCodeType] = useState('serial');
 
     const todayDate = new Date();
-    let lastDate;
-    if(todayDate.getMonth()+1 >= 10)
-    {
-        lastDate = (todayDate.getFullYear()-1)+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate();
-    }
-    else
-    {
-        lastDate = (todayDate.getFullYear()-1)+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate();
-    }
+    let lastDate = todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? (todayDate.getFullYear()-1)+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? (todayDate.getFullYear()-1)+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? (todayDate.getFullYear()-1)+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : (todayDate.getFullYear()-1)+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate();
     const lMDate = new Date(lastDate);
 
-    const [dailydate, setDailyDate] = useState(todayDate.getMonth()+1 >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate());
+    const [dailydate, setDailyDate] = useState(todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate());
     const [yearlydate, setYearlyDate] = useState(todayDate.getFullYear());
-    const [monthlydate, setMonthlyDate] = useState(todayDate.getMonth()+1);
+    const [monthlydate, setMonthlyDate] = useState({value:(todayDate.getMonth()+1), label: todayDate.toLocaleString('default', { month: 'long' })});
 
-    const [toRange, setToRange] = useState(todayDate.getMonth()+1 >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate());
-    const [fromRange, setFromRange] = useState(lMDate.getMonth()+1 >= 10 ? lMDate.getFullYear()+"-"+(lMDate.getMonth()+1)+"-"+lMDate.getDate() : lMDate.getFullYear()+"-0"+(lMDate.getMonth()+1)+"-"+lMDate.getDate());
+    const [toRange, setToRange] = useState(todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate());
+    const [fromRange, setFromRange] = useState(lMDate.getMonth()+1 >= 10 && lMDate.getDate() >= 10 ? lMDate.getFullYear()+"-"+(lMDate.getMonth()+1)+"-"+lMDate.getDate() : lMDate.getMonth()+1 >= 10 && lMDate.getDate() < 10 ? lMDate.getFullYear()+"-"+(lMDate.getMonth()+1)+"-0"+lMDate.getDate() : lMDate.getMonth()+1 < 10 && lMDate.getDate() >= 10 ? lMDate.getFullYear()+"-0"+(lMDate.getMonth()+1)+"-"+lMDate.getDate() : lMDate.getFullYear()+"-0"+(lMDate.getMonth()+1)+"-0"+lMDate.getDate());
 
     const [report_type, setReportType] = useState(null);
     const [centreID, setCentre] = useState(0);
@@ -132,12 +128,12 @@ export default function Reports({ auth }) {
         setGenerated(null);
         setDataFreq(null);
 
-        setDailyDate(todayDate.getMonth()+1 >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate());
+        setDailyDate(todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate());
         setYearlyDate(todayDate.getFullYear());
-        setMonthlyDate(todayDate.getMonth()+1);
+        setMonthlyDate({value:(todayDate.getMonth()+1), label: todayDate.toLocaleString('default', { month: 'long' })});
 
-        setToRange(todayDate.getMonth()+1 >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate());
-        setFromRange(lMDate.getMonth()+1 >= 10 ? lMDate.getFullYear()+"-"+(lMDate.getMonth()+1)+"-"+lMDate.getDate() : lMDate.getFullYear()+"-0"+(lMDate.getMonth()+1)+"-"+lMDate.getDate());
+        setToRange(todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate());
+        setFromRange(lMDate.getMonth()+1 >= 10 && lMDate.getDate() >= 10 ? lMDate.getFullYear()+"-"+(lMDate.getMonth()+1)+"-"+lMDate.getDate() : lMDate.getMonth()+1 >= 10 && lMDate.getDate() < 10 ? lMDate.getFullYear()+"-"+(lMDate.getMonth()+1)+"-0"+lMDate.getDate() : lMDate.getMonth()+1 < 10 && lMDate.getDate() >= 10 ? lMDate.getFullYear()+"-0"+(lMDate.getMonth()+1)+"-"+lMDate.getDate() : lMDate.getFullYear()+"-0"+(lMDate.getMonth()+1)+"-0"+lMDate.getDate());
 
         setCentre(0);
         setReportType(0);
@@ -177,7 +173,11 @@ export default function Reports({ auth }) {
             toRange: toRange,
             centreID: centreID,
             countries: country,
-            report_type: report_type
+            report_type: report_type,
+            inclusion: inclusion,
+            portion: portion,
+            code_type: code_type,
+            case_status: case_status
         };
 
         const requestJson = JSON.stringify(requestData);
@@ -195,6 +195,7 @@ export default function Reports({ auth }) {
                     (result) => {
                         // $('#preloader').hide();
                         setResultData(result.data);
+                        setResultDataFiltered(result.data);
                         setResultKeys(result.keys);
                         setGenerated(null);
                         if(result.data?.length > 0)
@@ -290,7 +291,8 @@ export default function Reports({ auth }) {
             countries: country,
             report_type: report_type,
             keys: resultKeys,
-            data: resultData
+            data: resultData,
+            portion: portion
         };
 
         const requestJson = JSON.stringify(requestData);
@@ -307,8 +309,9 @@ export default function Reports({ auth }) {
                 .then(
                     (result) => {
                         // Remove the anchor from the body
-                        document.body.removeChild(downloadLink);
-                            toast.success('Report has been exported!', {
+                            if(result.success)
+                            {
+                                toast.success('Report has been exported!', {
                                 position: "top-right",
                                 autoClose: 5000,
                                 hideProgressBar: false,
@@ -320,15 +323,29 @@ export default function Reports({ auth }) {
                                 });
 
                                 const downloadUrl = result.filename;
-
+                                const downloadName = result.filename.split('/');
                                 // Create a hidden anchor element to trigger the download
                                 const downloadLink = document.createElement('a');
                                 downloadLink.href = downloadUrl;
-                                downloadLink.download = data.filename;
+                                downloadLink.download = downloadName[8];
 
                                 // Append the anchor to the body and simulate a click
                                 document.body.appendChild(downloadLink);
                                 downloadLink.click();
+                            }
+                            else
+                            {
+                                toast.warning('Report file was not created properly! Please try again :(', {
+                                    position: "top-right",
+                                    autoClose: 5000,
+                                    hideProgressBar: false,
+                                    closeOnClick: true,
+                                    pauseOnHover: true,
+                                    draggable: true,
+                                    progress: undefined,
+                                    theme: "light",
+                                    });
+                            }
                     },
                     (error) => {
                         toast.error('Something went wrong! Please try again :(', {
@@ -483,6 +500,22 @@ export default function Reports({ auth }) {
                     :
                     <></>
                     }
+                    {report_type?.value == 'status_report' ?
+                    <div className="col-sm-6 col-lg-3">
+                        <div style={{width: '100%'}}>
+                            <div className="form-label">Status</div>
+                            <Select
+                                options={[{value: 'In Process', label: 'In Process'}, {value: 'FIT', label: 'FIT'},{value: 'UNFIT', label: 'UNFIT'}, {value: 'Pending', label: 'Pending'}]}
+                                value={case_status}
+                                name="case_status"
+                                isMulti
+                                onChange={setCaseStatus}
+                            />
+                        </div>
+                    </div>
+                    :
+                    <></>
+                    }
                 </div>
                 <div className="row row-deck row-cards">
 
@@ -510,6 +543,65 @@ export default function Reports({ auth }) {
                             />
                         </div>
                     </div>
+                    {country?.length > 0 ?
+                    <div className="col-sm-6 col-lg-3">
+                        <div>
+                            <div className="form-label">Include or Exclude Countries?</div>
+                            <div>
+                                <label className="form-check form-check-inline">
+                                    <input className="form-check-input" type="radio" name="inclusion" value="Yes" checked={inclusion == 'Yes' ? true : false} onChange={(e) => setInclusion(e.target.value)}/>
+                                    <span className="form-check-label">Include</span>
+                                </label>
+                                <label className="form-check form-check-inline">
+                                    <input className="form-check-input" type="radio" name="inclusion" value="No" checked={inclusion == 'No' ? true : false} onChange={(e) => setInclusion(e.target.value)}/>
+                                    <span className="form-check-label">Exclude</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    :
+                    <></>
+                    }
+                    <div className="col-sm-6 col-lg-3">
+                        <div>
+                            <div className="form-label">Report Portion</div>
+                            <div>
+                                <label className="form-check form-check-inline">
+                                    <input className="form-check-input" type="radio" name="portion" value="A-B" checked={portion == 'A-B' ? true : false} onChange={(e) => setPortion(e.target.value)}/>
+                                    <span className="form-check-label">A-B</span>
+                                </label>
+                                <label className="form-check form-check-inline">
+                                    <input className="form-check-input" type="radio" name="portion" value="A" checked={portion == 'A' ? true : false} onChange={(e) => setPortion(e.target.value)}/>
+                                    <span className="form-check-label">A</span>
+                                </label>
+                                <label className="form-check form-check-inline">
+                                    <input className="form-check-input" type="radio" name="portion" value="B" checked={portion == 'B' ? true : false} onChange={(e) => setPortion(e.target.value)}/>
+                                    <span className="form-check-label">B</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    {report_type != null ? report_type.value == 'lab_report' ?
+                    <div className="col-sm-6 col-lg-3">
+                        <div>
+                            <div className="form-label">Serial or Code?</div>
+                            <div>
+                                <label className="form-check form-check-inline">
+                                    <input className="form-check-input" type="radio" name="code_type" value="serial" checked={code_type == 'serial' ? true : false} onChange={(e) => setCodeType(e.target.value)}/>
+                                    <span className="form-check-label">Serial No</span>
+                                </label>
+                                <label className="form-check form-check-inline">
+                                    <input className="form-check-input" type="radio" name="code_type" value="code" checked={code_type == 'code' ? true : false} onChange={(e) => setCodeType(e.target.value)}/>
+                                    <span className="form-check-label">Code</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    :
+                    <></>
+                    :
+                    <></>
+                    }
                 </div>
 
                 <div className="mt-3 row row-deck row-cards mb-3" style={{justifyContent: 'flex-end'}}>

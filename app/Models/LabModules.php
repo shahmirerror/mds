@@ -64,14 +64,12 @@ class LabModules extends Model
             $send_out = new stdClass();
             $check = CentreLabModules::where('centre_id',$centre_id)->where('lab_module_id',$a->id)->first();
 
-            $check2 = CentreUserModules::where('centre_id',$centre_id)->where('user_id',$user_id)->where('lab_module_id',$a->id)->first();
-
                 $send_out->id = $a->id;
                 $send_out->title = $a->title;
                 $send_out->description = $a->description;
                 $send_out->route = $a->route;
                 $send_out->rights = LabModules::get_permissions($a->id, $user_id, $user->role_id);
-                $send_out->status = ($check && $check2) ? true : false;
+                $send_out->status = (isset($check->lab_module_id)) ? true : false;
 
                 array_push($send_out_arr, $send_out);
         }

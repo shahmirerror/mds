@@ -140,7 +140,8 @@ export default function ReportIssuance(props) {
             centre_id: props.auth.user.centre.centre_id,
             token_no: candidate.token_no,
             reg_date: candidate.reg_date,
-            reg_id: candidate.reg_id
+            reg_id: candidate.reg_id,
+            created_by: props?.auth?.user?.id
         };
 
         const requestJson = JSON.stringify(requestData);
@@ -258,7 +259,15 @@ export default function ReportIssuance(props) {
                                                     <h3>Candidate Information</h3>
                                                 </div>
                                             </div>
-                                        </div><div className="card-body" id="manual_import">
+                                        </div>
+                                        <div className="card-body">
+                                            <div className="row g-5 mb-3">
+                                                <div className='col-md-6'>
+                                                    <img src={candidate?.candidate_image} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="card-body" id="manual_import">
                                             <div className="row g-5 mb-3">
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
@@ -287,7 +296,7 @@ export default function ReportIssuance(props) {
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Country</label>
-                                                        <input type="date" className="form-control" name="dob" value={candidate?.country} disabled={true} />
+                                                        <input type="text" className="form-control" name="dob" value={candidate?.country} disabled={true} />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
@@ -318,7 +327,11 @@ export default function ReportIssuance(props) {
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Barcode Number</label>
-                                                        <input type="password" className="form-control" name="reg_date" onChange={(e) => setBarcode(e.target.value)} />
+                                                        <input type="password" className="form-control" name="reg_date" onChange={(e) => setBarcode(e.target.value)} maxLength={6} onKeyDown={event => {
+                                                                                                                                                                                                        if (event.key === 'Enter') {
+                                                                                                                                                                                                            handleSearch(event)
+                                                                                                                                                                                                        }
+                                                                                                                                                                                                        }} />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">

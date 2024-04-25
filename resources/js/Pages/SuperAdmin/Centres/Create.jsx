@@ -196,6 +196,8 @@ export default function Create(props) {
                             <select class="form-select" name="role" onChange={(event) => handleInputChange(event, 'role', row.id)}>
                                 <option value="Admin">Admin</option>
                                 <option value="Staff" selected>Staff</option>
+                                <option value="Token">Token</option>
+                                <option value="Feedback">Feedback</option>
                             </select>
                         </div>
                         </div>

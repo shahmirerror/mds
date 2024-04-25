@@ -18,7 +18,7 @@ class PlaceOfIssueController extends Controller
      */
     public function index()
     {
-        return Inertia::render('CentreAdmin/PlaceOfIssue', ['issue' => PlaceOfIssue::where('centre_id', Auth::user()->centre->id)->where('status', 'Active')->get()], 200);
+        return Inertia::render('CentreAdmin/PlaceOfIssue', ['issue' => PlaceOfIssue::where('centre_id', Auth::user()->centre->centre_id)->where('status', 'Active')->get()], 200);
     }
 
     /**
@@ -36,7 +36,7 @@ class PlaceOfIssueController extends Controller
     {
         $new = new PlaceOfIssue;
         $new->name = $request->name;
-        $new->centre_id = Auth::user()->centre->id;
+        $new->centre_id = Auth::user()->centre->centre_id;
 
         $new->save();
 
@@ -66,7 +66,7 @@ class PlaceOfIssueController extends Controller
     {
         $new = PlaceOfIssue::find($id);
         $new->name = $request->name;
-        $new->centre_id = Auth::user()->centre->id;
+        $new->centre_id = Auth::user()->centre->centre_id;
 
         $new->update();
 

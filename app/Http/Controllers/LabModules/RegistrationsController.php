@@ -13,6 +13,7 @@ use App\Models\Agency;
 use App\Models\QueueManager;
 use App\Models\Candidates;
 use App\Models\Registrations;
+use App\Models\LabModulePermissions;
 use App\Models\User;
 
 use Inertia\Inertia;
@@ -26,12 +27,30 @@ class RegistrationsController extends Controller
         if(User::check_permission(1, 'index') == true)
         {
             $username = $_SERVER['REMOTE_ADDR'];
-            $token = QueueManager::where('center_id',Auth::user()->centre->centre_id)
-                            ->where('process_id',1)
-                            ->where('process_date',date('Y-m-d'))
-                            ->where('status','In Process')
-                            ->where('cancelled',NULL)
-                            ->first();
+            // $token = QueueManager::where('center_id',Auth::user()->centre->centre_id)
+            //                 ->where('process_id',1)
+            //                 ->where('process_date',date('Y-m-d'))
+            //                 ->where('status','In Process')
+            //                 ->where('cancelled',NULL)
+            //                 ->first();
+
+            if(Auth::user()->role_id == 2)
+            {
+                $counters = LabModulePermissions::select('permission_value as counter_no')
+                                                ->join('staff_lab_rights','staff_lab_rights.permission_id','lab_module_permissions.id')
+                                                ->join('centre_users','centre_users.user_id','staff_lab_rights.user_id')
+                                                ->where('lab_module_permissions.name','counter_no')
+                                                ->where('centre_users.centre_id',Auth::user()->centre->centre_id)
+                                                ->get();
+            }
+            elseif(Auth::user()->role_id == 3)
+            {
+                $counters = LabModulePermissions::select('permission_value as counter_no')
+                                                ->join('staff_lab_rights','staff_lab_rights.permission_id','lab_module_permissions.id')
+                                                ->where('lab_module_permissions.name','counter_no')
+                                                ->where('staff_lab_rights.user_id',Auth::user()->id)
+                                                ->first();
+            }
 
             $queue = QueueManager::select("token_no","id")
                                             ->where("process_id",1)
@@ -43,7 +62,7 @@ class RegistrationsController extends Controller
                                             ->orderBy('id', 'ASC')
                                             ->count();
 
-            $token_no = ($token) ? $token->token_no : 'None';
+            $token_no = 'None';
 
             $code = BarcodeSetup::where('centre_id',Auth::user()->centre->centre_id)->orderBy('id','DESC')->first();
 
@@ -59,6 +78,8 @@ class RegistrationsController extends Controller
                                         'barcode' => $barcode,
                                         'username' => $username,
                                         'prevBarcode' => ($prev) ? $prev->barcode_no : NULL,
+                                        'counters' => (Auth::user()->role_id == 2 && count($counters) > 0) ? $counters : NULL,
+                                        'counter' => ($counters && Auth::user()->role_id == 3) ? $counters->counter_no : NULL,
                                         'countries' => Country::select('name as value','name as label')->where('centre_id',Auth::user()->centre->centre_id)->get(),
                                         'agencies' => Agency::select('name as value','name as label')->where('centre_id',Auth::user()->centre->centre_id)->get(),
                                         'places' => PlaceOfIssue::select('name as value','name as label')->where('centre_id',Auth::user()->centre->centre_id)->get(),

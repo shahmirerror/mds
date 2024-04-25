@@ -52,6 +52,22 @@ export default function Authenticated({ user, header, children }) {
                     }
                 )
         }
+        else if(user?.role_id == 3)
+        {
+            fetch(route("staff.mods", {'centre_id' : user?.centre?.centre_id, 'user_id':user?.id}))
+                .then(res => res.json())
+
+                .then(
+                    (result) => {
+                    setModules(result.modules);
+                    setLabs(result.lab);
+
+                    },
+                    (error) => {
+                        console.log(error)
+                    }
+                )
+        }
     }
 
     const getImage = async (imageName) => {
@@ -85,7 +101,7 @@ export default function Authenticated({ user, header, children }) {
             <div className="sticky-top">
             <Header2 modules={modules} labs={labs}/>
             </div> */}
-            <VerticalNav logo={logoImgMain} modules={modules} labs={labs}/>
+            <VerticalNav role_id={user.role_id} logo={logoImgMain} modules={modules} labs={labs}/>
             <NavBar user={user} logo={logoImgSecondary} />
             <div className="page-wrapper">
 

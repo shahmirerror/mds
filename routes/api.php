@@ -19,7 +19,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 // ->middleware('auth')
 Route::get('fetch-prev-regs', [App\Http\Controllers\API\ImportController::class, 'fetch_regs'])->name('import.regs');
-
+Route::get('fix-prev-regs', [App\Http\Controllers\API\ImportController::class, 'fix_regs'])->name('import.fix_regs');
+Route::get('fix-xray-verif', [App\Http\Controllers\API\ImportController::class, 'fix_xray_verif'])->name('import.fix_xray_verif');
 Route::get('fetch-prev-meds', [App\Http\Controllers\API\ImportController::class, 'fetch_medicals'])->name('import.meds');
 Route::get('fetch-prev-xrays', [App\Http\Controllers\API\ImportController::class, 'fetch_xrays'])->name('import.xrays');
 Route::get('fetch-prev-labs', [App\Http\Controllers\API\ImportController::class, 'fetch_labs'])->name('import.labs');
@@ -31,6 +32,9 @@ Route::get('fetch-prev-profession', [App\Http\Controllers\API\ImportController::
 
 Route::post('assign-new-token', [App\Http\Controllers\API\TokenManagementController::class, 'assign_token'])->name('token.assign');
 Route::post('create-new-token', [App\Http\Controllers\API\TokenManagementController::class, 'new_token'])->name('token.new');
+Route::post('now-serving', [App\Http\Controllers\API\TokenManagementController::class, 'now_serving'])->name('token.now_serving');
+
+Route::post('create-new-feedback', [App\Http\Controllers\API\FeedbackController::class, 'new_feedback'])->name('feedback.new');
 
 Route::post('fetch-passport', [App\Http\Controllers\API\PPScannerController::class, 'fetch_passport'])->name('ppscan.new');
 
@@ -38,6 +42,7 @@ Route::post('fetch-passport', [App\Http\Controllers\API\PPScannerController::cla
 
             //DashboardController
             Route::get('super-admin/fetch-centre-stats/{id}', [App\Http\Controllers\API\SuperAdmin\DashboardController::class, 'stats'])->name('super.centre.stats');
+            Route::post('super-admin/fetch-centre-stats/{id}/seperate', [App\Http\Controllers\API\SuperAdmin\DashboardController::class, 'stats_separate'])->name('super.centre.stats_sep');
 
             //ModulesController
             Route::get('fetch-super-mods', [App\Http\Controllers\API\ModulesController::class, 'fetch_super'])->name('super.mods');
@@ -71,6 +76,7 @@ Route::post('fetch-passport', [App\Http\Controllers\API\PPScannerController::cla
 
             //DashboardController
             Route::get('admin/fetch-centre-stats/{id}', [App\Http\Controllers\API\CentreAdmin\DashboardController::class, 'stats'])->name('admin.centre.stats');
+            Route::post('admin/fetch-centre-stats/{id}/seperate', [App\Http\Controllers\API\CentreAdmin\DashboardController::class, 'stats_separate'])->name('admin.centre.stats_sep');
 
             //CandidatesController
             Route::get('admin/candidates/fetch-registration/{id}', [App\Http\Controllers\API\CentreAdmin\CandidatesController::class, 'fetch_reg'])->name('admin.candidate.fetch_reg');
@@ -105,6 +111,7 @@ Route::post('fetch-passport', [App\Http\Controllers\API\PPScannerController::cla
 
 //Lab Modules API Routes
 
+Route::post('lab-modules/prints/log-attempts', [App\Http\Controllers\API\LabModulesController::class, 'log_print_attempts'])->name('prints.log_attempts');
             //XRAY Result
             Route::post('lab-modules/xray/fetch-result', [App\Http\Controllers\API\LabModulesController::class, 'fetch_xray_result'])->name('xray.fetch_result');
             //Registration Desk
@@ -119,6 +126,10 @@ Route::post('fetch-passport', [App\Http\Controllers\API\PPScannerController::cla
             //Report
             Route::post('lab-modules/fetch-registration-print-normal', [App\Http\Controllers\API\LabModulesController::class, 'fetch_registration_print_normal'])->name('lab.fetch_registration_print_normal');
             Route::post('lab-modules/fetch-registration-print-passport', [App\Http\Controllers\API\LabModulesController::class, 'fetch_registration_print_passport'])->name('lab.fetch_registration_print_passport');
+            Route::post('lab-modules/update-registration-portion', [App\Http\Controllers\API\LabModulesController::class, 'update_registration_portion'])->name('lab.update_registration_portion');
+            Route::post('lab-modules/update-registration-status', [App\Http\Controllers\API\LabModulesController::class, 'update_registration_status'])->name('lab.update_registration_status');
+            Route::post('lab-modules/export-final-report', [App\Http\Controllers\API\LabModulesController::class, 'export_final_report'])->name('lab.export_final_report');
+            Route::post('lab-modules/export-embassy-report', [App\Http\Controllers\API\LabModulesController::class, 'export_embassy_report'])->name('lab.export_embassy_report');
             //Barcode
             Route::post('lab-modules/barcode/fetch', [App\Http\Controllers\API\LabModulesController::class, 'fetch_barcode'])->name('barcode.new');
             //Biometric
@@ -139,8 +150,20 @@ Route::post('fetch-passport', [App\Http\Controllers\API\PPScannerController::cla
             Route::post('lab-modules/update-medical-result', [App\Http\Controllers\API\LabModulesController::class, 'update_medical_result'])->name('lab.update_medical_result');
             //Report Issue
             Route::post('lab-modules/report-issue', [App\Http\Controllers\API\LabModulesController::class, 'report_issue'])->name('lab.report_issue');
+            //Print Sticker
+            Route::post('lab-modules/print-sticker', [App\Http\Controllers\API\LabModulesController::class, 'print_sticker'])->name('lab.print_sticker');
+            //ENO
+            Route::post('lab-modules/make-eno', [App\Http\Controllers\API\LabModulesController::class, 'make_eno'])->name('lab.submit_eno');
 
 //Centre Staff API Routes
 
+            //CandidatesController
+            Route::get('staff/candidates/fetch-registration/{id}', [App\Http\Controllers\API\CentreStaff\CandidatesController::class, 'fetch_reg'])->name('staff.candidate.fetch_reg');
+            Route::get('staff/candidates/fetch-medical/{id}', [App\Http\Controllers\API\CentreStaff\CandidatesController::class, 'fetch_medical'])->name('staff.candidate.fetch_medical');
+            Route::get('staff/candidates/fetch-lab/{id}', [App\Http\Controllers\API\CentreStaff\CandidatesController::class, 'fetch_lab'])->name('staff.candidate.fetch_lab');
+            Route::get('staff/candidates/fetch-xray/{id}', [App\Http\Controllers\API\CentreStaff\CandidatesController::class, 'fetch_xray'])->name('staff.candidate.fetch_xray');
+
             //ModulesController
-            Route::get('fetch-staff-mods/{centre_id}', [App\Http\Controllers\API\ModulesController::class, 'fetch_staff'])->name('staff.mods');
+            Route::get('fetch-staff-mods/{centre_id}/{user_id}', [App\Http\Controllers\API\ModulesController::class, 'fetch_staff'])->name('staff.mods');
+
+            Route::get('lab/status-restore', [App\Http\Controllers\API\LabModulesController::class, 'status_restore'])->name('lab.status_restore');

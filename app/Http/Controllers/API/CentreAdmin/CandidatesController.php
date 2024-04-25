@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Registrations;
+use App\Models\Candidates;
 
 use App\Models\Medical;
 use App\Models\XrayResult;
@@ -13,12 +14,21 @@ use App\Models\XrayStickers;
 
 use App\Models\LabResult;
 use App\Models\LabSticker;
+use Illuminate\Support\Facades\File;
 
 class CandidatesController extends Controller
 {
     public function fetch_reg($id)
     {
-        return response()->json(['reg' => Registrations::find($id)], 200);
+        $reg = Registrations::find($id);
+        $cand = Candidates::find($reg->candidate_id);
+
+        if($reg)
+        {
+            $reg->candidate_picture = Registrations::get_passport_image($cand, $reg);
+            $reg->candidate_passport = Registrations::get_candidate_image($cand, $reg);
+        }
+        return response()->json(['reg' => $reg], 200);
     }
 
     public function fetch_medical($id)

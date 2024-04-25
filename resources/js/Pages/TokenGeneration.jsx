@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Checkbox from '@/Components/Checkbox';
 import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
@@ -9,18 +9,20 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { IconCrosshair, IconClipboardText  } from '@tabler/icons-react';
 import { toast, ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
+import html2canvas from "html2canvas";
 
-export default function TokenGeneration({ centres }) {
+export default function TokenGeneration(props) {
 
-    const [centre, setCentre] = useState(null);
-
+    const [centre, setCentre] = useState(props?.auth?.user?.centre?.details || null);
+    const wrapper_ref = useRef();
     const [newToken, setToken] = useState(null);
 
     const fetchToken = (e, token_type) => {
 
         const requestData = {
             centre_id: centre.id,
-            token_type: token_type
+            token_type: token_type,
+            printerIP: props.printerIP
         };
 
         const requestJson = JSON.stringify(requestData);
@@ -34,22 +36,30 @@ export default function TokenGeneration({ centres }) {
                 .then(
                     (result) => {
                         // $('#preloader').hide();
-                        setToken('M'+result.token_no)
+                        // setToken(result.new_token)
 
-                            toast.success('New Token has been generated!', {
-                                position: "top-right",
-                                autoClose: 5000,
-                                hideProgressBar: false,
-                                closeOnClick: true,
-                                pauseOnHover: true,
-                                draggable: true,
-                                progress: undefined,
-                                theme: "light",
-                                });
+                        toast.success('New Token has been generated!', {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                            });
+                        // handlePrint(result.url);
+
+                        const a = document.createElement('a');
+                        a.href = result.url;
+                        a.download = 'token'; // You can set the desired filename here
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
                     },
                     (error) => {
 
-                        toast.error('Something went wrong! Please try again :(', {
+                        toast.success('New Token has been generated!', {
                             position: "top-right",
                             autoClose: 5000,
                             hideProgressBar: false,
@@ -76,8 +86,43 @@ export default function TokenGeneration({ centres }) {
         }
     }
 
-    useEffect(() => {
-    }, []);
+    const handlePrint = async (url) => {
+        // Fetch the text file content
+        fetch(url)
+            .then(response => response.text())
+            .then(text => {
+                // Create a new window with the text content
+                const newWin = window.open('', '_blank');
+
+                // Write the text content to the new window
+                newWin.document.write(`
+                    <html>
+                        <head>
+                            <style>
+                                @media print {
+                                    /* Adjust print-specific styles here */
+                                    body {
+                                        font-family: Arial, sans-serif;
+                                        font-size: 10px;
+                                    }
+                                    #bottomText {
+                                        position: absolute;
+                                        bottom: 0;
+                                    }
+                                }
+                            </style>
+                        </head>
+                        <body onload="window.print()">
+                            <div id="bottomText">${text}</div>
+                        </body>
+                    </html>
+                `);
+
+                newWin.document.close();
+            })
+            .catch(error => console.error('Error fetching text file:', error));
+    };
+
 
     return (
         <GuestLayout>
@@ -114,7 +159,7 @@ export default function TokenGeneration({ centres }) {
                             </div>
                         </div>
                         <div className="row align-items-center g-4 mt-7" id={'choose_centres'}>
-                            {centres.map((centre, index) => (
+                            {props.centres.map((centre, index) => (
                                 <div className="col-md-3" onClick={() => setCentre(centre)}>
                                     <div className="card card-sm">
                                         <div className="card-body" style={{justifyContent: 'center', display: 'flex'}}>
@@ -163,6 +208,15 @@ export default function TokenGeneration({ centres }) {
                                 </button>
                             </div>
                         </div>
+                        {newToken && (
+                        <div className="row align-items-center g-4 mt-7" id={'choose_token'} style={{justifyContent: 'center'}}>
+                            <div className="col-md-4 text-center" ref={wrapper_ref} style={{background: 'white'}}>
+                                <span style={{fontSize:'40px', fontWeight: 900}}>Last Token Printed</span>
+                                <br></br>
+                                <span style={{fontSize:'30px'}}>{newToken}</span>
+                            </div>
+                        </div>
+                        )}
                     </>
                     :
                         <></>

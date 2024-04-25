@@ -10,6 +10,8 @@ use App\Models\QueueManager;
 
 use Inertia\Inertia;
 
+use App\Models\User;
+
 use Auth;
 
 class XRAYVerificationController extends Controller

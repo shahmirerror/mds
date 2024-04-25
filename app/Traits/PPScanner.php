@@ -17,90 +17,66 @@ use App\Models\Centres;
 
 trait PPScanner
 {
-    public function handle($file, $centre_id, $counter_no)
+    public function handle($file, $file2, $centre_id, $counter_no)
     {
         try {
-        $jpgFiles = File::glob($file);
 
-        foreach ($jpgFiles as $jpgFile) {
-            $image = new Imagick();
-            $image->readImage($jpgFile);
+        $txtFiles = File::glob($file2);
 
-            Storage::disk('public')->put('temp_passports/'.basename($jpgFile), $image->getImageBlob());
+        foreach ($txtFiles as $txtFile) {
 
-            $mrz = (new TesseractOCR(storage_path('app/public/temp_passports/'.basename($jpgFile))));
-            $text = $mrz->run();
+            copy($file2, storage_path('app/public/temp_passports').'/'.basename($txtFile));
+
+            $fileHandle = fopen(storage_path('app/public/temp_passports').'/'.basename($txtFile), 'rb');
+            $mrz = str_replace("\0", "", utf8_encode(fread($fileHandle, filesize(storage_path('app/public/temp_passports').'/'.basename($txtFile)))));
+
             // $text = preg_replace("/\n+/", "\n", $text);
-            $arr = explode("\n",$text);
-            Log::info($arr);
-            for($l = 0; $l < count($arr); $l++)
-            {
-                if(strpos($arr[$l], "P<") !== false)
-                {
-                    $first = $arr[$l];
-                    if($arr[$l+1] != '')
-                    {
-                        $last = $arr[$l+1];
-                    }
-                    else
-                    {
-                        $last = $arr[$l+2];
-                    }
-                }
-            }
-            $first = str_replace(" ","<",$first);
-            $last = str_replace(" ","",$last);
-            $last_less_than_position = strrpos($first, "<");
-            // for($i = 1; $i <= $last_less_than_position; $i++)
-            // {
-            //     if (ctype_alpha($first[strlen($first)-$i]) &&
-            //         ($first[strlen($first)-$i] !== "<" &&
-            //         ($first[strlen($first)-$i-1] == "<" &&
-            //         $first[strlen($first)-$i-2] == "<" && $first[strlen($first)-$i-3] == "<")))
-            //     {
-            //         $first[strlen($first)-$i] = "<";
-            //     }
-            // }
-            // $last_less_than_position = strrpos($first, "<<<");
-            // for($i = 1; $i <= $last_less_than_position; $i++)
-            // {
-            //         $first[strlen($first)-$i] = "<";
-            // }
-            if(strlen($first) > 44)
-            {
-                $first = substr($first, 0, 44);
-            }
-            if(strlen($last) == 44)
-            {
-                $last[0] = (is_numeric($last[0])) ? 'G' : $last[0];
-                $last[0] = ($last[0] == ':') ? '' : $last[0];
-            }
-            elseif(strlen($last) > 44)
-            {
-                unset($last[0]);
-            }
-                Log::info($first."\n".$last);
+            $lines = explode("\n",$mrz);
+            Log::info($lines);
+            Log::info($mrz);
+            $result = [];
 
-                $data = MrzParser::parse($first."\n".$last);
+            // Iterate over each line
+            foreach ($lines as $line) {
+                // Split the line into key and value using the first occurrence of "/"
+                $parts = explode('/', $line, 2);
+                // Trim whitespace from key and value
+                $key = trim($parts[0]);
+                $value = isset($parts[1]) ? trim($parts[1]) : '';
+                // Store key-value pair in the result array
+                $result[$key] = $value;
+            }
+
+            Log::info($result);
 
 
             $centre = Centres::find($centre_id);
 
-            if ($data) {
+            if ($result) {
+
+                $jpgFiles = File::glob($file.$result['DocumentNo.'].'.JPG');
+                Log::info($file.$result['DocumentNo.']);
+
+                foreach ($jpgFiles as $jpgFile) {
+                    $image = new Imagick();
+                    $image->readImage($jpgFile);
+
+                    Storage::disk('public')->put('temp_passports/'.basename($jpgFile), $image->getImageBlob());
+                }
 
                 $new = [
                     'center_name' => $centre->name,
                     'center_id' => $centre_id,
                     'counter_no' => $counter_no,
-                    'pp_no' => $data['card_no'],
-                    'first_name' => $data['first_name'],
-                    'last_name' => $data['last_name'],
-                    'nationality' => $data['nationality'],
-                    'dob' => $data['date_of_birth'],
-                    'cnic' => $data['personal_number'],
-                    'gender' => $data['gender'],
-                    'pp_expiry_date' => $data['date_of_expiry'],
-                    'pp_issue_state' => $data['issuer']
+                    'pp_no' => $result['DocumentNo.'],
+                    'first_name' => $result['Givenname'],
+                    'last_name' => $result['Familyname'],
+                    'nationality' => $result['Nationality'],
+                    'dob' => date('Y-m-d',strtotime($result['Dateofbirth'])),
+                    'cnic' => substr($result['MRTDs'],-16,-3),
+                    'gender' => ($result['Sex'] == 'M') ? 'Male' : 'Female',
+                    'pp_expiry_date' => date('Y-m-d',strtotime($result['Dateofexpiry'])),
+                    'pp_issue_state' => $result['Nationality']
                 ];
 
                 PassportInfo::insert($new);

@@ -12,7 +12,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 
 export default function XRAYResult(props) {
-    const [date, setSearchDate] = useState(null);
+    const todayDate = new Date();
+    const [date, setSearchDate] = useState(todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate());
     const [serial_no, setSerialNumber] = useState(null);
 
     const [result, setResult] = useState(null);
@@ -23,7 +24,7 @@ export default function XRAYResult(props) {
         note: '',
         serial_no: '',
         remarks: '',
-        date: '',
+        date: todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate(),
         images: ''
     });
 
@@ -35,7 +36,7 @@ export default function XRAYResult(props) {
         }
         else
         {
-            setData(e.target.name, e.target.value);
+            setData(e.target.name, e.target.name == 'chest' ? e.target.value : e.target.value.toUpperCase());
             // console.log(e.target.name, e.target.value);
         }
 
@@ -102,6 +103,7 @@ export default function XRAYResult(props) {
                                     data.serial_no = result.xray.serial_no;
                                     data.chest = result.xray.chest;
                                     data.notes = result.xray.notes;
+                                    document.getElementsByName('notes')[0].innerHTML = result.xray.notes;
 
                                     toast.success('Candidate XRAY Result Found!', {
                                         position: "top-right",
@@ -155,7 +157,8 @@ export default function XRAYResult(props) {
                 serial_no: data.serial_no,
                 notes: data.notes,
                 chest: data.chest,
-                images: data.images
+                images: data.images,
+                created_by: props?.auth?.user?.id
             };
 
             const requestJson = JSON.stringify(requestData);
@@ -321,22 +324,7 @@ export default function XRAYResult(props) {
     {
         let message = true;
 
-        if(data.images?.length == 0 && form == 'store')
-        {
-            toast.warning('Please add at least one image before submitting the form!', {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                });
-
-            message = false;
-        }
-        else if(data.chest == "")
+        if(data.chest == "")
         {
             toast.warning('Please select chest status before submitting the form!', {
                 position: "top-right",
@@ -359,11 +347,11 @@ export default function XRAYResult(props) {
     {
         setResult(null);
         data.notes = '';
-        data.date = '';
+        data.date = todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate();
         data.chest = '';
         data.images = '';
         data.serial_no = '';
-        setSearchDate('');
+        setSearchDate(todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate());
         setSerialNumber('');
     }
 
@@ -496,13 +484,21 @@ export default function XRAYResult(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Date</label>
-                                                        <input type="date" className="form-control" name="search_date" value={date} onChange={(e) => setSearchDate(e.target.value)} />
+                                                        <input type="date" className="form-control" name="search_date" value={date} onChange={(e) => setSearchDate(e.target.value)} onKeyDown={event => {
+                                                                                                                                                                                                            if (event.key === 'Enter') {
+                                                                                                                                                                                                                handleSearch(event)
+                                                                                                                                                                                                            }
+                                                                                                                                                                                                            }} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Serial Number</label>
-                                                        <input type="text" className="form-control" name="search_serial_number" value={serial_no} onChange={(e) => setSerialNumber(e.target.value)} />
+                                                        <input type="text" className="form-control" name="search_serial_number" value={serial_no} onChange={(e) => setSerialNumber(e.target.value.toUpperCase())} onKeyDown={event => {
+                                                                                                                                                                                                                                        if (event.key === 'Enter') {
+                                                                                                                                                                                                                                            handleSearch(event)
+                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                        }} />
                                                     </div>
                                                 </div>
                                             </div>

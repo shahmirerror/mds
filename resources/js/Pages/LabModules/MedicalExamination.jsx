@@ -7,21 +7,26 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { IconCrosshair, IconClipboardText  } from '@tabler/icons-react';
-import { IconRefresh } from '@tabler/icons-react';
+import { IconLock, IconRefresh } from '@tabler/icons-react';
 import { toast, ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 
 export default function MedicalExamination(props) {
 
     const [barcode, setBarcode] = useState(null);
-    const [date, setRegDate] = useState(null);
+    const [barcode2, setBarcode2] = useState(null);
+    const todayDate = new Date();
+    const [date, setRegDate] = useState(todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate());
     const [serial_no, setSerialNo] = useState(null);
 
     const [candidate, setCandidate] = useState(null);
     const [result, setResult] = useState(null);
     const [exist, setExist] = useState(false);
 
+    const [fingerDamaged, setDamaged] = useState(false);
+
     const [searched, setSearched] = useState(false);
+    const [secugen_lic, setSecugenLic] = useState('');
 
     const [currToken, setToken] = useState('None');
 
@@ -29,50 +34,51 @@ export default function MedicalExamination(props) {
         height: '',
         weight: '',
         bmi: '',
-        bp: '',
-        pulse: '',
-        rr: '',
+        bp: '120/80',
+        pulse: '70',
+        rr: '18',
         biometric_fingerprint: '',
-        visual_aided_right_eye: '',
-        visual_aided_left_eye: '',
-        visual_unaided_right_eye: '',
-        visual_unaided_left_eye: '',
-        distant_aided_right_eye: '',
-        distant_aided_left_eye: '',
-        distant_unaided_right_eye: '',
-        distant_unaided_left_eye: '',
-        near_aided_right_eye: '',
-        near_aided_left_eye: '',
-        near_unaided_right_eye: '',
-        near_unaided_left_eye: '',
+        visual_aided_right_eye: '-',
+        visual_aided_left_eye: '-',
+        visual_unaided_right_eye: '-',
+        visual_unaided_left_eye: '-',
+        distant_aided_right_eye: '-',
+        distant_aided_left_eye: '-',
+        distant_unaided_right_eye: '6',
+        distant_unaided_left_eye: '6',
+        near_aided_right_eye: '-',
+        near_aided_left_eye: '-',
+        near_unaided_right_eye: '20',
+        near_unaided_left_eye: '20',
         color_vision: '',
-        hearing_right_ear: '',
-        hearing_left_ear: '',
-        appearance: '',
-        speech: '',
-        behavior: '',
-        cognition: '',
-        orientation: '',
-        memory: '',
-        concentration: '',
-        mood: '',
-        thoughts: '',
-        other: '',
-        general_appearance: '',
-        cardiovascular: '',
-        respiratory: '',
-        abdomen: '',
-        hernia: '',
-        hydrocele: '',
-        extremities: '',
-        back: '',
-        skin: '',
-        cns: '',
-        deformities: '',
-        remarks: '',
-        ent: '',
+        hearing_right_ear: 'normal',
+        hearing_left_ear: 'normal',
+        appearance: 'NAD',
+        speech: 'NAD',
+        behavior: 'NAD',
+        cognition: 'NAD',
+        orientation: 'NAD',
+        memory: 'NAD',
+        concentration: 'NAD',
+        mood: 'NAD',
+        thoughts: 'NAD',
+        other: 'NAD',
+        general_appearance: 'NAD',
+        cardiovascular: 'NAD',
+        respiratory: 'NAD',
+        abdomen: 'NAD',
+        hernia: 'NAD',
+        hydrocele: 'NAD',
+        extremities: 'NAD',
+        back: 'NAD',
+        skin: 'NAD',
+        cns: 'NAD',
+        deformities: 'NAD',
+        remarks: 'NAD',
+        ent: 'NAD',
         mo_file: '',
-        status: 'In Process',
+        status: 'FIT',
+        created_by: props?.auth?.user?.id
     });
 
     function CallSGIFPGetData(successCall, failCall) {
@@ -83,6 +89,7 @@ export default function MedicalExamination(props) {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                 // fpobject = JSON.parse(xmlhttp.responseText);
                 successCall(JSON.parse(xmlhttp.responseText));
+
             }
             else if (xmlhttp.status == 404) {
                 failCall(xmlhttp.status)
@@ -108,6 +115,7 @@ export default function MedicalExamination(props) {
                 document.getElementById('fingerPrint').src = "data:image/bmp;base64," + result.BMPBase64;
             }
             setData('biometric_fingerprint', result.TemplateBase64);
+
         }
         else {
             // alert("Fingerprint Capture Error Code:  " + result.ErrorCode + ".\nDescription:  " + ErrorCodeToString(result.ErrorCode) + ".");
@@ -141,6 +149,7 @@ export default function MedicalExamination(props) {
         e.preventDefault();
 
         CallSGIFPGetData(FingerSuccessFunc, FingerErrorFunc);
+
     }
 
     const handleSearch = async (e) =>
@@ -152,12 +161,13 @@ export default function MedicalExamination(props) {
             serial_no: serial_no,
             reg_date: date,
             barcode: barcode,
+            barcode2: barcode2,
             process_id: 2
         };
 
         const requestJson = JSON.stringify(requestData);
 
-        if((serial_no == null && date == null && barcode == null) || data.biometric_fingerprint == '')
+        if((serial_no == null && date == null && barcode == null) && (barcode2 == null && data.biometric_fingerprint == '' && fingerDamaged == false))
         {
             toast.warning('Please select date & serial number or input barcode number and scan finger print to proceed!', {
                 position: "top-right",
@@ -200,7 +210,44 @@ export default function MedicalExamination(props) {
                                 }
                                 else
                                 {
-                                    matchScore(result.registration, result.medical);
+                                    if(fingerDamaged || ((barcode2 == '' || barcode2 == null) && data.biometric_fingerprint == ''))
+                                    {
+                                        setCandidate(result.registration);
+                                        setToken('M'+result.registration.token_no);
+                                        setSearched(true);
+                                        if(result.verified)
+                                        {
+                                            setResult(result.medical);
+                                            handleEdit(result.medical);
+                                            toast.warning('Candidate Medical Result Already Exists!', {
+                                                position: "top-right",
+                                                autoClose: 5000,
+                                                hideProgressBar: false,
+                                                closeOnClick: true,
+                                                pauseOnHover: true,
+                                                draggable: true,
+                                                progress: undefined,
+                                                theme: "light",
+                                                });
+                                        }
+                                        else
+                                        {
+                                            toast.success('Candidate Found!', {
+                                                position: "top-right",
+                                                autoClose: 5000,
+                                                hideProgressBar: false,
+                                                closeOnClick: true,
+                                                pauseOnHover: true,
+                                                draggable: true,
+                                                progress: undefined,
+                                                theme: "light",
+                                                });
+                                        }
+                                    }
+                                    else
+                                    {
+                                        matchScore(result.registration, result.medical, result.verified);
+                                    }
                                 }
                         },
                         (error) => {
@@ -232,7 +279,7 @@ export default function MedicalExamination(props) {
         }
     };
 
-    const matchScore = (registration, medical) => {
+    const matchScore = (registration, medical, verified) => {
 
         let db_template = registration?.biometric_fingerprint;
             var uri = "https://localhost:8443/SGIMatchScore";
@@ -247,10 +294,10 @@ export default function MedicalExamination(props) {
                         {
                             setCandidate(registration);
                             setToken('M'+registration.token_no);
-                            if(medical?.length > 0)
+                            if(verified)
                             {
                                 setResult(medical);
-                                handleEdit();
+                                handleEdit(medical);
                                 toast.warning('Candidate Medical Result Already Exists!', {
                                     position: "top-right",
                                     autoClose: 5000,
@@ -367,6 +414,8 @@ export default function MedicalExamination(props) {
                                     progress: undefined,
                                     theme: "light",
                                     });
+
+                                    handleReset();
                             }
                             else
                             {
@@ -380,6 +429,8 @@ export default function MedicalExamination(props) {
                                     progress: undefined,
                                     theme: "light",
                                     });
+
+                                    handleReset();
                             }
                         },
                         (error, result) => {
@@ -439,7 +490,7 @@ export default function MedicalExamination(props) {
                     .then(
                         (result) => {
 
-                            if(result.message == 'XRAY Result has been updated!')
+                            if(result.message == 'Medical Result has been updated!')
                             {
                                 handleReset();
                                 toast.success(result.message, {
@@ -511,68 +562,72 @@ export default function MedicalExamination(props) {
             {
                 data.weight = e.target.value;
             }
-            setData('bmi', (data.weight/((data.height*data.height)*1000)).toFixed(2));
+            setData('bmi', (data.weight/((data.height*data.height))*10000).toFixed(2));
         }
         console.log(e.target.name, e.target.value);
     }
 
     const handleReset = () =>
     {
+        document.getElementById('fingerPrint').src = "./../assets/static/photos/ThumbPrint.png";
         setCandidate(null);
         setResult(null);
         setSearched(false);
         setBarcode('');
-        setRegDate('');
+        setBarcode2('');
+        setRegDate(todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate());
         setSerialNo('');
+        data.biometric_fingerprint = '';
+        setToken('None');
     }
 
-    const handleEdit = () =>
+    const handleEdit = (medical) =>
     {
-        data.height = result?.height;
-        data.weight = result?.weight;
-        data.bmi = result?.bmi;
-        data.bp = result?.bp;
-        data.pulse = result?.pulse;
-        data.rr = result?.rr;
-        data.visual_aided_right_eye = result?.visual_aided_right_eye;
-        data.visual_aided_left_eye = result?.visual_aided_left_eye;
-        data.visual_unaided_right_eye = result?.visual_unaided_right_eye;
-        data.visual_unaided_left_eye = result?.visual_unaided_left_eye;
-        data.distant_aided_right_eye = result?.distant_aided_right_eye;
-        data.distant_aided_left_eye = result?.distant_aided_left_eye;
-        data.distant_unaided_right_eye = result?.distant_unaided_right_eye;
-        data.distant_unaided_left_eye = result?.distant_unaided_left_eye;
-        data.near_aided_right_eye = result?.near_aided_right_eye;
-        data.near_aided_left_eye = result?.near_aided_left_eye;
-        data.near_unaided_right_eye = result?.near_unaided_right_eye;
-        data.near_unaided_left_eye = result?.near_unaided_left_eye;
-        data.color_vision = result?.color_vision;
-        data.hearing_right_ear = result?.hearing_right_ear;
-        data.hearing_left_ear = result?.hearing_left_ear;
-        data.appearance = result?.appearance;
-        data.speech = result?.speech;
-        data.behavior = result?.behavior;
-        data.cognition = result?.cognition;
-        data.orientation = result?.orientation;
-        data.memory = result?.memory;
-        data.concentration = result?.concentration;
-        data.mood = result?.mood;
-        data.thoughts = result?.thoughts;
-        data.other = result?.other;
-        data.general_appearance = result?.general_appearance;
-        data.cardiovascular = result?.cardiovascular;
-        data.respiratory = result?.respiratory;
-        data.abdomen = result?.abdomen;
-        data.hernia = result?.hernia;
-        data.hydrocele = result?.hydrocele;
-        data.extremities = result?.extremities;
-        data.back = result?.back;
-        data.skin = result?.skin;
-        data.cns = result?.cns;
-        data.deformities = result?.deformities;
-        data.remarks = result?.remarks;
-        data.ent = result?.ent;
-        data.status = result?.status;
+        data.height = medical?.height;
+        data.weight = medical?.weight;
+        data.bmi = medical?.bmi;
+        data.bp = medical?.bp;
+        data.pulse = medical?.pulse;
+        data.rr = medical?.rr;
+        data.visual_aided_right_eye = medical?.visual_aided_right_eye;
+        data.visual_aided_left_eye = medical?.visual_aided_left_eye;
+        data.visual_unaided_right_eye = medical?.visual_unaided_right_eye;
+        data.visual_unaided_left_eye = medical?.visual_unaided_left_eye;
+        data.distant_aided_right_eye = medical?.distant_aided_right_eye;
+        data.distant_aided_left_eye = medical?.distant_aided_left_eye;
+        data.distant_unaided_right_eye = medical?.distant_unaided_right_eye;
+        data.distant_unaided_left_eye = medical?.distant_unaided_left_eye;
+        data.near_aided_right_eye = medical?.near_aided_right_eye;
+        data.near_aided_left_eye = medical?.near_aided_left_eye;
+        data.near_unaided_right_eye = medical?.near_unaided_right_eye;
+        data.near_unaided_left_eye = medical?.near_unaided_left_eye;
+        data.color_vision = medical?.color_vision;
+        data.hearing_right_ear = medical?.hearing_right_ear;
+        data.hearing_left_ear = medical?.hearing_left_ear;
+        data.appearance = medical?.appearance.toUpperCase();
+        data.speech = medical?.speech.toUpperCase();
+        data.behavior = medical?.behavior.toUpperCase();
+        data.cognition = medical?.cognition.toUpperCase();
+        data.orientation = medical?.orientation.toUpperCase();
+        data.memory = medical?.memory.toUpperCase();
+        data.concentration = medical?.concentration.toUpperCase();
+        data.mood = medical?.mood.toUpperCase();
+        data.thoughts = medical?.thoughts.toUpperCase();
+        data.other = medical?.other.toUpperCase();
+        data.general_appearance = medical?.general_appearance.toUpperCase();
+        data.cardiovascular = medical?.cardiovascular.toUpperCase();
+        data.respiratory = medical?.respiratory.toUpperCase();
+        data.abdomen = medical?.abdomen.toUpperCase();
+        data.hernia = medical?.hernia.toUpperCase();
+        data.hydrocele = medical?.hydrocele.toUpperCase();
+        data.extremities = medical?.extremities.toUpperCase();
+        data.back = medical?.back.toUpperCase();
+        data.skin = medical?.skin.toUpperCase();
+        data.cns = medical?.cns.toUpperCase();
+        data.deformities = medical?.deformities.toUpperCase();
+        data.remarks = medical?.remarks.toUpperCase();
+        data.ent = medical?.ent.toUpperCase();
+        data.status = medical?.status;
     }
 
     return (
@@ -623,26 +678,58 @@ export default function MedicalExamination(props) {
                             <div className="row row-cards">
                                 <div className="col-12">
                                     <div className="card">
-                                    <div className="card-header">
-                                        <div className="col-md-12 flex align-items-center">
-                                            <div className='col-md-12' style={{float: 'left'}}>
-                                                <h3>Biometric Verification</h3>
+                                        <div className="card-header">
+                                            <div className="col-md-12 flex align-items-center">
+                                                <div className='col-md-4' style={{float: 'left'}}>
+                                                    <h3>Biometric Verification</h3>
+                                                </div>
+                                                <div className="col-4" style={{float: 'right'}}>
+                                                    <label class="form-check form-switch" style={{float: 'right'}}>
+                                                        {props?.auth?.modules?.[2]?.rights?.[1]?.permission_name == 'biometric_search' && props?.auth?.modules?.[2]?.rights?.[1]?.status == true ?
+                                                        <input class="form-check-input" type="checkbox" disabled={candidate != null} checked={fingerDamaged} onChange={(e) => setDamaged(e.target.checked)}/>
+                                                        :
+                                                            <IconLock stroke={1} />
+                                                        }
+                                                        <span class="form-check-label">Finger Damaged</span>
+                                                    </label>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="card-body">
-                                        <div className="row g-3">
-                                            <div className="col-12">
-                                                <div className="row g-3 align-items-center justify-content-center">
-                                                    <img id="fingerPrint" src={"./../assets/static/photos/ThumbPrint.png"} style={{width : 500}}/>
-                                                    <div className="col-md-12 text-center">
-                                                        <button className="btn btn-purple btn-md" onClick={handleFinger} disabled={searched}>Scan Fingerprint</button>
+                                        <div className="card-body">
+                                            <div className="row g-3 mb-3">
+                                                <div className="col-3">
+                                                    <div className="row g-3 align-items-center justify-content-center">
+                                                    {props?.auth?.modules?.[2]?.rights?.[1]?.permission_name == 'biometric_search' && props?.auth?.modules?.[2]?.rights?.[1]?.status == true ?
+                                                        <input type="text" className='form-control' value={barcode2} onChange={(e) => setBarcode2(e.target.value)} onKeyDown={event => {
+                                                                                                                                                                            if (event.key === 'Enter') {
+                                                                                                                                                                                handleSearch(event)
+                                                                                                                                                                            }
+                                                                                                                                                                            }} />
+                                                    :
+                                                        <IconLock stroke={1} />
+                                                    }
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div className="row g-3">
+                                                <div className="col-12">
+                                                    <div className="row g-3 align-items-center justify-content-center">
+                                                        <img id="fingerPrint" src={"./../assets/static/photos/ThumbPrint.png"} style={{width : 500}}/>
+                                                        <div className="col-md-12 text-center">
+                                                            {props?.auth?.modules?.[2]?.rights?.[1]?.permission_name == 'biometric_search' && props?.auth?.modules?.[2]?.rights?.[1]?.status == true ?
+                                                                <button className="btn btn-purple btn-md" disabled={fingerDamaged} onClick={handleFinger}>Scan fingerprint</button>
+                                                            :
+                                                                <button className="btn btn-purple btn-md" disabled={true} onClick={''}>
+                                                                    <IconLock stroke={1} />
+                                                                    Scan fingerprint
+                                                                </button>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
 
+                                            </div>
                                         </div>
-                                    </div>
                                     </div>
                                 </div>
                                 {candidate && (
@@ -698,23 +785,6 @@ export default function MedicalExamination(props) {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <hr></hr>
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Visual Aided (R & L)</label>
-                                                        <input type="text" className="form-control" name="visual_aided_right_eye" value={data.visual_aided_right_eye} onChange={handleChange}/>
-                                                        <input type="text" className="form-control" name="visual_aided_left_eye" value={data.visual_aided_left_eye} onChange={handleChange}/>
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Visual Un-Aided (R & L)</label>
-                                                        <input type="text" className="form-control" name="visual_unaided_right_eye" value={data.visual_unaided_right_eye} onChange={handleChange} />
-                                                        <input type="text" className="form-control" name="visual_unaided_left_eye" value={data.visual_unaided_right_eye} onChange={handleChange} />
-                                                    </div>
-                                                </div>
-                                            </div>
 
                                             <hr></hr>
                                             <div className="row g-5 mb-3">
@@ -729,7 +799,7 @@ export default function MedicalExamination(props) {
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Near Eye Sight - Aided (R & L)</label>
                                                         <input type="text" className="form-control" name="near_aided_right_eye" value={data.near_aided_right_eye} onChange={handleChange}/>
-                                                        <input type="text" className="form-control" name="near_aided_left_eye" value={data.near_aided_right_eye} onChange={handleChange}/>
+                                                        <input type="text" className="form-control" name="near_aided_left_eye" value={data.near_aided_left_eye} onChange={handleChange}/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -739,14 +809,14 @@ export default function MedicalExamination(props) {
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Distant Eye Sight - Unaided (R & L)</label>
                                                         <input type="text" className="form-control" name="distant_unaided_right_eye" value={data.distant_unaided_right_eye} onChange={handleChange}/>
-                                                        <input type="text" className="form-control" name="distant_unaided_left_eye" value={data.distant_unaided_right_eye} onChange={handleChange}/>
+                                                        <input type="text" className="form-control" name="distant_unaided_left_eye" value={data.distant_unaided_left_eye} onChange={handleChange}/>
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Near Eye Sight - Unaided (R & L)</label>
                                                         <input type="text" className="form-control" name="near_unaided_right_eye" value={data.near_unaided_right_eye} onChange={handleChange}/>
-                                                        <input type="text" className="form-control" name="near_unaided_left_eye" value={data.near_unaided_right_eye} onChange={handleChange}/>
+                                                        <input type="text" className="form-control" name="near_unaided_left_eye" value={data.near_unaided_left_eye} onChange={handleChange}/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -791,6 +861,140 @@ export default function MedicalExamination(props) {
                                                 </div>
                                             </div>
 
+                                        </div>
+                                    </div>
+                                </div>
+                                </>
+                                )}
+
+                            </div>
+                        </div>
+                        <div className="col-md-8">
+                            <div className="row row-cards">
+                                <div className="col-12">
+                                    <div className="card">
+                                        <div className="card-header">
+                                            <div className="col-md-12 flex align-items-center">
+                                                <div className='col-md-6' style={{float: 'left'}}>
+                                                    <h3>Registration Information</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="card-body">
+                                            <div className="row g-5 mb-3">
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Barcode</label>
+                                                        {props?.auth?.modules?.[2]?.rights?.[2]?.permission_name == 'barcode_search' && props?.auth?.modules?.[2]?.rights?.[2]?.status == true ?
+                                                        <input type="password" className="form-control" name="barcode" value={barcode} onChange={(e) => setBarcode(e.target.value)}  maxLength={6} onKeyDown={event => {
+                                                                                                                                                                                                                        if (event.key === 'Enter') {
+                                                                                                                                                                                                                            handleSearch(event)
+                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                        }} />
+                                                        :
+                                                            <IconLock stroke={1} />
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Date</label>
+                                                        {props?.auth?.modules?.[2]?.rights?.[3]?.permission_name == 'date_search' && props?.auth?.modules?.[2]?.rights?.[3]?.status == true ?
+                                                        <input type="date" className="form-control" name="reg_date" value={date} onChange={(e) => setRegDate(e.target.value)} onKeyDown={event => {
+                                                                                                                                                                                                    if (event.key === 'Enter') {
+                                                                                                                                                                                                        handleSearch(event)
+                                                                                                                                                                                                    }
+                                                                                                                                                                                                }} />
+                                                        :
+                                                            <IconLock stroke={1} />
+                                                        }
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Serial Number</label>
+                                                        {props?.auth?.modules?.[2]?.rights?.[3]?.permission_name == 'date_search' && props?.auth?.modules?.[2]?.rights?.[3]?.status == true ?
+                                                        <input type="text" className="form-control" name="serial_no" value={serial_no} onChange={(e) => setSerialNo(e.target.value.toUpperCase())} onKeyDown={event => {
+                                                                                                                                                                                                                        if (event.key === 'Enter') {
+                                                                                                                                                                                                                            handleSearch(event)
+                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                        }} />
+                                                        :
+                                                            <IconLock stroke={1} />
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="row g-5 mb-3">
+                                                <div className="col-2">
+                                                </div>
+                                                <div className="col-4">
+                                                    <button className={'btn btn-md btn-outline-secondary'} disabled={searched ? false : true} onClick={handleReset}>Reset Form</button>
+                                                </div>
+                                                <div className="col-4">
+                                                    <button className={'btn btn-md btn-outline-info'} disabled={searched} onClick={handleSearch}>Search for Candidate</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {candidate && (
+                                <>
+                                <div className="col-12">
+                                    <div className="card">
+                                        <div className="card-header">
+                                            <div className="col-md-12 flex align-items-center">
+                                                <div className='col-md-6' style={{float: 'left'}}>
+                                                    <h3>Candidate Information</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="card-body">
+                                            <div className="row g-5 mb-3">
+                                                <div className='col-md-6'>
+                                                    <img src={candidate?.candidate_image} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="card-body">
+                                            <div className="row g-5 mb-3">
+                                                <div className="col-6">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Candidate Name</label>
+                                                        <input type="text" className="form-control" name="reg_date" disabled value={candidate?.candidate_name} />
+                                                    </div>
+                                                </div>
+                                                <div className="col-6">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Passport Number</label>
+                                                        <input type="text" className="form-control" name="serial_no" disabled value={candidate?.passport_no}/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="row g-5 mb-3">
+                                                <div className="col-6">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Registration Date</label>
+                                                        <input type="date" className="form-control" name="reg_date" disabled value={candidate?.reg_date}/>
+                                                    </div>
+                                                </div>
+                                                <div className="col-6">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Serial Number</label>
+                                                        <input type="text" className="form-control" name="serial_no" disabled value={candidate?.serial_no}/>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="row g-5 mb-3">
+                                                <div className="col-6">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>S/O or D/O or W/O</label>
+                                                        <input type="text" className="form-control" name="relative_name" disabled value={candidate?.relative_name}/>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -966,7 +1170,7 @@ export default function MedicalExamination(props) {
                                                         <input type="text" className="form-control" name="deformities" value={data.deformities} onChange={handleChange}/>
                                                     </div>
                                                 </div>
-                                                <div className="col-4">
+                                                {/* <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Status</label>
                                                         <select className="form-select" name="status" value={data.status} onChange={handleChange}>
@@ -975,188 +1179,11 @@ export default function MedicalExamination(props) {
                                                             <option value="In Process">In Process</option>
                                                         </select>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                </>
-                                )}
-
-                            </div>
-                        </div>
-                        <div className="col-md-8">
-                            <div className="row row-cards">
-                                <div className="col-12">
-                                    <div className="card">
-                                        <div className="card-header">
-                                            <div className="col-md-12 flex align-items-center">
-                                                <div className='col-md-6' style={{float: 'left'}}>
-                                                    <h3>Registration Information</h3>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="card-body">
-                                            <div className="row g-5 mb-3">
+                                                </div> */}
                                                 <div className="col-4">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Barcode</label>
-                                                        <input type="password" className="form-control" name="barcode" value={barcode} onChange={(e) => setBarcode(e.target.value)} />
-                                                    </div>
-                                                </div>
-                                                <div className="col-4">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Date</label>
-                                                        <input type="date" className="form-control" name="reg_date" value={date} onChange={(e) => setRegDate(e.target.value)}/>
-                                                    </div>
-                                                </div>
-                                                <div className="col-4">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Serial Number</label>
-                                                        <input type="text" className="form-control" name="serial_no" value={serial_no} onChange={(e) => setSerialNo(e.target.value)}/>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-2">
-                                                </div>
-                                                <div className="col-4">
-                                                    <button className={'btn btn-md btn-outline-secondary'} disabled={searched ? false : true} onChange={handleReset}>Reset Form</button>
-                                                </div>
-                                                <div className="col-4">
-                                                    <button className={'btn btn-md btn-outline-info'} disabled={searched} onClick={handleSearch}>Fetch & Verify Candidate</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                {candidate && (
-                                <>
-                                <div className="col-12">
-                                    <div className="card">
-                                        <div className="card-header">
-                                            <div className="col-md-12 flex align-items-center">
-                                                <div className='col-md-6' style={{float: 'left'}}>
-                                                    <h3>Candidate Information</h3>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="card-body">
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Candidate Name</label>
-                                                        <input type="text" className="form-control" name="reg_date" disabled value={candidate?.candidate_name} />
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Passport Number</label>
-                                                        <input type="text" className="form-control" name="serial_no" disabled value={candidate?.passport_no} />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Passport Issue Date</label>
-                                                        <input type="date" className="form-control" name="reg_date" disabled value={candidate?.passport_issue_date}/>
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Passport Expiry Date</label>
-                                                        <input type="text" className="form-control" name="serial_no" disabled value={candidate?.passport_expiry_date}/>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Registration Date</label>
-                                                        <input type="date" className="form-control" name="reg_date" disabled value={candidate?.reg_date}/>
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Serial Number</label>
-                                                        <input type="text" className="form-control" name="serial_no" disabled value={candidate?.serial_no}/>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Agency</label>
-                                                        <input type="text" className="form-control" name="serial_no" disabled value={candidate?.agency}/>
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Country</label>
-                                                        <input type="text" className="form-control" name="serial_no" disabled value={candidate?.country}/>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Profession</label>
-                                                        <input type="text" className="form-control" name="serial_no" disabled value={candidate?.profession}/>
-                                                    </div>
-                                                </div>
-                                                <div className="col-3">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Fees</label>
-                                                        <input className="form-control" name="fees" type="text"  disabled value={candidate?.fee_charged}/>
-                                                    </div>
-                                                </div>
-                                                <div className="col-3">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Discount</label>
-                                                        <input className="form-control" name="discount" type="text" disabled value={candidate?.discount} />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Relation</label>
-                                                        <input className="form-control" name="fees" type="text"  disabled value={candidate?.relation_type}/>
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Relative Name</label>
-                                                        <input className="form-control" name="fees" type="text"  disabled value={candidate?.relative_name}/>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Phone 1</label>
-                                                        <input type="text" className="form-control" name="phone_1" disabled value={candidate?.phone_1}/>
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Phone 2</label>
-                                                        <input type="text" className="form-control" name="phone_2" disabled value={candidate?.phone_2}/>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row g-5">
-                                                <div className="col-6">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Marital Status</label>
-                                                        <input type="text" className="form-control" name="phone_2" disabled value={candidate?.marital_status}/>
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Remarks</label>
-                                                        <textarea className="form-control" disabled>{candidate?.remarks}</textarea>
+                                                        <textarea name={'remarks'} onChange={handleChange} className='form-control'>{data.remarks}</textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1173,8 +1200,13 @@ export default function MedicalExamination(props) {
                                                     <div className="col-md-12 text-center">
                                                         {result == null ?
                                                         <button className="btn btn-success btn-md w-50" disabled={candidate == null} onClick={handleSubmit}>Save & Upload Exam</button>
+                                                        :result != null && props?.auth?.modules?.[2]?.rights?.[4]?.permission_name == 'upload_&_edit' && props?.auth?.modules?.[2]?.rights?.[4]?.status == true ?
+                                                            <button className="btn btn-success btn-md w-50" onClick={handleUpdate}>Update & Upload Exam</button>
                                                         :
-                                                        <button className="btn btn-success btn-md w-50" onClick={handleSubmit}>Update & Upload Exam</button>
+                                                        <button className="btn btn-success btn-md w-50" onClick={''}>
+                                                            <IconLock stroke={1} />
+                                                            Update & Upload Exam
+                                                        </button>
                                                         }
                                                     </div>
                                                 </div>
@@ -1186,18 +1218,6 @@ export default function MedicalExamination(props) {
                                 </div>
                                 </>
                                 )}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="row row-cards">
-                    <div className="col-md-6">
-                            <div className="row row-cards">
-
-                            </div>
-                        </div>
-                        <div className="col-md-6">
-                            <div className="row row-cards">
-
                             </div>
                         </div>
                     </div>

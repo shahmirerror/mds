@@ -8,6 +8,7 @@ import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { IconCrosshair, IconClipboardText  } from '@tabler/icons-react';
 import { IconRefresh } from '@tabler/icons-react';
+import { IconLock } from '@tabler/icons-react';
 import { toast, ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 
@@ -21,7 +22,7 @@ export default function Registration(props) {
     const [report, setReport] = useState(null);
     const [manualPP, setManualPP] = useState(true);
     const [ppFormat, setPPFormat] = useState(false);
-    const [counterID, setCounter] = useState(props.auth.user.role_id == 2 ? 1 : 0);
+    const [counterID, setCounter] = useState(props.auth.user.role_id == 2 ? props.counters?.length > 0 ? props.counters[0].counter_no : 1 : props.counter);
     const [prevReg, setPrevReg] = useState(null);
 
     const todayDate = new Date();
@@ -49,10 +50,10 @@ export default function Registration(props) {
         profession: '',
         cnic: '',
         gender: '',
-        finger_type: '',
+        finger_type: null,
         dob: null,
         place_of_issue: '',
-        reg_date: todayDate.getMonth()+1 >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate(),
+        reg_date: todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate(),
         ref_slip_issue_date: null,
         ref_slip_expiry_date: null,
         barcode: props.barcode,
@@ -69,21 +70,21 @@ export default function Registration(props) {
         remarks: '',
         pregnancy_test: 0,
         repeat: false,
-        token_no: currToken
-
+        token_no: currToken,
+        created_by: props?.auth?.user?.id
     });
 
     const fingers = [
-                        {value: 'L-Thumb', label: 'L-Thumb'},
-                        {value: 'L-Index Finger', label: 'L-Index Finger'},
-                        {value: 'L-Middle Finger', label: 'L-Middle Finger'},
-                        {value: 'L-Ring Finger', label: 'L-Ring Finger'},
-                        {value: 'L-Pinky Finger', label: 'L-Pinky Finger'},
                         {value: 'R-Thumb', label: 'R-Thumb'},
                         {value: 'R-Index Finger', label: 'R-Index Finger'},
                         {value: 'R-Middle Finger', label: 'R-Middle Finger'},
                         {value: 'R-Ring Finger', label: 'R-Ring Finger'},
-                        {value: 'R-Pinky Finger', label: 'R-Pinky Finger'}
+                        {value: 'R-Pinky Finger', label: 'R-Pinky Finger'},
+                        {value: 'L-Thumb', label: 'L-Thumb'},
+                        {value: 'L-Index Finger', label: 'L-Index Finger'},
+                        {value: 'L-Middle Finger', label: 'L-Middle Finger'},
+                        {value: 'L-Ring Finger', label: 'L-Ring Finger'},
+                        {value: 'L-Pinky Finger', label: 'L-Pinky Finger'}
                     ]
 
     function findElementPromise(elementSelector, timeout = 5000) {
@@ -215,6 +216,8 @@ export default function Registration(props) {
                         // $('#preloader').hide();
                         setToken(result.new_token)
                         setQueue(result.in_queue)
+
+                        data.token_no = result.new_token;
 
                         if(result.new_token == 'None')
                         {
@@ -775,6 +778,7 @@ export default function Registration(props) {
     const resetData = () => {
         data.passport_no = '';
         data.passport_issue_date = '';
+        data.ref_slip_issue_date = '';
         data.passport_expiry_date = '';
         data.candidate_name = '';
         data.candidate_image = null;
@@ -784,10 +788,10 @@ export default function Registration(props) {
         data.profession = '';
         data.cnic = '';
         data.gender = '';
-        data.finger_type = '';
+        data.finger_type = null;
         data.dob = '';
         data.place_of_issue = '';
-        data.reg_date = todayDate.getMonth()+1 >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate();
+        data.reg_date = todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate();
         data.slip_issue_date = '';
         data.ref_slip_expiry_date = '';
         data.serial_no = '';
@@ -808,13 +812,21 @@ export default function Registration(props) {
     {
         let message = true;
         Object.entries(data).map(([key, value]) => {
-            if((key == 'biometric_fingerprint' || key == 'serial_no') && (value == null || value == ''))
+            if((key == 'biometric_fingerprint' || key == 'serial_no' || key == 'finger_type') && (value == null || value == ''))
             {
                 message = 'Please input '+key.replaceAll('_',' ')+' before submitting form!';
             }
             else if((key == 'candidate_image' || key == 'passport_image' || key == 'passport_no' || key == 'gender') && (value == null || value == ''))
             {
                 message = 'Please input candidate details before submitting form!';
+            }
+            else if((key == 'country' || key == 'agency' || key == 'profession' || key == 'place_of_issue') && (value == null || value ==''))
+            {
+                message = 'Please input '+key.replaceAll('_',' ')+' detail(s) before submitting form!';
+            }
+            else if(key == 'token_no' && (value == null || value =='None'))
+            {
+                data.token_no = currToken;
             }
         });
 
@@ -849,10 +861,18 @@ export default function Registration(props) {
                                 Registration Desk
                             </h2>
                             <h4 style={{float: 'right'}}>
+                                {props.auth.user.role_id == 2 ?
                                 <select className="form-select" name="counter_no" value={counterID} onChange={(e) => setCounter(e.target.value)}>
+                                    {props.counters?.length > 0 ? props.counters.map((counter, index) => (
+                                    <option value={counter.counter_no}>Counter {counter.counter_no}</option>
+                                    ))
+                                    :
                                     <option value={1}>Counter 1</option>
-                                    <option value={2}>Counter 2</option>
+                                    }
                                 </select>
+                                :
+                                <span className={'badge bg-info text-white'}>Counter {props.counter}</span>
+                                }
                             </h4>
                         </div>
                         <div className="col-md-6 align-items-center" style={{float: 'right'}}>
@@ -893,8 +913,8 @@ export default function Registration(props) {
                                                         <button className="btn btn-purple btn-md w-50" onClick={handleFinger}>Scan fingerprint</button>
                                                     </div>
                                                     <div className="col-md-12 text-center">
-                                                        <select className="form-select" required name="finger_type" onChange={handleChange}>
-                                                            <option>--</option>
+                                                        <select className="form-select" required name="finger_type" value={data.finger_type} onChange={handleChange}>
+                                                            <option value={null}>--</option>
                                                             {fingers.map((finger, index) => (
                                                                 <option value={finger.value}>{finger.label}</option>
                                                             ))}
@@ -945,13 +965,16 @@ export default function Registration(props) {
                                                     (<h3>Passport Information</h3>)}
                                                 </div>
                                                 <div className='col-md-6' style={{float: 'right'}}>
-                                                {props?.auth?.modules?.[0]?.rights?.[2]?.permission_name == 'manual_entry' && props?.auth?.modules?.[2]?.rights?.[0]?.status == true ?
+                                                {props?.auth?.modules?.[0]?.rights?.[2]?.permission_name == 'manual_entry' && props?.auth?.modules?.[0]?.rights?.[2]?.status == true ?
                                                     <label class="form-check form-switch" style={{float: 'right'}}>
                                                         <input class="form-check-input" type="checkbox" disabled={data.passport_image != null && data.passport_image != '' && ppFormat} checked={manual} onChange={(e) => setManual(e.target.checked)}/>
                                                         <span class="form-check-label">Manual Entry</span>
                                                     </label>
                                                 :
-                                                <></>
+                                                    <label class="form-check form-switch" style={{float: 'right'}}>
+                                                        <IconLock stroke={1} />
+                                                        <span class="form-check-label">Manual Entry</span>
+                                                    </label>
                                                 }
                                                 </div>
                                             </div>
@@ -1027,7 +1050,7 @@ export default function Registration(props) {
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>PP Issue Date</label>
-                                                        <input type="date" required={manual == false} className="form-control" name="passport_issue_date" onChange={handleChange} />
+                                                        <input type="date" required={manual == false} className="form-control" name="passport_issue_date" onChange={handleChange} value={data.passport_issue_date} />
                                                     </div>
                                                 </div>
                                                 <div className="col-4">
@@ -1360,10 +1383,17 @@ export default function Registration(props) {
                                                 </div>
                                                 {props?.auth?.modules?.[0]?.rights?.[0]?.permission_name == 'edit' && props?.auth?.modules?.[0]?.rights?.[0]?.status == true ?
                                                 <div className="col-3">
-                                                    <a className="btn btn-outline-info" type="button" href={route('registration-desk.show','edit')}>Edit Registration</a>
+                                                    <a className="btn btn-outline-info" type="button" href={route('registration-desk.show','edit')}>
+                                                        Edit Registration
+                                                    </a>
                                                 </div>
                                                 :
-                                                <>{}</>
+                                                <div className="col-4">
+                                                    <a className="btn btn-outline-info" type="button" href={'#'}>
+                                                        <IconLock stroke={1} />
+                                                        Edit Registration
+                                                    </a>
+                                                </div>
                                                 }
                                                 <div className="col-3">
                                                     <button className="btn btn-outline-purple" data-bs-toggle="modal" data-bs-target="#reg-report" disabled={prevBarcode == null} onClick={handlePrint}>Print Report</button>

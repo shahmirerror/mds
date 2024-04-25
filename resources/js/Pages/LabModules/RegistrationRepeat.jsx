@@ -30,10 +30,13 @@ export default function RegistrationRepeat(props) {
     const [stream, setStream] = useState(null);
     const [imageSrc, setImageSrc] = useState(null);
     const [showModal, setModal] = useState(false);
+    const [fingerDamaged, setDamaged] = useState(false);
 
     const [candidate, setCandidate] = useState(null);
     const [searched, setSearched] = useState(null);
     const [passport_no, setPassportNo] = useState(null);
+
+    const todayDate = new Date();
 
     const {data, setData, post, processing, errors, reset} = useForm({
         passport_no: '',
@@ -50,7 +53,7 @@ export default function RegistrationRepeat(props) {
         finger_type: '',
         dob: '',
         place_of_issue: '',
-        reg_date: '',
+        reg_date: todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate(),
         ref_slip_issue_date: '',
         ref_slip_expiry_date: '',
         barcode: props.barcode,
@@ -72,16 +75,16 @@ export default function RegistrationRepeat(props) {
     });
 
     const fingers = [
+                        {value: 'R-Thumb', label: 'R-Thumb'},
+                        {value: 'R-Index Finger', label: 'R-Index Finger'},
+                        {value: 'R-Middle Finger', label: 'R-Middle Finger'},
+                        {value: 'R-Ring Finger', label: 'R-Ring Finger'},
+                        {value: 'R-Pinky Finger', label: 'R-Pinky Finger'},
                         {value: 'L-Thumb', label: 'L-Thumb'},
                         {value: 'L-Index Finger', label: 'L-Index Finger'},
                         {value: 'L-Middle Finger', label: 'L-Middle Finger'},
                         {value: 'L-Ring Finger', label: 'L-Ring Finger'},
                         {value: 'L-Pinky Finger', label: 'L-Pinky Finger'},
-                        {value: 'R-Thumb', label: 'R-Thumb'},
-                        {value: 'R-Index Finger', label: 'R-Index Finger'},
-                        {value: 'R-Middle Finger', label: 'R-Middle Finger'},
-                        {value: 'R-Ring Finger', label: 'R-Ring Finger'},
-                        {value: 'R-Pinky Finger', label: 'R-Pinky Finger'}
                     ]
 
     function findElementPromise(elementSelector, timeout = 5000) {
@@ -521,7 +524,7 @@ export default function RegistrationRepeat(props) {
 
         const requestJson = JSON.stringify(requestData);
 
-        if(passport_no == null || data.biometric_fingerprint == '')
+        if(passport_no == null || (data.biometric_fingerprint == '' && fingerDamaged == false))
         {
             toast.warning('Please input Passport Number and Scan Finger Print to proceed!', {
                 position: "top-right",
@@ -564,7 +567,29 @@ export default function RegistrationRepeat(props) {
                                 }
                                 else
                                 {
-                                    matchScore(result.registration);
+                                    if(fingerDamaged)
+                                    {
+                                        let temp = data.reg_date;
+                                        data.reg_date = result.registration.reg_date;
+                                        result.registration.reg_date = temp;
+                                        setCandidate(result.registration);
+                                        setSearched(true);
+                                        data.serial_no = result.registration.serial_no;
+                                        toast.success('Candidate Found!', {
+                                            position: "top-right",
+                                            autoClose: 5000,
+                                            hideProgressBar: false,
+                                            closeOnClick: true,
+                                            pauseOnHover: true,
+                                            draggable: true,
+                                            progress: undefined,
+                                            theme: "light",
+                                            });
+                                    }
+                                    else
+                                    {
+                                        matchScore(result.registration);
+                                    }
                                 }
                         },
                         (error) => {
@@ -610,6 +635,10 @@ export default function RegistrationRepeat(props) {
                     {
                         if(fpobject.MatchingScore >= 100)
                         {
+                            let temp = data.reg_date;
+                            data.reg_date = registration.reg_date;
+                            registration.reg_date = temp;
+                            data.serial_no = registration.serial_no;
                             setCandidate(registration);
                             setSearched(true);
                             toast.success('Candidate Found!', {
@@ -684,7 +713,8 @@ export default function RegistrationRepeat(props) {
             candidate_image: data.candidate_image,
             centre_id: props?.auth?.user?.centre?.centre_id,
             fingerprint: data.biometric_fingerprint,
-            token_no: currToken
+            token_no: currToken,
+            created_by: props?.auth?.user?.id
         };
 
         const requestJson = JSON.stringify(requestData);
@@ -821,6 +851,12 @@ export default function RegistrationRepeat(props) {
                                             <div className='col-md-4' style={{float: 'left'}}>
                                                 <span style={{float: "left"}} className={'badge bg-secondary text-white'}>Barcode Number: {data.barcode}</span>
                                             </div>
+                                            <div className="col-4" style={{float: 'right'}}>
+                                                <label class="form-check form-switch" style={{float: 'right'}}>
+                                                    <input class="form-check-input" type="checkbox" disabled={candidate != null} checked={fingerDamaged} onChange={(e) => setDamaged(e.target.checked)}/>
+                                                    <span class="form-check-label">Finger Damaged</span>
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="card-body">
@@ -829,8 +865,17 @@ export default function RegistrationRepeat(props) {
                                                 <div className="row g-3 align-items-center">
                                                     <img id="fingerPrint" src={"./../../assets/static/photos/ThumbPrint.png"} style={{width : 500}}/>
                                                     <div className="col-md-12 text-center">
-                                                        <button className="btn btn-purple btn-md w-50" onClick={handleFinger}>Scan fingerprint</button>
+                                                        <button className="btn btn-purple btn-md w-50" disabled={fingerDamaged} onClick={handleFinger}>Scan fingerprint</button>
                                                     </div>
+                                                </div>
+                                                
+                                                <div className="col-md-12 text-center mt-3">
+                                                    <select className="form-select" required name="finger_type" disabled={candidate == null} value={candidate?.finger_type} onChange={handleChange}>
+                                                        <option value={null}>--</option>
+                                                        {fingers.map((finger, index) => (
+                                                            <option value={finger.value}>{finger.label}</option>
+                                                        ))}
+                                                    </select>
                                                 </div>
                                             </div>
                                             <div className="col-6">
@@ -869,7 +914,11 @@ export default function RegistrationRepeat(props) {
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Enter Passport Number</label>
-                                                        <input type="text" className="form-control" name="passport_issue_date" value={passport_no} onChange={(e) => setPassportNo(e.target.value.toUpperCase())} />
+                                                        <input type="text" className="form-control" name="passport_no" value={passport_no} onChange={(e) => setPassportNo(e.target.value.toUpperCase())} onKeyDown={event => {
+                                                                                                                                                                                                                        if (event.key === 'Enter') {
+                                                                                                                                                                                                                            handleSearch(event)
+                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                        }} />
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
@@ -880,7 +929,8 @@ export default function RegistrationRepeat(props) {
                                             </div>
                                         </div>
                                         {candidate && (
-                                        <div className="card-body" id="auto_import">
+                                            <>
+                                            <div className="card-body" id="auto_import">
                                                 <div className="row g-5 mb-3">
                                                     <div className="col-6">
                                                         <div className="row g-3 align-items-center">
@@ -933,31 +983,59 @@ export default function RegistrationRepeat(props) {
                                                     <div className="col-4">
                                                         <div className="row g-3 align-items-center">
                                                             <label className='form-label'>Place of Issue</label>
-                                                            <input type="text" className="form-control" disabled name="cnic" value={candidate?.place_of_issue?.value} onChange={handleChange} />
+                                                            <Select
+                                                                options={props.places}
+                                                                value={candidate?.place_of_issue}
+                                                                name="place_of_issue"
+                                                                onChange={(e) => setData('place_of_issue', e)}
+                                                            />
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className="row g-5 mb-3">
-                                                <div className="col-4">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>PP Issue Date</label>
-                                                        <input type="date" className="form-control" name="passport_issue_date" onChange={handleChange} />
+                                                    <div className="col-4">
+                                                        <div className="row g-3 align-items-center">
+                                                            <label className='form-label'>PP Issue Date</label>
+                                                            <input type="date" className="form-control" name="passport_issue_date" value={candidate?.passport_issue_date} onChange={handleChange} />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="col-4">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Reference Slip Issue Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_issue_date" value={candidate?.slip_issue_date} onChange={handleChange} />
+                                                    <div className="col-4">
+                                                        <div className="row g-3 align-items-center">
+                                                            <label className='form-label'>Reference Slip Issue Date</label>
+                                                            <input type="date" className="form-control" name="ref_slip_issue_date" value={candidate?.slip_issue_date} onChange={handleChange} />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="col-4">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Reference Slip Expiry Date</label>
-                                                        <input type="date" className="form-control" name="ref_slip_expiry_date" value={candidate?.slip_expiry_date} onChange={handleChange} />
+                                                    <div className="col-4">
+                                                        <div className="row g-3 align-items-center">
+                                                            <label className='form-label'>Reference Slip Expiry Date</label>
+                                                            <input type="date" className="form-control" name="ref_slip_expiry_date" value={candidate?.slip_expiry_date} onChange={handleChange} />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                            <div className="card-body" id="auto_import">
+                                                <div className="row g-5 mb-3">
+                                                    <div className="col-4">
+                                                        <div className="row g-3 align-items-center">
+                                                            <label className='form-label'>Previous Registration Date</label>
+                                                            <input type="date" className="form-control" name="prev_reg_date" value={data.reg_date} disabled />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-4">
+                                                        <div className="row g-3 align-items-center">
+                                                            <label className='form-label'>Previous Serial Number</label>
+                                                            <input type="text" disabled className="form-control" name="prev_serial_no" value={candidate?.serial_no} />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-4">
+                                                        <div className="row g-3 align-items-center">
+                                                            <label className='form-label'>Previous Status</label>
+                                                            <input type="text" disabled className="form-control" name="passport_expiry_date" value={candidate?.reg_status} />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            </>
                                         )}
                                     </div>
                                 </div>

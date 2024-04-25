@@ -380,16 +380,23 @@ export default function Centre(props) {
 
     const handlePerStatus = (e, user_id, permission_id, index) => {
         // console.log(user_id, permission_id);
-        let status = e.target.checked ? 'On' : 'Off';
+        let status = e.target.type == 'checkbox' ? e.target.checked ? 'On' : 'Off' : e.target.value;
         try {
             const response = fetch(route("admin.centre.toggle_lab_module_permissions", {'user_id': user_id, 'permission_id': permission_id}), {
                 method: "POST",
-                body: JSON.stringify({permission_value: document.getElementById('perswitch'+permission_id).value})
+                body: JSON.stringify({permission_value: e.target.type == 'checkbox' ? e.target.checked ? 'on' : 'off' : e.target.value})
             })
                 .then(res => res.json())
                 .then(
                     (result) => {
-                        e.target.checked = status === 'Off' ? false : true;
+                        if(e.target.type == 'checkbox')
+                        {
+                            e.target.checked = status === 'Off' ? false : true;
+                        }
+                        else
+                        {
+                            e.target.value = status;
+                        }
                         let message = "Permissions have been updated!";
                         toast.success(message, {
                             position: "top-right",
@@ -599,7 +606,7 @@ export default function Centre(props) {
                                                     <IconPower />
                                                 </a>
                                             :
-                                                <a className="dropdown-item text-success" href="#" type="button" data-bs-toggle="modal" data-bs-target="#delete-user" onClick={() => handleStatus(user?.id, 'Active')}>
+                                                <a className="card-btn text-success" href="#" type="button" data-bs-toggle="modal" data-bs-target="#delete-user" onClick={() => handleStatus(user?.id, 'Active')}>
                                                     <IconPower />
                                                 </a>
                                             }
@@ -673,6 +680,8 @@ export default function Centre(props) {
                         <select class="form-select" name="role" onChange={(event) => setRole(event.target.value)}>
                             <option value="Admin">Admin</option>
                             <option value="Staff" selected>Staff</option>
+                            <option value="Token" selected>Token</option>
+                            <option value="Feedback" selected>Feedback</option>
                         </select>
                     </div>
                     <div className="mb-3">
@@ -719,11 +728,36 @@ export default function Centre(props) {
                                 <>
                                 <option value="Admin" selected>Admin</option>
                                 <option value="Staff">Staff</option>
+                                <option value="Token">Token</option>
+                                <option value="Feedback">Feedback</option>
+                                </>
+                            :role == 'Staff' ?
+                                <>
+                                <option value="Admin">Admin</option>
+                                <option value="Staff" selected>Staff</option>
+                                <option value="Token">Token</option>
+                                <option value="Feedback">Feedback</option>
+                                </>
+                            :role == 'Token' ?
+                                <>
+                                <option value="Admin">Admin</option>
+                                <option value="Staff">Staff</option>
+                                <option value="Token" selected>Token</option>
+                                <option value="Feedback">Feedback</option>
+                                </>
+                            :role == 'Feedback' ?
+                                <>
+                                <option value="Admin">Admin</option>
+                                <option value="Staff">Staff</option>
+                                <option value="Token">Token</option>
+                                <option value="Feedback" selected>Feedback</option>
                                 </>
                             :
                                 <>
                                 <option value="Admin">Admin</option>
-                                <option value="Staff" selected>Staff</option>
+                                <option value="Staff">Staff</option>
+                                <option value="Token">Token</option>
+                                <option value="Feedback">Feedback</option>
                                 </>
                             }
                         </select>
@@ -760,43 +794,48 @@ export default function Centre(props) {
                 <div className="row m-3">
                     {module_rights?.length > 0 ? module_rights.map((mod, index) => (
                     <>
-                        {/* <div style={{content: "", height: "100%", width: "1px", backgroundColor: 'black',position: "absolute", top: 0, right: 0}}> */}
+                        {mod?.status == true ?
+                        <>
                             <div className="col-md-12 mb-2" >
                                 <div style={{display: 'inline-flex',justifyContent: 'space-between'}} className="col-7">
                                 <div className="form-label h4">{mod?.title}</div>
                                 {mod?.rights?.length > 0 ? mod?.rights.map((right, index) => (
-                                <div>
+                                <>
                                     {right?.permission_type == 'Primary' ?
+                                    <div>
                                     <label className="form-check form-switch">
                                         <input className="form-check-input" type="checkbox" id={`perswitch${right?.permission_id}`} name={`perswitch${right?.permission_id}`} checked={right?.status} onChange={(e) => handlePerStatus(e, module_user_rights, right?.permission_id, index)}/>
                                         <span class="form-check-label text-small" id={`perswitchlabel${right?.permission_id}`}>{'Allow Access?'}</span>
                                     </label>
+                                    </div>
                                     :
                                     <></>
                                     }
-                                </div>
+                                </>
                                 ))
                                 :
                                 <></>
                                 }
                                 </div>
-                                <div className="mt-2 col-md-12 mb-3" style={{display: 'inline-flex', justifyContent: 'space-between'}}>
+                                <div className="mt-2 col-md-12 mb-3" style={{display: 'inline-flex', justifyContent: 'space-between', flexWrap: 'wrap'}}>
                                 {mod?.rights?.length > 0 ? mod?.rights.map((right, index) => (
-                                    <div>
+                                    <>
                                         {right?.permission_type == 'CRUD' || right?.permission_type == 'Alternate' ?
+                                        <div>
                                         <label className="form-check">
                                             <input className="form-check-input" type="checkbox" id={`perswitch${right?.permission_id}`} name={`perswitch${right?.permission_id}`} checked={right?.status} onChange={(e) => handlePerStatus(e, module_user_rights, right?.permission_id, index)}/>
                                             <span class="form-check-label text-small" id={`perswitchlabel${right?.permission_id}`}>{right?.permission_name.replaceAll('_',' ').toUpperCase()}</span>
                                         </label>
+                                        </div>
                                         :right?.permission_type == 'Counter' || right?.permission_type == 'Printing' ?
-                                        <>
+                                        <div>
                                             <label className="form-label" id={`perswitchlabel${index}`}>{right?.permission_name.replaceAll('_',' ').toUpperCase()}</label>
                                             <input className="form-control" type="text" id={`perswitch${right?.permission_id}`} name={`perswitch${right?.permission_id}`} placeholder="Enter Value" value={right?.permission_value} onChange={(e) => handlePerStatus(e, module_user_rights, right?.permission_id, index)}/>
-                                        </>
+                                        </div>
                                         :
                                         <></>
                                         }
-                                    </div>
+                                    </>
                                 ))
                                 :
                                     <div>
@@ -807,6 +846,10 @@ export default function Centre(props) {
                             </div>
 
                             <hr></hr>
+                        </>
+                        :
+                        <></>
+                        }
                     </>
                     ))
                 :

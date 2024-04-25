@@ -18,7 +18,7 @@ class ProfessionController extends Controller
      */
     public function index()
     {
-        return Inertia::render('CentreAdmin/Profession', ['profession' => Profession::where('centre_id', Auth::user()->centre->id)->get()], 200);
+        return Inertia::render('CentreAdmin/Profession', ['profession' => Profession::where('centre_id', Auth::user()->centre->centre_id)->get()], 200);
     }
 
     /**
@@ -36,7 +36,7 @@ class ProfessionController extends Controller
     {
         $new = new Profession;
         $new->name = $request->name;
-        $new->centre_id = Auth::user()->centre->id;
+        $new->centre_id = Auth::user()->centre->centre_id;
 
         $new->save();
 
@@ -66,7 +66,7 @@ class ProfessionController extends Controller
     {
         $new = Profession::find($id);
         $new->name = $request->name;
-        $new->centre_id = Auth::user()->centre->id;
+        $new->centre_id = Auth::user()->centre->centre_id;
 
         $new->update();
 

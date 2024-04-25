@@ -19,6 +19,18 @@ class RedirectController extends Controller
             {
                 return redirect()->route('admin.dashboard');
             }
+            elseif(Auth::user()->role_id == 3)
+            {
+                return redirect()->route('staff.dashboard');
+            }
+            elseif(Auth::user()->role_id == 4)
+            {
+                return redirect()->route('token-generation-page');
+            }
+            elseif(Auth::user()->role_id == 5)
+            {
+                return redirect()->route('feedback-page');
+            }
         }
     }
 }

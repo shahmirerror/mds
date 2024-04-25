@@ -16,7 +16,8 @@ import Select from 'react-select';
 export default function RegistrationEdit(props) {
 
     const [barcode, setBarcode] = useState(null);
-    const [date, setRegDate] = useState(null);
+    const todayDate = new Date();
+    const [date, setRegDate] = useState(todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate());
     const [serial_no, setSerialNo] = useState(null);
     const [searched, setSearched] = useState(false);
     const [candidate, setCandidate] = useState(null);
@@ -184,7 +185,6 @@ export default function RegistrationEdit(props) {
             const file = new File([blob], filename, { type: 'image/png' });
 
             data.candidate_image = canvas.toDataURL('image/png');
-            console.log(data.candidate_image)
         }
         else if(e.target.value == 'retake')
         {
@@ -571,7 +571,7 @@ export default function RegistrationEdit(props) {
     {
         setCandidate(null);
         setBarcode('');
-        setRegDate('');
+        setRegDate(todayDate.getMonth()+1 >= 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getMonth()+1 >= 10 && todayDate.getDate() < 10 ? todayDate.getFullYear()+"-"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate() : todayDate.getMonth()+1 < 10 && todayDate.getDate() >= 10 ? todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-"+todayDate.getDate() : todayDate.getFullYear()+"-0"+(todayDate.getMonth()+1)+"-0"+todayDate.getDate());
         setSerialNo('');
         setSearched(false);
     };
@@ -580,7 +580,8 @@ export default function RegistrationEdit(props) {
         const requestData = {
             candidate: candidate,
             candidate_image: data.candidate_image,
-            passport_image: data.passport_image
+            passport_image: data.passport_image,
+            updated_by: props?.auth?.user?.id
         };
 
         const requestJson = JSON.stringify(requestData);
@@ -761,21 +762,33 @@ export default function RegistrationEdit(props) {
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Passport Number</label>
-                                                        <input type="text" className="form-control" name="barcode"  value={barcode} onChange={(e) => setBarcode(e.target.value.toUpperCase())}/>
+                                                        <input type="text" className="form-control" name="barcode"  value={barcode} onChange={(e) => setBarcode(e.target.value.toUpperCase())} onKeyDown={event => {
+                                                                                                                                                                                                                        if (event.key === 'Enter') {
+                                                                                                                                                                                                                            handleSearch(event)
+                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                        }} />
                                                     </div>
                                                 </div>
 
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Date</label>
-                                                        <input type="date" className="form-control" name="reg_date" value={date} onChange={(e) => setRegDate(e.target.value)}/>
+                                                        <input type="date" className="form-control" name="reg_date" value={date} onChange={(e) => setRegDate(e.target.value)} onKeyDown={event => {
+                                                                                                                                                                                                                        if (event.key === 'Enter') {
+                                                                                                                                                                                                                            handleSearch(event)
+                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                        }} />
                                                     </div>
                                                 </div>
 
                                                 <div className="col-4">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Serial Number</label>
-                                                        <input type="text" className="form-control" name="serial_no" value={serial_no} onChange={(e) => setSerialNo(e.target.value.toUpperCase())}/>
+                                                        <input type="text" className="form-control" name="serial_no" value={serial_no} onChange={(e) => setSerialNo(e.target.value.toUpperCase())} onKeyDown={event => {
+                                                                                                                                                                                                                        if (event.key === 'Enter') {
+                                                                                                                                                                                                                            handleSearch(event)
+                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                        }} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -929,7 +942,11 @@ export default function RegistrationEdit(props) {
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="row g-3 align-items-center">
+                                                        {searched ?
                                                         <img src={candidate?.candidate_image} style={{width : 300, marginTop: '55px'}} className="mb-5" />
+                                                        :
+                                                        <></>
+                                                        }
                                                     </div>
                                                 </div>
                                             </div>

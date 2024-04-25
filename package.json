@@ -27,7 +27,10 @@
         "@inertiajs/inertia": "^0.11.1",
         "@tabler/icons-react": "^2.42.0",
         "apexcharts": "^3.45.2",
+        "html2canvas": "^1.4.1",
+        "print-js": "^1.6.0",
         "react-apexcharts": "^1.4.1",
+        "react-barcode": "^1.4.6",
         "react-select": "^5.8.0",
         "react-toastify": "^10.0.4",
         "react-webcam": "^7.2.0"

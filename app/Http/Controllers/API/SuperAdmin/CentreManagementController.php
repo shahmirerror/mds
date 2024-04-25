@@ -27,9 +27,17 @@ class CentreManagementController extends Controller
         {
             $new_user->role_id = 3;
         }
-        else
+        elseif($array->role == 'Admin')
         {
             $new_user->role_id = 2;
+        }
+        elseif($array->role == 'Token')
+        {
+            $new_user->role_id = 4;
+        }
+        elseif($array->role == 'Feedback')
+        {
+            $new_user->role_id = 5;
         }
         $new_user->save();
 
@@ -52,9 +60,17 @@ class CentreManagementController extends Controller
         {
             $new_user->role_id = 3;
         }
-        else
+        elseif($array->role == 'Admin')
         {
             $new_user->role_id = 2;
+        }
+        elseif($array->role == 'Token')
+        {
+            $new_user->role_id = 4;
+        }
+        elseif($array->role == 'Feedback')
+        {
+            $new_user->role_id = 5;
         }
         $new_user->update();
 
@@ -102,11 +118,13 @@ class CentreManagementController extends Controller
 
     public function toggle_lab_module_permissions(request $request, $permission_id, $user_id)
     {
+        $all = json_decode($request->getContent());
+
         $permission = LabModulePermissions::find($permission_id);
 
         $check = StaffLabRights::where('permission_id',$permission_id)->where('user_id',$user_id)->first();
 
-        if($permission->type == 'CRUD' || $permission->type == 'Alternate')
+        if($permission->type != 'Printing' && $permission->type != 'Counter')
         {
             if($check)
             {
@@ -139,7 +157,7 @@ class CentreManagementController extends Controller
         {
             if($check)
             {
-                $del = StaffLabRights::where('permission_id',$permission_id)->where('user_id',$user_id)->update(array('permission_value' => $request->permission_value));
+                $del = StaffLabRights::where('permission_id',$permission_id)->where('user_id',$user_id)->update(array('permission_value' => ($all->permission_value != "") ? $all->permission_value : 0));
 
                 if($del)
                 {
@@ -152,7 +170,7 @@ class CentreManagementController extends Controller
             }
             else
             {
-                $new = StaffLabRights::create(array('permission_id' => $permission_id, 'user_id' => $user_id, 'permission_value' => $request->permission_value));
+                $new = StaffLabRights::create(array('permission_id' => $permission_id, 'user_id' => $user_id, 'permission_value' => $all->permission_value));
 
                 if($new)
                 {

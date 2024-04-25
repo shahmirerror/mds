@@ -21,15 +21,27 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('/token-generation', function () {
-    return Inertia::render('TokenGeneration', [
-        'centres' => App\Models\Centres::where('status','=','Active')->get()
-    ]);
-});
-
 Route::resource('redirect', App\Http\Controllers\RedirectController::class);
 
 Route::middleware('auth')->group(function () {
+
+    Route::get('now-serving', function () {
+        return Inertia::render('NowServing');
+    });
+
+    Route::get('/token-generation', function () {
+        return Inertia::render('TokenGeneration', [
+            'centres' => App\Models\Centres::where('status','=','Active')->get(),
+            'printerIP' => $_SERVER['REMOTE_ADDR']
+        ]);
+    })->name('token-generation-page');
+    
+    Route::get('/feedback', function () {
+        return Inertia::render('Feedback', [
+            'centres' => App\Models\Centres::where('status','=','Active')->get()
+        ]);
+    })->name('feedback-page');
+    
     Route::group(['prefix' => 'super-admin'], function () {
         Route::get('/dashboard', function () {
             return Inertia::render('SuperAdmin/Dashboard', ['centres' => Centres::select('id as value','name as label')->where('status','Active')->get()]);
@@ -70,7 +82,26 @@ Route::middleware('auth')->group(function () {
 
     });
 
+    Route::group(['prefix' => 'centre-staff'], function () {
+
+        Route::get('/dashboard', function () {
+            return Inertia::render('CentreStaff/Dashboard');
+        })->name('staff.dashboard');
+
+        Route::get('/reports', function () {
+            return Inertia::render('CentreStaff/Reports');
+        })->name('staff.reports');
+        Route::resource('nationalitysetup', App\Http\Controllers\CentreStaff\NationalityController::class);
+        Route::resource('professionsetup', App\Http\Controllers\CentreStaff\ProfessionController::class);
+        Route::resource('agencysetup', App\Http\Controllers\CentreStaff\AgencyController::class);
+        Route::resource('place-of-issuesetup', App\Http\Controllers\CentreStaff\PlaceOfIssueController::class);
+        Route::resource('countrysetup', App\Http\Controllers\CentreStaff\CountryController::class);
+
+    });
+
     Route::group(['prefix' => 'centre'], function () {
+
+        Route::resource('candidates-in-centre', App\Http\Controllers\CentreStaff\CandidatesController::class);
 
         Route::resource('registration-desk', App\Http\Controllers\LabModules\RegistrationsController::class);
         Route::post('registration-desk/update', [App\Http\Controllers\LabModules\RegistrationsController::class, 'update'])->name('registration-desk.update');

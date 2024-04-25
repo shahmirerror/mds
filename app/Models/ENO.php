@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class ENO extends Model
 {
     use HasFactory;
+
+    protected $table = 'eno';
 }

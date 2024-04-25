@@ -9,6 +9,7 @@ use App\Models\Candidates;
 use App\Models\Registrations;
 use App\Models\Medical;
 use App\Models\XrayResult;
+use App\Models\XrayVerification;
 use App\Models\LabResult;
 use App\Models\LabSticker;
 use App\Models\Profession;
@@ -24,7 +25,7 @@ class ImportController extends Controller
     public function fetch_regs()
     {
         // Define the URL to be accessed
-        $url = "http://localhost:81/old_mls/reliance/candidates.php";
+        $url = "http://localhost:8080/old_mls/reliance/candidates.php";
 
         // Initialize a cURL session
         $curl = curl_init($url);
@@ -75,6 +76,7 @@ class ImportController extends Controller
                             $new->nationality = $d['nationality'];
                             $new->agency = $d['agency'];
                             $new->country = $d['country'];
+                            $new->cnic = $d['cnic'];
                             $new->profession = $d['profession'];
                             $new->marital_status = $d['marital_status'];
                             $new->barcode_no = $d['barcode_no'];
@@ -114,8 +116,7 @@ class ImportController extends Controller
                             $new->discount = $d['discount'];
                             $new->remarks = $d['remarks'];
                             $new->pregnancy_test = $d['pregnancy_test'];
-                            // $new->created_by = $d->id;
-                            // $new->updated_by = $d->id;
+                            $new->cnic = $d['cnic'];
                             $new->status_remarks = $d['status_remarks'];
                             $new->slip_issue_date = (date('Y-m-d', strtotime($d['slip_issue_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_issue_date'])) : date('Y-m-d', strtotime('1970-01-01'));
                             $new->slip_expiry_date = (date('Y-m-d', strtotime($d['slip_expiry_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_expiry_date'])) : date('Y-m-d', strtotime('1970-01-01'));
@@ -132,7 +133,6 @@ class ImportController extends Controller
                         $new->passport_issue_date = date('Y-m-d', strtotime($d['passport_issue_date']));
                         $new->passport_expiry_date = date('Y-m-d', strtotime($d['passport_expiry_date']));
                         $new->candidate_name = $d['candidate_name'];
-                        $new->cnic = $d['cnic'];
                         $new->gender = $d['gender'];
                         $new->dob = $d['d_o_b'];
                         $new->save();
@@ -153,6 +153,7 @@ class ImportController extends Controller
                         $new->profession = $d['profession'];
                         $new_2->marital_status = $d['marital_status'];
                         $new_2->barcode_no = $d['barcode_no'];
+                        $new_2->cnic = $d['cnic'];
                         $new_2->biometric_fingerprint = $d['biometric_fingerprint'];
                         $new_2->fee_charged = $d['fee_charged'];
                         $new_2->discount = $d['discount'];
@@ -178,7 +179,7 @@ class ImportController extends Controller
     public function fetch_labs()
     {
         // Define the URL to be accessed
-        $url = "http://localhost:81/old_mls/reliance/lab.php";
+        $url = "http://localhost:8080/old_mls/reliance/lab.php";
 
         // Initialize a cURL session
         $curl = curl_init($url);
@@ -266,7 +267,7 @@ class ImportController extends Controller
     public function fetch_labsticker()
     {
         // Define the URL to be accessed
-        $url = "http://localhost:81/old_mls/reliance/lab.php";
+        $url = "http://localhost:8080/old_mls/reliance/lab.php";
 
         // Initialize a cURL session
         $curl = curl_init($url);
@@ -318,7 +319,7 @@ class ImportController extends Controller
     public function fetch_xrays()
     {
         // Define the URL to be accessed
-        $url = "http://localhost:81/old_mls/reliance/xray.php";
+        $url = "http://localhost:8080/old_mls/reliance/xray.php";
 
         // Initialize a cURL session
         $curl = curl_init($url);
@@ -363,7 +364,7 @@ class ImportController extends Controller
     public function fetch_medicals()
     {
         // Define the URL to be accessed
-        $url = "http://localhost:81/old_mls/reliance/medical.php";
+        $url = "http://localhost:8080/old_mls/reliance/medical.php";
 
         // Initialize a cURL session
         $curl = curl_init($url);
@@ -465,7 +466,7 @@ class ImportController extends Controller
     public function fetch_country()
     {
         // Define the URL to be accessed
-        $url = "http://localhost:81/old_mls/reliance/country.php";
+        $url = "http://localhost:8080/old_mls/reliance/country.php";
 
         $centres = Centres::where('status','Active')->get();
 
@@ -656,5 +657,29 @@ class ImportController extends Controller
 
         // Close the cURL session
         curl_close($curl);
+    }
+
+    public function fix_regs()
+    {
+        $get_regs = Registrations::join('candidates','candidates.id','registrations.candidate_id')->where('reg_date','<=','2024-04-04')->where('center_id','1')->get();
+
+        foreach($get_regs as $reg)
+        {
+            $update = Registrations::where('reg_id',$reg->reg_id)->update(array('old_img' => $reg->passport_no));
+        }
+    }
+
+    public function fix_xray_verif()
+    {
+        $get_regs = XrayResult::whereDate('created_at','<=','2024-04-04')->where('centre_id','1')->get();
+
+        foreach($get_regs as $reg)
+        {
+            $check = XrayVerification::where('reg_id',$reg->reg_id)->where('centre_id',$reg->centre_id)->first();
+            if(!$check)
+            {
+                $update = XrayVerification::insert(array('centre_id' => $reg->centre_id, 'reg_id' => $reg->reg_id, 'created_at' => $reg->created_at));
+            }
+        }
     }
 }

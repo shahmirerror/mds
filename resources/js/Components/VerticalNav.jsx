@@ -1,6 +1,6 @@
 
 import {useForm} from "@inertiajs/react";
-export default function VerticalNav({modules, logo, labs}) {
+export default function VerticalNav({role_id, modules, logo, labs}) {
     const {post} = useForm();
     const handleDelete = (e) =>
     {
@@ -31,7 +31,23 @@ export default function VerticalNav({modules, logo, labs}) {
                             </a>
                         </li>
                     ))}
-                    {labs?.length > 0 &&
+                    {labs?.length > 0 && role_id == 3 ? labs.map((mod, index) => (
+                        mod?.status == true ? mod?.rights.map((right) => (
+                            right?.permission_name == 'index' && right?.status == true ?
+                                <li className="nav-item">
+                                    <a className="nav-link" href={mod.route != null ? route(`${mod.route}`) : '#'} >
+                                        <span className="nav-link-title">
+                                        {mod.title}
+                                        </span>
+                                    </a>
+                                </li>
+                            :
+                            <></>
+                        ))
+                        :
+                        <></>
+                    )): (<></>)}
+                    {role_id == 2 && labs?.length > 0 &&
                         <li className="nav-item dropdown">
                             <a className="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false" >
                                 <span className="nav-link-title">
@@ -40,13 +56,16 @@ export default function VerticalNav({modules, logo, labs}) {
                             </a>
                             <div className="dropdown-menu">
                                 {labs.map((lab, index) => (
-                                <div className="dropdown-menu-columns">
-                                    <div className="dropdown-menu-column">
-                                        <a className="dropdown-item" href={lab.route != null ? route(`${lab.route}`) : '#'}>
-                                        {lab?.title}
-                                        </a>
-                                    </div>
-                                </div>
+                                    lab?.title != 'Country Setup' && lab?.title != 'Place of Issue Setup' && lab?.title != 'Profession Setup' && lab?.title != 'Nationality Setup' && lab?.title != 'Agency Setup' && lab?.title != 'Reports' && lab?.title != 'Candidates' ?
+                                        <div className="dropdown-menu-columns">
+                                            <div className="dropdown-menu-column">
+                                                <a className="dropdown-item" href={lab.route != null ? route(`${lab.route}`) : '#'}>
+                                                {lab?.title}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    :
+                                    <></>
                                 ))}
                             </div>
                         </li>
