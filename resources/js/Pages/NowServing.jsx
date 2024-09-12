@@ -72,7 +72,7 @@ export default function NowServing(props) {
         const intervalId = setInterval(() => {
             fetchToken();
           }, 2000);
-      
+
           // Clear the interval when the component unmounts
           return () => clearInterval(intervalId);
     }, []);
@@ -93,19 +93,25 @@ export default function NowServing(props) {
                 pauseOnHover
                 theme="light"
                 />
-            <div className="page page-center" style={{backgroundImage: 'url(./assets/static/photos/mdsbackground.png)', height: '100vh', blur: "10%"}}>
+            <div className="page page-center" style={{backgroundImage: 'url("assets/backgrounds/small-icons.png")',
+                                                        backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundAttachment: 'fixed',
+    backgroundColor: 'royalblue',
+    minHeight: '100vh'}}>
                 <div className="p-6">
 
                     {centre !== null ?
                     <>
-                        <div className="row g-4" id={'centre_logo'}>
-                            <div className="col-lg">
-                                <div style={{maxWidth: "15rem"}}>
+                        <div className="row g-4" id={'centre_logo'} style={{justifyContent:'center'}}>
+                            <div className="col-md-3">
+                                <div >
                                     <div className="text-center mb-4">
                                     <div className="card card-sm">
                                         <div className="card-body">
                                         <a href="#" className="navbar-brand navbar-brand-autodark">
-                                            <img src={`./storage/app/public/centres/logos/${centre?.image}`} height="50" alt="" /></a>
+                                            <img src={`./storage/app/public/centres/logos/${centre?.image}`} height="100" alt="" /></a>
                                         </div>
                                         </div>
                                     </div>
@@ -113,11 +119,11 @@ export default function NowServing(props) {
                             </div>
                         </div>
                         {newToken && (
-                        <div className="row align-items-center g-4 mt-7" id={'choose_token'} style={{justifyContent: 'center'}}>
-                            <div className="col-md-5 text-center" ref={wrapper_ref} style={{background: 'white'}}>
-                                <span style={{fontSize:'50px', fontWeight: 900}}>Now Serving</span>
+                        <div className="row align-items-center g-4" id={'choose_token'} style={{justifyContent: 'center', marginTop: '5rem'}}>
+                            <div className="col-md-12 text-center" ref={wrapper_ref} style={{background: 'white'}}>
+                                <span style={{fontSize:'200px', fontWeight: 900}}>Now Serving</span>
                                 <br></br><br></br>
-                                <span style={{fontSize:'30px'}}>{newToken}</span>
+                                <span style={{fontSize:'250px', fontWeight: 900}}>{newToken}</span>
                             </div>
                         </div>
                         )}

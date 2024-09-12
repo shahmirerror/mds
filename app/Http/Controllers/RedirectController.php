@@ -11,25 +11,32 @@ class RedirectController extends Controller
     {
         if(Auth::user())
         {
-            if(Auth::user()->role_id == 1)
+            if(Auth::user()->status == 'Active')
             {
-                return redirect()->route('super.dashboard');
+                if(Auth::user()->role_id == 1)
+                {
+                    return redirect()->route('super.dashboard');
+                }
+                elseif(Auth::user()->role_id == 2)
+                {
+                    return redirect()->route('admin.dashboard');
+                }
+                elseif(Auth::user()->role_id == 3)
+                {
+                    return redirect()->route('staff.dashboard');
+                }
+                elseif(Auth::user()->role_id == 4)
+                {
+                    return redirect()->route('token-generation-page');
+                }
+                elseif(Auth::user()->role_id == 5)
+                {
+                    return redirect()->route('feedback-page');
+                }
             }
-            elseif(Auth::user()->role_id == 2)
+            else
             {
-                return redirect()->route('admin.dashboard');
-            }
-            elseif(Auth::user()->role_id == 3)
-            {
-                return redirect()->route('staff.dashboard');
-            }
-            elseif(Auth::user()->role_id == 4)
-            {
-                return redirect()->route('token-generation-page');
-            }
-            elseif(Auth::user()->role_id == 5)
-            {
-                return redirect()->route('feedback-page');
+                Auth::logout();
             }
         }
     }

@@ -316,7 +316,7 @@ class ReportsController extends Controller
             {
                 if(count($countries) > 0)
                 {
-                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate", 'remarks'))
                                             ->where('center_id', $all->centreID->value)
                                             ->when($print_report == 'A-B', function ($query) use ($all) {
                                                 return $query->whereIn('print_report_portion', ['A-B','A'])
@@ -342,7 +342,7 @@ class ReportsController extends Controller
                 }
                 else
                 {
-                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate",'remarks'))
                                             ->where('center_id', $all->centreID->value)
                                             ->when($print_report == 'A-B', function ($query) use ($all) {
                                                 return $query->whereIn('print_report_portion', ['A-B','A'])
@@ -365,7 +365,7 @@ class ReportsController extends Controller
             {
                 if(count($countries) > 0)
                 {
-                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate",'remarks'))
                                             ->where('center_id',$all->centreID->value)
                                             ->when($print_report == 'A-B', function ($query) use ($all) {
                                                 return $query->whereIn('print_report_portion', ['A-B','A'])
@@ -391,7 +391,7 @@ class ReportsController extends Controller
                 }
                 else
                 {
-                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate",'remarks'))
                                             ->where('center_id',$all->centreID->value)
                                             ->when($print_report == 'A-B', function ($query) use ($all) {
                                                 return $query->whereIn('print_report_portion', ['A-B','A'])
@@ -414,7 +414,7 @@ class ReportsController extends Controller
             {
                 if(count($countries) > 0)
                 {
-                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate",'remarks'))
                                             ->where('center_id',$all->centreID->value)
                                             ->when($print_report == 'A-B', function ($query) use ($all) {
                                                 return $query->whereIn('print_report_portion', ['A-B','A'])
@@ -440,7 +440,7 @@ class ReportsController extends Controller
                 }
                 else
                 {
-                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate",'remarks'))
                                             ->where('center_id',$all->centreID->value)
                                             ->when($print_report == 'A-B', function ($query) use ($all) {
                                                 return $query->whereIn('print_report_portion', ['A-B','A'])
@@ -463,7 +463,7 @@ class ReportsController extends Controller
             {
                 if(count($countries) > 0)
                 {
-                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate",'remarks'))
                                             ->where('center_id',$all->centreID->value)
                                             ->when($print_report == 'A-B', function ($query) use ($all) {
                                                 return $query->whereIn('print_report_portion', ['A-B','A'])
@@ -491,7 +491,7 @@ class ReportsController extends Controller
                 }
                 else
                 {
-                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate"))
+                    $data = Registrations::select("country as particulars", DB::raw("count(country) as cases"), DB::raw("FORMAT(fee_charged, 0) as rate",'remarks'))
                                             ->where('reg_date','>=',$all->fromRange)
                                             ->where('reg_date','<=',$all->toRange)
                                             ->where('center_id',$all->centreID->value)
@@ -2769,7 +2769,7 @@ class ReportsController extends Controller
         {
 
             $pdf = new Fpdf();
-            if($all->report_type->value == 'reference_slip_report')
+            if($all->report_type->value == 'reference_slip_report' || $all->report_type->value == 'code_list_report')
             {
                 $pdf->AddPage('P', 'A4', '0');
             }
@@ -2783,12 +2783,12 @@ class ReportsController extends Controller
 
             //Header Start
             $pdf->SetX(140); //The next cell will be set 100 units to the right
-            if($all->report_type->value != 'reference_slip_report')
+            if($all->report_type->value != 'reference_slip_report' && $all->report_type->value != 'code_list_report')
             {
                 $pdf->Cell(40,0,$pdf->Image(asset('storage/app/public/centres/logos/'.$centre->image),$pdf->GetX(),$pdf->GetY(),70,20),0,0,'C',false);
             }
             $pdf->setFillColor(210,230,230);
-            if($all->report_type->value != 'reference_slip_report')
+            if($all->report_type->value != 'reference_slip_report' && $all->report_type->value != 'code_list_report')
             {
                 $pdf->SetX(10);
                 $pdf->Cell(65,7,$centre->name,0,1,'L',1);
@@ -2805,7 +2805,7 @@ class ReportsController extends Controller
             $pdf->Ln(10);
             $pdf->Cell(45,8,'Code '.$centre->code,1,0, 'C',1);
             $pdf->SetX(15);
-            if($all->report_type->value == 'reference_slip_report')
+            if($all->report_type->value == 'reference_slip_report' || $all->report_type->value == 'code_list_report')
             {
                 if($all->datafreq == 'Daily')
                 {
@@ -3105,7 +3105,8 @@ class ReportsController extends Controller
             else
             {
                 $pdf->Ln(11);
-                $pdf->SetFont('Arial','B',9);
+                
+                $pdf->SetFont('Arial','B',($all->report_type->value == 'status_report') ? 11 : 9);
 
                 if($all->report_type->value == 'code_list_report')
                 {
@@ -3122,19 +3123,7 @@ class ReportsController extends Controller
 
                     if(count($data) > 15)
                     {
-                        $pdf->SetX(135);
-                        foreach($all->keys as $key)
-                        {
-                            if($key->name != '#' && isset($measure[$key->name]))
-                            {
-                                $pdf->Cell($measure[$key->name],9,strtoupper(str_replace('_',' ',$key->name)),1,0,'C',1);
-                            }
-                        }
-                    }
-
-                    if(count($data) > 30)
-                    {
-                        $pdf->SetX(250);
+                        $pdf->SetX(110);
                         foreach($all->keys as $key)
                         {
                             if($key->name != '#' && isset($measure[$key->name]))
@@ -3189,37 +3178,21 @@ class ReportsController extends Controller
                 {
                     $pdf->Ln(9);
                 }
-                if($all->report_type->value == 'code_list_report' && ($i >=16 && $i <= 30) && $pdf->PageNo() == 1)
+                if($all->report_type->value == 'code_list_report' && ($i >=25 && $i <= 48) && $pdf->PageNo() == 1)
                 {
-                    if($i == 16)
+                    if($i == 25)
                     {
-                        $pdf->Ln(-135);
+                        $pdf->Ln(-216);
                     }
-                    $pdf->SetX(135);
+                    $pdf->SetX(110);
                 }
-                elseif($all->report_type->value == 'code_list_report' && ($i >=21 && $i <= 40) && $pdf->PageNo() != 1)
+                elseif($all->report_type->value == 'code_list_report' && ($i >=25 && $i <= 48) && $pdf->PageNo() != 1)
                 {
-                    if($i == 21)
+                    if($i == 25)
                     {
-                        $pdf->Ln(-180);
+                        $pdf->Ln(-216);
                     }
-                    $pdf->SetX(135);
-                }
-                elseif($all->report_type->value == 'code_list_report' && ($i >=31 && $i <= 45) && $pdf->PageNo() == 1)
-                {
-                    if($i == 31)
-                    {
-                        $pdf->Ln(-135);
-                    }
-                    $pdf->SetX(250);
-                }
-                elseif($all->report_type->value == 'code_list_report' && ($i >=41 && $i <= 60) && $pdf->PageNo() != 1)
-                {
-                    if($i == 41)
-                    {
-                        $pdf->Ln(-180);
-                    }
-                    $pdf->SetX(250);
+                    $pdf->SetX(110);
                 }
                 $arr = (array)$data;
 
@@ -3288,6 +3261,11 @@ class ReportsController extends Controller
                     }
                 }
 
+                if($i == 48 && $all->report_type->value == 'code_list_report')
+                {
+                    $i = 0;
+                }
+
                 if(($i % 10 == 0 && $pdf->PageNo() == 1) && $all->report_type->value == 'lab_report')
                 {
                     if($all->report_type->value == 'lab_report')
@@ -3322,9 +3300,9 @@ class ReportsController extends Controller
                     
                 }
 
-                if(($i % 11 == 0 && $pdf->PageNo() == 1) && $all->report_type->value == 'status_report' && $all->portion == 'A-B')
+                if(($i % 12 == 0 && $pdf->PageNo() == 1) && $all->report_type->value == 'status_report' && $all->portion == 'A-B')
                 {
-                        $pdf->Ln(30);
+                        $pdf->Ln(15);
                         $pdf->Cell(140,10, "_______________________", 0, 0);
                         $pdf->Cell(130,10, "_______________________", 0, 0);
                         $pdf->Cell(15,10, "____________________________", 0, 0);
@@ -3332,11 +3310,14 @@ class ReportsController extends Controller
                         $pdf->Cell(140,10, '           Prepared By ', 0, 0);
                         $pdf->Cell(130,10, '           Checked By ', 0, 0);
                         $pdf->Cell(195,10, '           Authorised Signature ', 0, 0);
-                        $i = 0;
+                        $pdf->Ln(7);
+                        $pdf->Cell(645,10,'Page '.$pdf->PageNo().' of {nb}'.$pdf->AliasNbPages().'',0,0,'C');
+                        $pdf->SetFont('Arial','B',11);
+                        $i = 2;
                 }
                 elseif($i % 19 == 0 && $all->report_type->value == 'status_report' && $all->portion == 'A-B')
                 {
-                        $pdf->Ln(25);
+                        $pdf->Ln(17);
                         $pdf->Cell(140,10, "_______________________", 0, 0);
                         $pdf->Cell(130,10, "_______________________", 0, 0);
                         $pdf->Cell(15,10, "____________________________", 0, 0);
@@ -3344,11 +3325,14 @@ class ReportsController extends Controller
                         $pdf->Cell(140,10, '           Prepared By ', 0, 0);
                         $pdf->Cell(130,10, '           Checked By ', 0, 0);
                         $pdf->Cell(195,10, '           Authorised Signature ', 0, 0);
-                        $i = 0;
+                        $pdf->Ln(7);
+                        $pdf->Cell(645,10,'Page '.$pdf->PageNo().' of {nb}'.$pdf->AliasNbPages().'',0,0,'C');
+                        $pdf->SetFont('Arial','B',11);
+                        $i = 2;
                 }
-                elseif(($i % 11 == 0 && $pdf->PageNo() == 1) && $all->report_type->value == 'status_report' && ($all->portion == 'B' || $all->portion == 'A'))
+                elseif(($i % 12 == 0 && $pdf->PageNo() == 1) && $all->report_type->value == 'status_report' && ($all->portion == 'B' || $all->portion == 'A'))
                 {
-                        $pdf->Ln(30);
+                        $pdf->Ln(15);
                         $pdf->Cell(140,10, "_______________________", 0, 0);
                         $pdf->Cell(130,10, "_______________________", 0, 0);
                         $pdf->Cell(15,10, "____________________________", 0, 0);
@@ -3356,11 +3340,14 @@ class ReportsController extends Controller
                         $pdf->Cell(140,10, '           Prepared By ', 0, 0);
                         $pdf->Cell(130,10, '           Checked By ', 0, 0);
                         $pdf->Cell(195,10, '           Authorised Signature ', 0, 0);
-                        $i = 0;
+                        $pdf->Ln(7);
+                        $pdf->Cell(645,10,'Page '.$pdf->PageNo().' of {nb}'.$pdf->AliasNbPages().'',0,0,'C');
+                        $pdf->SetFont('Arial','B',11);
+                        $i = 2;
                 }
                 elseif($i % 19 == 0 && $all->report_type->value == 'status_report' && ($all->portion == 'B' || $all->portion == 'A'))
                 {
-                        $pdf->Ln(25);
+                        $pdf->Ln(15);
                         $pdf->Cell(140,10, "_______________________", 0, 0);
                         $pdf->Cell(130,10, "_______________________", 0, 0);
                         $pdf->Cell(15,10, "____________________________", 0, 0);
@@ -3368,12 +3355,10 @@ class ReportsController extends Controller
                         $pdf->Cell(140,10, '           Prepared By ', 0, 0);
                         $pdf->Cell(130,10, '           Checked By ', 0, 0);
                         $pdf->Cell(195,10, '           Authorised Signature ', 0, 0);
-                        $i = 0;
-                }
-
-                if($i == 45 || $i == 60)
-                {
-                    $i = 0;
+                        $pdf->Ln(7);
+                        $pdf->Cell(645,10,'Page '.$pdf->PageNo().' of {nb}'.$pdf->AliasNbPages().'',0,0,'C');
+                        $pdf->SetFont('Arial','B',11);
+                        $i = 2;
                 }
             }
 
@@ -3390,9 +3375,10 @@ class ReportsController extends Controller
                     $pdf->SetFont('Arial','B',8);
                     $i = 0;
             }
-            elseif(($i <= 18 || $i <= 10) && $all->report_type->value == 'status_report')
+            elseif(($i <= 18 || $i <= 11) && $all->report_type->value == 'status_report' && $pdf->PageNo() != 1)
             {
-                $pdf->Ln(30);
+                $pdf->SetY(170);
+                // $pdf->Ln(20);
                 $pdf->Cell(140,10, "_______________________", 0, 0);
                 $pdf->Cell(130,10, "_______________________", 0, 0);
                 $pdf->Cell(15,10, "____________________________", 0, 0);
@@ -3400,6 +3386,9 @@ class ReportsController extends Controller
                 $pdf->Cell(140,10, '           Prepared By ', 0, 0);
                 $pdf->Cell(130,10, '           Checked By ', 0, 0);
                 $pdf->Cell(195,10, '           Authorised Signature ', 0, 0);
+                $pdf->Ln(7);
+                $pdf->Cell(645,10,'Page '.$pdf->PageNo().' of {nb}'.$pdf->AliasNbPages().'',0,0,'C');
+                $pdf->SetFont('Arial','B',11);
             }
 
             $filename = $all->report_type->value.'_export_' . time() . '.pdf';
@@ -3492,7 +3481,7 @@ class ReportsController extends Controller
         }
         elseif($type == 'status_report')
         {
-            $arr = array('date' => 20, "serial_#" => 20, "name" => 78, 's/d/w/o' => 70, 'pp_#' => 35, 'country' => 40, 'agency' => 45, 'status' => 22);
+            $arr = array('date' => 22, "serial_#" => 20, "name" => 78, 's/d/w/o' => 75, 'pp_#' => 24, 'country' => 49, 'agency' => 40, 'status' => 22);
         }
         elseif($type == 'cash_report')
         {

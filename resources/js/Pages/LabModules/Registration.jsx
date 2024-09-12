@@ -16,6 +16,7 @@ import Select from 'react-select';
 
 export default function Registration(props) {
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [currToken, setToken] = useState(props.token_no);
     const [Queue, setQueue] = useState(props.in_queue);
     const [prevBarcode, setPrevBarcode] = useState(props.prevBarcode);
@@ -158,7 +159,7 @@ export default function Registration(props) {
             });
         }
     }
-
+    
     const handleCapture = (e) => {
 
         let video = document.getElementById('video');
@@ -306,7 +307,7 @@ export default function Registration(props) {
     }
 
     const handlePrint = async () => {
-
+        setIsSubmitting(true);
         const requestData = {
             centre_id: props.auth.user.centre.centre_id,
             barcode_no: prevBarcode
@@ -367,6 +368,8 @@ export default function Registration(props) {
                 progress: undefined,
                 theme: "light",
                 });
+        } finally {
+            setIsSubmitting(false); // Re-enable the button
         }
     }
 
@@ -681,7 +684,7 @@ export default function Registration(props) {
         }
         else
         {
-            if(e.target.name == 'marital_status' || e.target.name == 'pregnancy_test')
+            if(e.target.name == 'marital_status' || e.target.name == 'pregnancy_test' || e.target.name == 'finger_type')
             {
                 setData(e.target.name, e.target.value);
             }
@@ -689,7 +692,6 @@ export default function Registration(props) {
             {
                 setData(e.target.name, e.target.value.toUpperCase());
             }
-
         }
     }
 
@@ -699,6 +701,7 @@ export default function Registration(props) {
 
         if(verify == true)
         {
+            setIsSubmitting(true);
             const requestData = {
                 data: data,
                 passport_image: data.passport_image,
@@ -758,6 +761,8 @@ export default function Registration(props) {
                         progress: undefined,
                         theme: "light",
                         });
+                } finally {
+                    setIsSubmitting(false); // Re-enable the button
                 }
         }
         else
@@ -967,7 +972,7 @@ export default function Registration(props) {
                                                 <div className='col-md-6' style={{float: 'right'}}>
                                                 {props?.auth?.modules?.[0]?.rights?.[2]?.permission_name == 'manual_entry' && props?.auth?.modules?.[0]?.rights?.[2]?.status == true ?
                                                     <label class="form-check form-switch" style={{float: 'right'}}>
-                                                        <input class="form-check-input" type="checkbox" disabled={data.passport_image != null && data.passport_image != '' && ppFormat} checked={manual} onChange={(e) => setManual(e.target.checked)}/>
+                                                        <input class="form-check-input" type="checkbox" checked={manual} onChange={(e) => setManual(e.target.checked)}/>
                                                         <span class="form-check-label">Manual Entry</span>
                                                     </label>
                                                 :
@@ -1110,14 +1115,16 @@ export default function Registration(props) {
                                                         </select>
                                                     </div>
                                                 </div>
-                                                {manualPP &&(
+                                                {manualPP && !ppFormat ? 
                                                 <div className="col-4" id="passport_manual_image">
                                                     <div className="row g-3 align-items-center">
                                                         <label className='form-label'>Passport Image</label>
                                                         <input type="file" className="form-control" required={manual} name="passport_image" onChange={(e) => setData('passport_image',e.target.files[0])} />
                                                     </div>
                                                 </div>
-                                                )}
+                                                :
+                                                <></>
+                                                }
                                             </div>
                                             <div className="row g-5 mb-3">
                                                 <div className="col-4">
@@ -1161,13 +1168,15 @@ export default function Registration(props) {
                                             </div>
                                         </div>)
                                         }
-                                        {!manualPP && (
+                                        {(!manualPP || data.passport_image != null || data.passport_image != '') && typeof data.passport_image === 'string' ? 
                                             <div className="card-body">
                                                 <div className="row g-5 mb-3">
                                                     <img src={data.passport_image != null || data.passport_image != '' ? data.passport_image : '#'} />
                                                 </div>
                                             </div>
-                                        )}
+                                            :
+                                            <></>
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -1379,11 +1388,11 @@ export default function Registration(props) {
                                         <div className="card-body">
                                             <div className='row g-5'>
                                                 <div className="col-3">
-                                                    <button className="btn btn-outline-success" disabled={currToken == 'None'} onClick={handleSubmit}>Submit Form</button>
+                                                    <button className="btn btn-outline-success" disabled={currToken == 'None' || isSubmitting} onClick={handleSubmit}>Submit Form</button>
                                                 </div>
                                                 {props?.auth?.modules?.[0]?.rights?.[0]?.permission_name == 'edit' && props?.auth?.modules?.[0]?.rights?.[0]?.status == true ?
                                                 <div className="col-3">
-                                                    <a className="btn btn-outline-info" type="button" href={route('registration-desk.show','edit')}>
+                                                    <a className="btn btn-outline-info" type="button" href={route('registration-desk.show','edit')} disabled={isSubmitting}>
                                                         Edit Registration
                                                     </a>
                                                 </div>
@@ -1396,7 +1405,7 @@ export default function Registration(props) {
                                                 </div>
                                                 }
                                                 <div className="col-3">
-                                                    <button className="btn btn-outline-purple" data-bs-toggle="modal" data-bs-target="#reg-report" disabled={prevBarcode == null} onClick={handlePrint}>Print Report</button>
+                                                    <button className="btn btn-outline-purple" data-bs-toggle="modal" data-bs-target="#reg-report" disabled={prevBarcode == null || isSubmitting} onClick={handlePrint}>Print Report</button>
                                                 </div>
                                             </div>
                                         </div>

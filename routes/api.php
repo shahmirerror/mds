@@ -20,6 +20,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // ->middleware('auth')
 Route::get('fetch-prev-regs', [App\Http\Controllers\API\ImportController::class, 'fetch_regs'])->name('import.regs');
 Route::get('fix-prev-regs', [App\Http\Controllers\API\ImportController::class, 'fix_regs'])->name('import.fix_regs');
+Route::get('fix-prev-regs-id', [App\Http\Controllers\API\ImportController::class, 'fix_reg_ids'])->name('import.fix_reg_ids');
+Route::get('fix-finger', [App\Http\Controllers\API\ImportController::class, 'fix_finger'])->name('import.fix_finger');
 Route::get('fix-xray-verif', [App\Http\Controllers\API\ImportController::class, 'fix_xray_verif'])->name('import.fix_xray_verif');
 Route::get('fetch-prev-meds', [App\Http\Controllers\API\ImportController::class, 'fetch_medicals'])->name('import.meds');
 Route::get('fetch-prev-xrays', [App\Http\Controllers\API\ImportController::class, 'fetch_xrays'])->name('import.xrays');

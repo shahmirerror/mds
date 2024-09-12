@@ -804,455 +804,591 @@ class ReportsController extends Controller
 
             if($all->datafreq == 'Daily')
             {
-                $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
-                                        ->join('candidates','candidates.id','registrations.candidate_id')
-                                        ->where('center_id', $all->centreID)
-                                        ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries,$status) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereIn('country', $countries)
-                                                        ->whereIn('registrations.status', $status)
-                                                            ->where('reg_date',$all->dailydate)
-                                                            ->orWhere(function ($query) use ($countries, $status) {
-                                                                $query->where('print_report_portion','B')->whereIn('country',$countries)->whereIn('registrations.status',$status);
-                                                            });
-                                        })
-                                        ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereIn('country', $countries)
-                                                            ->where('reg_date',$all->dailydate)
-                                                            ->orWhere(function ($query) use ($countries) {
-                                                                $query->where('print_report_portion','B')->whereIn('country',$countries);
-                                                            });
-                                        })
-                                        ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereNotIn('country', $countries)
-                                                        ->whereIn('registrations.status', $status)
-                                                            ->where('reg_date',$all->dailydate)
-                                                            ->orWhere(function ($query) use ($countries, $status) {
-                                                                $query->where('print_report_portion','B')->whereNotIn('country',$countries)->whereIn('registrations.status',$status);
-                                                            });
-                                        })
-                                        ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereNotIn('country', $countries)
-                                                            ->where('reg_date',$all->dailydate)
-                                                            ->orWhere(function ($query) use ($countries) {
-                                                                $query->where('print_report_portion','B')->whereNotIn('country',$countries);
-                                                            });
-                                        })
-                                        ->when($print_report == 'A-B' && count($countries) == 0 && count($status) > 0, function ($query) use ($all, $countries) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereIn('registrations.status', $status)
-                                                            ->where('reg_date',$all->dailydate)
-                                                            ->orWhere(function ($query) use ($status) {
-                                                                $query->where('print_report_portion','B')->whereIn('registrations.status',$status);
-                                                            });
-                                        })
-                                        ->when($print_report == 'A-B' && count($countries) == 0 && count($status) == 0, function ($query) use ($all, $countries) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->where('reg_date',$all->dailydate)
-                                                            ->orWhere(function ($query) {
-                                                                $query->where('print_report_portion','B');
-                                                            });
-                                        })
-                                        ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report,$countries,$status) {
-                                            return $query->where('print_report_portion', $print_report)->whereIn('country', $countries)
-                                                        ->whereIn('registrations.status', $status);
-                                        })
-                                        ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report,$countries) {
-                                            return $query->where('print_report_portion', $print_report)->whereIn('country', $countries);
-                                        })
-                                        ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report, $status) {
-                                            return $query->where('print_report_portion', $print_report)->whereNotIn('country', $countries)
-                                                        ->whereIn('registrations.status', $status);
-                                        })
-                                        ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report, $countries,$status) {
-                                            return $query->where('print_report_portion', $print_report)->whereNotIn('country', $countries);
-                                        })
-                                        ->when($print_report == 'B' && count($countries) == 0 && count($status) > 0, function ($query) use ($print_report, $status) {
-                                            return $query->where('print_report_portion', $print_report)
-                                                        ->whereIn('registrations.status', $status);
-                                        })
-                                        ->when($print_report == 'B' && count($countries) == 0 && count($status) == 0, function ($query) use ($print_report, $status) {
-                                            return $query->where('print_report_portion', $print_report);
-                                        })
-                                        ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all,$countries, $status) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereIn('country', $countries)
-                                                            ->where('reg_date',$all->dailydate)
-                                                            ->whereIn('registrations.status', $status);
-                                        })
-                                        ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all,$countries, $status) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereIn('country', $countries)
-                                                            ->where('reg_date',$all->dailydate);
-                                        })
-                                        ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all,$countries, $status) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereNotIn('country', $countries)
-                                                            ->where('reg_date',$all->dailydate)
-                                                            ->whereIn('registrations.status', $status);
-                                        })
-                                        ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all,$countries, $status) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereNotIn('country', $countries)
-                                                            ->where('reg_date',$all->dailydate);
-                                        })
-                                        ->when($print_report == 'A' && count($countries) == 0 && count($status) > 0, function ($query) use ($all,$countries, $status) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->where('reg_date',$all->dailydate)
-                                                            ->whereIn('registrations.status', $status);
-                                        })
-                                        ->when($print_report == 'A' && count($countries) == 0 && count($status) == 0, function ($query) use ($all,$countries, $status) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->where('reg_date',$all->dailydate);
-                                        })
-                                        ->orderBy('print_report_portion',"DESC")
-                                        ->orderBy('serial_no',"ASC")
-                                        ->get();
+                $data = Registrations::select(
+                    'candidates.passport_no as pp_#',
+                    'candidates.candidate_name as name',
+                    'relative_name as s/d/w/o',
+                    'country',
+                    'agency',
+                    'serial_no as serial_#',
+                    'reg_date as date',
+                    'print_report_portion',
+                    'registrations.status'
+                )
+                ->join('candidates', 'candidates.id', 'registrations.candidate_id')
+                ->where('center_id', $all->centreID)
+                ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->where(function ($q) use ($all, $countries, $status) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereIn('country', $countries)
+                          ->whereIn('registrations.status', $status)
+                          ->where('reg_date', $all->dailydate)
+                          ->orWhere(function ($q) use ($countries, $status) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereIn('country', $countries)
+                                ->whereIn('registrations.status', $status);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->where(function ($q) use ($all, $countries) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereIn('country', $countries)
+                          ->where('reg_date', $all->dailydate)
+                          ->orWhere(function ($q) use ($countries) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereIn('country', $countries);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->where(function ($q) use ($all, $countries, $status) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereNotIn('country', $countries)
+                          ->whereIn('registrations.status', $status)
+                          ->where('reg_date', $all->dailydate)
+                          ->orWhere(function ($q) use ($countries, $status) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereNotIn('country', $countries)
+                                ->whereIn('registrations.status', $status);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->where(function ($q) use ($all, $countries) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereNotIn('country', $countries)
+                          ->where('reg_date', $all->dailydate)
+                          ->orWhere(function ($q) use ($countries) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereNotIn('country', $countries);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && count($countries) == 0 && count($status) > 0, function ($query) use ($all, $status) {
+                    return $query->where(function ($q) use ($all, $status) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereIn('registrations.status', $status)
+                          ->where('reg_date', $all->dailydate)
+                          ->orWhere(function ($q) use ($status) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereIn('registrations.status', $status);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && count($countries) == 0 && count($status) == 0, function ($query) use ($all) {
+                    return $query->where(function ($q) use ($all) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->where('reg_date', $all->dailydate)
+                          ->orWhere(function ($q) {
+                              $q->where('print_report_portion', 'B');
+                          });
+                    });
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report, $countries, $status) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereIn('country', $countries)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report, $countries) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereIn('country', $countries);
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report, $countries, $status) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereNotIn('country', $countries)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report, $countries) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereNotIn('country', $countries);
+                })
+                ->when($print_report == 'B' && count($countries) == 0 && count($status) > 0, function ($query) use ($print_report, $status) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'B' && count($countries) == 0 && count($status) == 0, function ($query) use ($print_report) {
+                    return $query->where('print_report_portion', $print_report);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereIn('country', $countries)
+                        ->where('reg_date', $all->dailydate)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereIn('country', $countries)
+                        ->where('reg_date', $all->dailydate);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereNotIn('country', $countries)
+                        ->where('reg_date', $all->dailydate)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereNotIn('country', $countries)
+                        ->where('reg_date', $all->dailydate);
+                })
+                ->when($print_report == 'A' && count($countries) == 0 && count($status) > 0, function ($query) use ($all, $status) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->where('reg_date', $all->dailydate)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'A' && count($countries) == 0 && count($status) == 0, function ($query) use ($all) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->where('reg_date', $all->dailydate);
+                })
+                ->orderBy('print_report_portion', "DESC")
+                ->orderBy('serial_no', "ASC")
+                ->get();
+
             }
             elseif($all->datafreq == 'Monthly')
             {
-                $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
-                                        ->join('candidates','candidates.id','registrations.candidate_id')
-                                        ->where('center_id', $all->centreID)
-                                        ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries,$status) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereIn('country', $countries)
-                                                        ->whereIn('registrations.status', $status)
-                                                            ->whereMonth('reg_date',$all->monthlydate->value)
-                                                            ->orWhere(function ($query) use ($countries, $status) {
-                                                                $query->where('print_report_portion','B')->whereIn('country',$countries)->whereIn('registrations.status',$status);
-                                                            });
-                                        })
-                                        ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereIn('country', $countries)
-                                                            ->whereMonth('reg_date',$all->monthlydate->value)
-                                                            ->orWhere(function ($query) use ($countries) {
-                                                                $query->where('print_report_portion','B')->whereIn('country',$countries);
-                                                            });
-                                        })
-                                        ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereNotIn('country', $countries)
-                                                        ->whereIn('registrations.status', $status)
-                                                            ->whereMonth('reg_date',$all->monthlydate->value)
-                                                            ->orWhere(function ($query) use ($countries, $status) {
-                                                                $query->where('print_report_portion','B')->whereNotIn('country',$countries)->whereIn('registrations.status',$status);
-                                                            });
-                                        })
-                                        ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereNotIn('country', $countries)
-                                                            ->whereMonth('reg_date',$all->monthlydate->value)
-                                                            ->orWhere(function ($query) use ($countries) {
-                                                                $query->where('print_report_portion','B')->whereNotIn('country',$countries);
-                                                            });
-                                        })
-                                        ->when($print_report == 'A-B' && count($countries) == 0 && count($status) > 0, function ($query) use ($all, $countries) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereIn('registrations.status', $status)
-                                                            ->whereMonth('reg_date',$all->monthlydate->value)
-                                                            ->orWhere(function ($query) use ($status) {
-                                                                $query->where('print_report_portion','B')->whereIn('registrations.status',$status);
-                                                            });
-                                        })
-                                        ->when($print_report == 'A-B' && count($countries) == 0 && count($status) == 0, function ($query) use ($all, $countries) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereMonth('reg_date',$all->monthlydate->value)
-                                                            ->orWhere(function ($query) {
-                                                                $query->where('print_report_portion','B');
-                                                            });
-                                        })
-                                        ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report,$countries,$status) {
-                                            return $query->where('print_report_portion', $print_report)->whereIn('country', $countries)
-                                                        ->whereIn('registrations.status', $status);
-                                        })
-                                        ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report,$countries) {
-                                            return $query->where('print_report_portion', $print_report)->whereIn('country', $countries);
-                                        })
-                                        ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report, $status) {
-                                            return $query->where('print_report_portion', $print_report)->whereNotIn('country', $countries)
-                                                        ->whereIn('registrations.status', $status);
-                                        })
-                                        ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report, $countries,$status) {
-                                            return $query->where('print_report_portion', $print_report)->whereNotIn('country', $countries);
-                                        })
-                                        ->when($print_report == 'B' && count($countries) == 0 && count($status) > 0, function ($query) use ($print_report, $status) {
-                                            return $query->where('print_report_portion', $print_report)
-                                                        ->whereIn('registrations.status', $status);
-                                        })
-                                        ->when($print_report == 'B' && count($countries) == 0 && count($status) == 0, function ($query) use ($print_report, $status) {
-                                            return $query->where('print_report_portion', $print_report);
-                                        })
-                                        ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all,$countries, $status) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereIn('country', $countries)
-                                                            ->whereMonth('reg_date',$all->monthlydate->value)
-                                                            ->whereIn('registrations.status', $status);
-                                        })
-                                        ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all,$countries, $status) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereIn('country', $countries)
-                                                            ->whereMonth('reg_date',$all->monthlydate->value);
-                                        })
-                                        ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all,$countries, $status) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                        ->whereNotIn('country', $countries)
-                                                            ->whereMonth('reg_date',$all->monthlydate->value)
-                                                            ->whereIn('registrations.status', $status);
-                                        })
-                                        ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all,$countries, $status) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereNotIn('country', $countries)
-                                                            ->whereMonth('reg_date',$all->monthlydate->value);
-                                        })
-                                        ->when($print_report == 'A' && count($countries) == 0 && count($status) > 0, function ($query) use ($all,$countries, $status) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereMonth('reg_date',$all->monthlydate->value)
-                                                            ->whereIn('registrations.status', $status);
-                                        })
-                                        ->when($print_report == 'A' && count($countries) == 0 && count($status) == 0, function ($query) use ($all,$countries, $status) {
-                                            return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereMonth('reg_date',$all->monthlydate->value);
-                                        })
-                                        ->orderBy('print_report_portion',"DESC")
-                                        ->orderBy('serial_no',"ASC")
-                                        ->get();
+                $data = Registrations::select(
+                    'candidates.passport_no as pp_#',
+                    'candidates.candidate_name as name',
+                    'relative_name as s/d/w/o',
+                    'country',
+                    'agency',
+                    'serial_no as serial_#',
+                    'reg_date as date',
+                    'print_report_portion',
+                    'registrations.status'
+                )
+                ->join('candidates', 'candidates.id', 'registrations.candidate_id')
+                ->where('center_id', $all->centreID)
+                ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->where(function ($q) use ($all, $countries, $status) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereIn('country', $countries)
+                          ->whereIn('registrations.status', $status)
+                          ->whereMonth('reg_date', $all->monthlydate->value)
+                          ->orWhere(function ($q) use ($countries, $status) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereIn('country', $countries)
+                                ->whereIn('registrations.status', $status);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->where(function ($q) use ($all, $countries) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereIn('country', $countries)
+                          ->whereMonth('reg_date', $all->monthlydate->value)
+                          ->orWhere(function ($q) use ($countries) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereIn('country', $countries);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->where(function ($q) use ($all, $countries, $status) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereNotIn('country', $countries)
+                          ->whereIn('registrations.status', $status)
+                          ->whereMonth('reg_date', $all->monthlydate->value)
+                          ->orWhere(function ($q) use ($countries, $status) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereNotIn('country', $countries)
+                                ->whereIn('registrations.status', $status);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->where(function ($q) use ($all, $countries) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereNotIn('country', $countries)
+                          ->whereMonth('reg_date', $all->monthlydate->value)
+                          ->orWhere(function ($q) use ($countries) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereNotIn('country', $countries);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && count($countries) == 0 && count($status) > 0, function ($query) use ($all, $status) {
+                    return $query->where(function ($q) use ($all, $status) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereIn('registrations.status', $status)
+                          ->whereMonth('reg_date', $all->monthlydate->value)
+                          ->orWhere(function ($q) use ($status) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereIn('registrations.status', $status);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && count($countries) == 0 && count($status) == 0, function ($query) use ($all) {
+                    return $query->where(function ($q) use ($all) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereMonth('reg_date', $all->monthlydate->value)
+                          ->orWhere(function ($q) {
+                              $q->where('print_report_portion', 'B');
+                          });
+                    });
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report, $countries, $status) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereIn('country', $countries)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report, $countries) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereIn('country', $countries);
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report, $countries, $status) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereNotIn('country', $countries)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report, $countries) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereNotIn('country', $countries);
+                })
+                ->when($print_report == 'B' && count($countries) == 0 && count($status) > 0, function ($query) use ($print_report, $status) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'B' && count($countries) == 0 && count($status) == 0, function ($query) use ($print_report) {
+                    return $query->where('print_report_portion', $print_report);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereIn('country', $countries)
+                        ->whereMonth('reg_date', $all->monthlydate->value)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereIn('country', $countries)
+                        ->whereMonth('reg_date', $all->monthlydate->value);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereNotIn('country', $countries)
+                        ->whereMonth('reg_date', $all->monthlydate->value)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereNotIn('country', $countries)
+                        ->whereMonth('reg_date', $all->monthlydate->value);
+                })
+                ->when($print_report == 'A' && count($countries) == 0 && count($status) > 0, function ($query) use ($all, $status) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereMonth('reg_date', $all->monthlydate->value)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'A' && count($countries) == 0 && count($status) == 0, function ($query) use ($all) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereMonth('reg_date', $all->monthlydate->value);
+                })
+                ->orderBy('print_report_portion', "DESC")
+                ->orderBy('serial_no', "ASC")
+                ->get();
+
             }
             elseif($all->datafreq == 'Yearly')
             {
-                    $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
-                                            ->join('candidates','candidates.id','registrations.candidate_id')
-                                            ->where('center_id', $all->centreID)
-                                            ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries,$status) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereIn('country', $countries)
-                                                            ->whereIn('registrations.status', $status)
-                                                                ->whereYear('reg_date',$all->yearlydate)
-                                                                ->orWhere(function ($query) use ($countries, $status) {
-                                                                    $query->where('print_report_portion','B')->whereIn('country',$countries)->whereIn('registrations.status',$status);
-                                                                });
-                                            })
-                                            ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereIn('country', $countries)
-                                                                ->whereYear('reg_date',$all->yearlydate)
-                                                                ->orWhere(function ($query) use ($countries) {
-                                                                    $query->where('print_report_portion','B')->whereIn('country',$countries);
-                                                                });
-                                            })
-                                            ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereNotIn('country', $countries)
-                                                            ->whereIn('registrations.status', $status)
-                                                                ->whereYear('reg_date',$all->yearlydate)
-                                                                ->orWhere(function ($query) use ($countries, $status) {
-                                                                    $query->where('print_report_portion','B')->whereNotIn('country',$countries)->whereIn('registrations.status',$status);
-                                                                });
-                                            })
-                                            ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereNotIn('country', $countries)
-                                                                ->whereYear('reg_date',$all->yearlydate)
-                                                                ->orWhere(function ($query) use ($countries) {
-                                                                    $query->where('print_report_portion','B')->whereNotIn('country',$countries);
-                                                                });
-                                            })
-                                            ->when($print_report == 'A-B' && count($countries) == 0 && count($status) > 0, function ($query) use ($all, $countries) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereIn('registrations.status', $status)
-                                                                ->whereYear('reg_date',$all->yearlydate)
-                                                                ->orWhere(function ($query) use ($status) {
-                                                                    $query->where('print_report_portion','B')->whereIn('registrations.status',$status);
-                                                                });
-                                            })
-                                            ->when($print_report == 'A-B' && count($countries) == 0 && count($status) == 0, function ($query) use ($all, $countries) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                                ->whereYear('reg_date',$all->yearlydate)
-                                                                ->orWhere(function ($query) {
-                                                                    $query->where('print_report_portion','B');
-                                                                });
-                                            })
-                                            ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report,$countries,$status) {
-                                                return $query->where('print_report_portion', $print_report)->whereIn('country', $countries)
-                                                            ->whereIn('registrations.status', $status);
-                                            })
-                                            ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report,$countries) {
-                                                return $query->where('print_report_portion', $print_report)->whereIn('country', $countries);
-                                            })
-                                            ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report, $status) {
-                                                return $query->where('print_report_portion', $print_report)->whereNotIn('country', $countries)
-                                                            ->whereIn('registrations.status', $status);
-                                            })
-                                            ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report, $countries,$status) {
-                                                return $query->where('print_report_portion', $print_report)->whereNotIn('country', $countries);
-                                            })
-                                            ->when($print_report == 'B' && count($countries) == 0 && count($status) > 0, function ($query) use ($print_report, $status) {
-                                                return $query->where('print_report_portion', $print_report)
-                                                            ->whereIn('registrations.status', $status);
-                                            })
-                                            ->when($print_report == 'B' && count($countries) == 0 && count($status) == 0, function ($query) use ($print_report, $status) {
-                                                return $query->where('print_report_portion', $print_report);
-                                            })
-                                            ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all,$countries, $status) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereIn('country', $countries)
-                                                                ->whereYear('reg_date',$all->yearlydate)
-                                                                ->whereIn('registrations.status', $status);
-                                            })
-                                            ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all,$countries, $status) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereIn('country', $countries)
-                                                                ->whereYear('reg_date',$all->yearlydate);
-                                            })
-                                            ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all,$countries, $status) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereNotIn('country', $countries)
-                                                                ->whereYear('reg_date',$all->yearlydate)
-                                                                ->whereIn('registrations.status', $status);
-                                            })
-                                            ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all,$countries, $status) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                                ->whereNotIn('country', $countries)
-                                                                ->whereYear('reg_date',$all->yearlydate);
-                                            })
-                                            ->when($print_report == 'A' && count($countries) == 0 && count($status) > 0, function ($query) use ($all,$countries, $status) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                                ->whereYear('reg_date',$all->yearlydate)
-                                                                ->whereIn('registrations.status', $status);
-                                            })
-                                            ->when($print_report == 'A' && count($countries) == 0 && count($status) == 0, function ($query) use ($all,$countries, $status) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                                ->whereYear('reg_date',$all->yearlydate);
-                                            })
-                                            ->orderBy('print_report_portion',"DESC")
-                                            ->orderBy('serial_no',"ASC")
-                                            ->get();
+                $data = Registrations::select(
+                    'candidates.passport_no as pp_#',
+                    'candidates.candidate_name as name',
+                    'relative_name as s/d/w/o',
+                    'country',
+                    'agency',
+                    'serial_no as serial_#',
+                    'reg_date as date',
+                    'print_report_portion',
+                    'registrations.status'
+                )
+                ->join('candidates', 'candidates.id', 'registrations.candidate_id')
+                ->where('center_id', $all->centreID)
+                ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->where(function ($q) use ($all, $countries, $status) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereIn('country', $countries)
+                          ->whereIn('registrations.status', $status)
+                          ->whereYear('reg_date', $all->yearlydate)
+                          ->orWhere(function ($q) use ($countries, $status) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereIn('country', $countries)
+                                ->whereIn('registrations.status', $status);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->where(function ($q) use ($all, $countries) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereIn('country', $countries)
+                          ->whereYear('reg_date', $all->yearlydate)
+                          ->orWhere(function ($q) use ($countries) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereIn('country', $countries);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->where(function ($q) use ($all, $countries, $status) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereNotIn('country', $countries)
+                          ->whereIn('registrations.status', $status)
+                          ->whereYear('reg_date', $all->yearlydate)
+                          ->orWhere(function ($q) use ($countries, $status) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereNotIn('country', $countries)
+                                ->whereIn('registrations.status', $status);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->where(function ($q) use ($all, $countries) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereNotIn('country', $countries)
+                          ->whereYear('reg_date', $all->yearlydate)
+                          ->orWhere(function ($q) use ($countries) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereNotIn('country', $countries);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && count($countries) == 0 && count($status) > 0, function ($query) use ($all, $status) {
+                    return $query->where(function ($q) use ($all, $status) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereIn('registrations.status', $status)
+                          ->whereYear('reg_date', $all->yearlydate)
+                          ->orWhere(function ($q) use ($status) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereIn('registrations.status', $status);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && count($countries) == 0 && count($status) == 0, function ($query) use ($all) {
+                    return $query->where(function ($q) use ($all) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereYear('reg_date', $all->yearlydate)
+                          ->orWhere(function ($q) {
+                              $q->where('print_report_portion', 'B');
+                          });
+                    });
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report, $countries, $status) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereIn('country', $countries)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report, $countries) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereIn('country', $countries);
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report, $countries, $status) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereNotIn('country', $countries)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report, $countries) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereNotIn('country', $countries);
+                })
+                ->when($print_report == 'B' && count($countries) == 0 && count($status) > 0, function ($query) use ($print_report, $status) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'B' && count($countries) == 0 && count($status) == 0, function ($query) use ($print_report) {
+                    return $query->where('print_report_portion', $print_report);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereIn('country', $countries)
+                        ->whereYear('reg_date', $all->yearlydate)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereIn('country', $countries)
+                        ->whereYear('reg_date', $all->yearlydate);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereNotIn('country', $countries)
+                        ->whereYear('reg_date', $all->yearlydate)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereNotIn('country', $countries)
+                        ->whereYear('reg_date', $all->yearlydate);
+                })
+                ->when($print_report == 'A' && count($countries) == 0 && count($status) > 0, function ($query) use ($all, $status) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereYear('reg_date', $all->yearlydate)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'A' && count($countries) == 0 && count($status) == 0, function ($query) use ($all) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereYear('reg_date', $all->yearlydate);
+                })
+                ->orderBy('print_report_portion', "DESC")
+                ->orderBy('serial_no', "ASC")
+                ->get();
+
             }
             elseif($all->datafreq == 'Custom Date Range')
             {
-                    $data = Registrations::select('candidates.passport_no as pp_#','candidates.candidate_name as name','relative_name as s/d/w/o','country','agency','serial_no as serial_#','reg_date as date', 'print_report_portion', 'registrations.status')
-                                            ->join('candidates','candidates.id','registrations.candidate_id')
-                                            ->where('center_id', $all->centreID)
-                                            ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries,$status) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereIn('country', $countries)
-                                                            ->whereIn('registrations.status', $status)
-                                                                ->where('reg_date','>=',$all->fromRange)
-                                                            ->where('reg_date','<=',$all->toRange)
-                                                                ->orWhere(function ($query) use ($countries, $status) {
-                                                                    $query->where('print_report_portion','B')->whereIn('country',$countries)->whereIn('registrations.status',$status);
-                                                                });
-                                            })
-                                            ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereIn('country', $countries)
-                                                                ->where('reg_date','>=',$all->fromRange)
-                                                            ->where('reg_date','<=',$all->toRange)
-                                                                ->orWhere(function ($query) use ($countries) {
-                                                                    $query->where('print_report_portion','B')->whereIn('country',$countries);
-                                                                });
-                                            })
-                                            ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereNotIn('country', $countries)
-                                                            ->whereIn('registrations.status', $status)
-                                                                ->where('reg_date','>=',$all->fromRange)
-                                                            ->where('reg_date','<=',$all->toRange)
-                                                                ->orWhere(function ($query) use ($countries, $status) {
-                                                                    $query->where('print_report_portion','B')->whereNotIn('country',$countries)->whereIn('registrations.status',$status);
-                                                                });
-                                            })
-                                            ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereNotIn('country', $countries)
-                                                                ->where('reg_date','>=',$all->fromRange)
-                                                            ->where('reg_date','<=',$all->toRange)
-                                                                ->orWhere(function ($query) use ($countries) {
-                                                                    $query->where('print_report_portion','B')->whereNotIn('country',$countries);
-                                                                });
-                                            })
-                                            ->when($print_report == 'A-B' && count($countries) == 0 && count($status) > 0, function ($query) use ($all, $countries) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereIn('registrations.status', $status)
-                                                                ->where('reg_date','>=',$all->fromRange)
-                                                            ->where('reg_date','<=',$all->toRange)
-                                                                ->orWhere(function ($query) use ($status) {
-                                                                    $query->where('print_report_portion','B')->whereIn('registrations.status',$status);
-                                                                });
-                                            })
-                                            ->when($print_report == 'A-B' && count($countries) == 0 && count($status) == 0, function ($query) use ($all, $countries) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                                ->where('reg_date','>=',$all->fromRange)
-                                                            ->where('reg_date','<=',$all->toRange)
-                                                                ->orWhere(function ($query) {
-                                                                    $query->where('print_report_portion','B');
-                                                                });
-                                            })
-                                            ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report,$countries,$status) {
-                                                return $query->where('print_report_portion', $print_report)->whereIn('country', $countries)
-                                                            ->whereIn('registrations.status', $status);
-                                            })
-                                            ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report,$countries) {
-                                                return $query->where('print_report_portion', $print_report)->whereIn('country', $countries);
-                                            })
-                                            ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report, $status) {
-                                                return $query->where('print_report_portion', $print_report)->whereNotIn('country', $countries)
-                                                            ->whereIn('registrations.status', $status);
-                                            })
-                                            ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report, $countries,$status) {
-                                                return $query->where('print_report_portion', $print_report)->whereNotIn('country', $countries);
-                                            })
-                                            ->when($print_report == 'B' && count($countries) == 0 && count($status) > 0, function ($query) use ($print_report, $status) {
-                                                return $query->where('print_report_portion', $print_report)
-                                                            ->whereIn('registrations.status', $status);
-                                            })
-                                            ->when($print_report == 'B' && count($countries) == 0 && count($status) == 0, function ($query) use ($print_report, $status) {
-                                                return $query->where('print_report_portion', $print_report);
-                                            })
-                                            ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all,$countries, $status) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereIn('country', $countries)
-                                                                ->where('reg_date','>=',$all->fromRange)
-                                                            ->where('reg_date','<=',$all->toRange)
-                                                                ->whereIn('registrations.status', $status);
-                                            })
-                                            ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all,$countries, $status) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereIn('country', $countries)
-                                                                ->where('reg_date','>=',$all->fromRange)
-                                                            ->where('reg_date','<=',$all->toRange);
-                                            })
-                                            ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all,$countries, $status) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                            ->whereNotIn('country', $countries)
-                                                                ->where('reg_date','>=',$all->fromRange)
-                                                            ->where('reg_date','<=',$all->toRange)
-                                                                ->whereIn('registrations.status', $status);
-                                            })
-                                            ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all,$countries, $status) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                                ->whereNotIn('country', $countries)
-                                                                ->where('reg_date','>=',$all->fromRange)
-                                                            ->where('reg_date','<=',$all->toRange);
-                                            })
-                                            ->when($print_report == 'A' && count($countries) == 0 && count($status) > 0, function ($query) use ($all,$countries, $status) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                                ->where('reg_date','>=',$all->fromRange)
-                                                            ->where('reg_date','<=',$all->toRange)
-                                                                ->whereIn('registrations.status', $status);
-                                            })
-                                            ->when($print_report == 'A' && count($countries) == 0 && count($status) == 0, function ($query) use ($all,$countries, $status) {
-                                                return $query->whereIn('print_report_portion', ['A-B','A'])
-                                                                ->where('reg_date','>=',$all->fromRange)
-                                                            ->where('reg_date','<=',$all->toRange);
-                                            })
-                                            ->orderBy('print_report_portion',"DESC")
-                                            ->orderBy('serial_no',"ASC")
-                                            ->get();
+                $data = Registrations::select(
+                    'candidates.passport_no as pp_#',
+                    'candidates.candidate_name as name',
+                    'relative_name as s/d/w/o',
+                    'country',
+                    'agency',
+                    'serial_no as serial_#',
+                    'reg_date as date',
+                    'print_report_portion',
+                    'registrations.status'
+                )
+                ->join('candidates', 'candidates.id', 'registrations.candidate_id')
+                ->where('center_id', $all->centreID)
+                ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->where(function ($q) use ($all, $countries, $status) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereIn('country', $countries)
+                          ->whereIn('registrations.status', $status)
+                          ->where('reg_date', '>=', $all->fromRange)
+                          ->where('reg_date', '<=', $all->toRange)
+                          ->orWhere(function ($q) use ($countries, $status) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereIn('country', $countries)
+                                ->whereIn('registrations.status', $status);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->where(function ($q) use ($all, $countries) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereIn('country', $countries)
+                          ->where('reg_date', '>=', $all->fromRange)
+                          ->where('reg_date', '<=', $all->toRange)
+                          ->orWhere(function ($q) use ($countries) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereIn('country', $countries);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->where(function ($q) use ($all, $countries, $status) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereNotIn('country', $countries)
+                          ->whereIn('registrations.status', $status)
+                          ->where('reg_date', '>=', $all->fromRange)
+                          ->where('reg_date', '<=', $all->toRange)
+                          ->orWhere(function ($q) use ($countries, $status) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereNotIn('country', $countries)
+                                ->whereIn('registrations.status', $status);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->where(function ($q) use ($all, $countries) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereNotIn('country', $countries)
+                          ->where('reg_date', '>=', $all->fromRange)
+                          ->where('reg_date', '<=', $all->toRange)
+                          ->orWhere(function ($q) use ($countries) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereNotIn('country', $countries);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && count($countries) == 0 && count($status) > 0, function ($query) use ($all, $status) {
+                    return $query->where(function ($q) use ($all, $status) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->whereIn('registrations.status', $status)
+                          ->where('reg_date', '>=', $all->fromRange)
+                          ->where('reg_date', '<=', $all->toRange)
+                          ->orWhere(function ($q) use ($status) {
+                              $q->where('print_report_portion', 'B')
+                                ->whereIn('registrations.status', $status);
+                          });
+                    });
+                })
+                ->when($print_report == 'A-B' && count($countries) == 0 && count($status) == 0, function ($query) use ($all) {
+                    return $query->where(function ($q) use ($all) {
+                        $q->whereIn('print_report_portion', ['A-B', 'A'])
+                          ->where('reg_date', '>=', $all->fromRange)
+                          ->where('reg_date', '<=', $all->toRange)
+                          ->orWhere(function ($q) {
+                              $q->where('print_report_portion', 'B');
+                          });
+                    });
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report, $countries, $status) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereIn('country', $countries)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report, $countries) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereIn('country', $countries);
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($print_report, $countries, $status) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereNotIn('country', $countries)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'B' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($print_report, $countries) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereNotIn('country', $countries);
+                })
+                ->when($print_report == 'B' && count($countries) == 0 && count($status) > 0, function ($query) use ($print_report, $status) {
+                    return $query->where('print_report_portion', $print_report)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'B' && count($countries) == 0 && count($status) == 0, function ($query) use ($print_report) {
+                    return $query->where('print_report_portion', $print_report);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereIn('country', $countries)
+                        ->where('reg_date', '>=', $all->fromRange)
+                        ->where('reg_date', '<=', $all->toRange)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'Yes' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereIn('country', $countries)
+                        ->where('reg_date', '>=', $all->fromRange)
+                        ->where('reg_date', '<=', $all->toRange);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) > 0, function ($query) use ($all, $countries, $status) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereNotIn('country', $countries)
+                        ->where('reg_date', '>=', $all->fromRange)
+                        ->where('reg_date', '<=', $all->toRange)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'A' && ($all->inclusion == 'No' && count($countries) > 0) && count($status) == 0, function ($query) use ($all, $countries) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->whereNotIn('country', $countries)
+                        ->where('reg_date', '>=', $all->fromRange)
+                        ->where('reg_date', '<=', $all->toRange);
+                })
+                ->when($print_report == 'A' && count($countries) == 0 && count($status) > 0, function ($query) use ($all, $status) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->where('reg_date', '>=', $all->fromRange)
+                        ->where('reg_date', '<=', $all->toRange)
+                        ->whereIn('registrations.status', $status);
+                })
+                ->when($print_report == 'A' && count($countries) == 0 && count($status) == 0, function ($query) use ($all) {
+                    return $query->whereIn('print_report_portion', ['A-B', 'A'])
+                        ->where('reg_date', '>=', $all->fromRange)
+                        ->where('reg_date', '<=', $all->toRange);
+                })
+                ->orderBy('print_report_portion', "DESC")
+                ->orderBy('serial_no', "ASC")
+                ->get();
+
             }
 
             return response()->json(['data' => $data,'keys' => $keys],200);
@@ -2769,7 +2905,7 @@ class ReportsController extends Controller
         {
 
             $pdf = new Fpdf();
-            if($all->report_type->value == 'reference_slip_report')
+            if($all->report_type->value == 'reference_slip_report' || $all->report_type->value == 'code_list_report')
             {
                 $pdf->AddPage('P', 'A4', '0');
             }
@@ -2783,12 +2919,12 @@ class ReportsController extends Controller
 
             //Header Start
             $pdf->SetX(140); //The next cell will be set 100 units to the right
-            if($all->report_type->value != 'reference_slip_report')
+            if($all->report_type->value != 'reference_slip_report' && $all->report_type->value != 'code_list_report')
             {
                 $pdf->Cell(40,0,$pdf->Image(asset('storage/app/public/centres/logos/'.$centre->image),$pdf->GetX(),$pdf->GetY(),70,20),0,0,'C',false);
             }
             $pdf->setFillColor(210,230,230);
-            if($all->report_type->value != 'reference_slip_report')
+            if($all->report_type->value != 'reference_slip_report' && $all->report_type->value != 'code_list_report')
             {
                 $pdf->SetX(10);
                 $pdf->Cell(65,7,$centre->name,0,1,'L',1);
@@ -2805,7 +2941,7 @@ class ReportsController extends Controller
             $pdf->Ln(10);
             $pdf->Cell(45,8,'Code '.$centre->code,1,0, 'C',1);
             $pdf->SetX(15);
-            if($all->report_type->value == 'reference_slip_report')
+            if($all->report_type->value == 'reference_slip_report' || $all->report_type->value == 'code_list_report')
             {
                 if($all->datafreq == 'Daily')
                 {
@@ -3105,7 +3241,7 @@ class ReportsController extends Controller
             else
             {
                 $pdf->Ln(11);
-                $pdf->SetFont('Arial','B',9);
+                $pdf->SetFont('Arial','B',($all->report_type->value == 'status_report') ? 11 : 9);
 
                 if($all->report_type->value == 'code_list_report')
                 {
@@ -3122,19 +3258,7 @@ class ReportsController extends Controller
 
                     if(count($data) > 15)
                     {
-                        $pdf->SetX(135);
-                        foreach($all->keys as $key)
-                        {
-                            if($key->name != '#' && isset($measure[$key->name]))
-                            {
-                                $pdf->Cell($measure[$key->name],9,strtoupper(str_replace('_',' ',$key->name)),1,0,'C',1);
-                            }
-                        }
-                    }
-
-                    if(count($data) > 30)
-                    {
-                        $pdf->SetX(250);
+                        $pdf->SetX(110);
                         foreach($all->keys as $key)
                         {
                             if($key->name != '#' && isset($measure[$key->name]))
@@ -3177,11 +3301,18 @@ class ReportsController extends Controller
                 $pdf->Ln(9);
                 $pdf->Cell(330, 9,'Portion  '.$prev_print, 1, 1,'',1);
                 $i++;
+                $pdf->Ln(-9);
             }
+            $aar = (array)$all->data[0];
             foreach($all->data as $data)
             {
-                $i++;
-                if($i > 2 && $all->report_type->value == 'status_report')
+                $arr = (array)$data;
+
+                if($all->report_type->value != 'status_report')
+                {
+                    $i++;
+                }
+                if($all->report_type->value == 'status_report' && $pdf->PageNo() >= 1)
                 {
                     $pdf->Ln(9);
                 }
@@ -3189,103 +3320,224 @@ class ReportsController extends Controller
                 {
                     $pdf->Ln(9);
                 }
-                if($all->report_type->value == 'code_list_report' && ($i >=16 && $i <= 30) && $pdf->PageNo() == 1)
+                if($all->report_type->value == 'code_list_report' && ($i >=25 && $i <= 48) && $pdf->PageNo() == 1)
                 {
-                    if($i == 16)
+                    if($i == 25)
                     {
-                        $pdf->Ln(-135);
+                        $pdf->Ln(-216);
                     }
-                    $pdf->SetX(135);
+                    $pdf->SetX(110);
                 }
-                elseif($all->report_type->value == 'code_list_report' && ($i >=21 && $i <= 40) && $pdf->PageNo() != 1)
+                elseif($all->report_type->value == 'code_list_report' && ($i >=25 && $i <= 48) && $pdf->PageNo() != 1)
                 {
-                    if($i == 21)
+                    if($i == 25)
                     {
-                        $pdf->Ln(-180);
+                        $pdf->Ln(-216);
                     }
-                    $pdf->SetX(135);
+                    $pdf->SetX(110);
                 }
-                elseif($all->report_type->value == 'code_list_report' && ($i >=31 && $i <= 45) && $pdf->PageNo() == 1)
-                {
-                    if($i == 31)
-                    {
-                        $pdf->Ln(-135);
-                    }
-                    $pdf->SetX(250);
-                }
-                elseif($all->report_type->value == 'code_list_report' && ($i >=41 && $i <= 60) && $pdf->PageNo() != 1)
-                {
-                    if($i == 41)
-                    {
-                        $pdf->Ln(-180);
-                    }
-                    $pdf->SetX(250);
-                }
-                $arr = (array)$data;
 
                 if($all->report_type->value == 'status_report')
                 {
-                    if($data->print_report_portion != $prev_print && (($data->print_report_portion == 'A-B' || $data->print_report_portion == 'A') && $prev_print != 'A'))
+                    if($data->print_report_portion != $prev_print && (($data->print_report_portion == 'A-B' || $data->print_report_portion == 'A') && $prev_print == 'B' && $all->portion == 'A-B'))
                     {
                         $prev_print = ($data->print_report_portion == 'A-B' || $data->print_report_portion == 'A') ? 'A' : 'B';
                         $pdf->Cell(330, 9,'Portion  '.$prev_print, 1, 1,'',1);
                         $i++;
                     }
+                    else
+                    {
+                        $i++;
+                    }
                 }
 
-                foreach($all->keys as $key)
+                if(($i % 12 == 0 && $pdf->PageNo() == 1) && $all->report_type->value == 'status_report' && $all->portion == 'A-B')
                 {
-                    if($key->name != '#' && isset($arr[$key->name]))
+                        $pdf->SetY(170);
+                        $pdf->Cell(140,10, "_______________________", 0, 0);
+                        $pdf->Cell(130,10, "_______________________", 0, 0);
+                        $pdf->Cell(15,10, "____________________________", 0, 0);
+                        $pdf->Ln(5);
+                        $pdf->Cell(140,10, '           Prepared By ', 0, 0);
+                        $pdf->Cell(130,10, '           Checked By ', 0, 0);
+                        $pdf->Cell(195,10, '           Authorised Signature ', 0, 0);
+                        $pdf->Ln(7);
+                        $pdf->Cell(645,10,'Page '.$pdf->PageNo().' of {nb}'.$pdf->AliasNbPages().'',0,0,'C');
+                        $pdf->SetFont('Arial','B',11);
+                        $i = 0;
+                        $pdf->Ln(9);
+                }
+                elseif(($i % 16 == 0 && $pdf->PageNo() != 1) && $all->report_type->value == 'status_report' && $all->portion == 'A-B')
+                {
+                    $pdf->SetY(170);
+                    $pdf->Cell(140,10, "_______________________", 0, 0);
+                    $pdf->Cell(130,10, "_______________________", 0, 0);
+                    $pdf->Cell(15,10, "____________________________", 0, 0);
+                    $pdf->Ln(5);
+                    $pdf->Cell(140,10, '           Prepared By ', 0, 0);
+                    $pdf->Cell(130,10, '           Checked By ', 0, 0);
+                    $pdf->Cell(195,10, '           Authorised Signature ', 0, 0);
+                    $pdf->Ln(7);
+                    $pdf->Cell(645,10,'Page '.$pdf->PageNo().' of {nb}'.$pdf->AliasNbPages().'',0,0,'C');
+                    $pdf->SetFont('Arial','B',11);
+                    $i = 0;
+                    $pdf->Ln(9);
+                }
+                elseif(($i % 12 == 0 && $pdf->PageNo() == 1) && $all->report_type->value == 'status_report' && ($all->portion == 'B' || $all->portion == 'A'))
+                {
+                    $pdf->SetY(170);
+                    $pdf->Cell(140,10, "_______________________", 0, 0);
+                    $pdf->Cell(130,10, "_______________________", 0, 0);
+                    $pdf->Cell(15,10, "____________________________", 0, 0);
+                    $pdf->Ln(5);
+                    $pdf->Cell(140,10, '           Prepared By ', 0, 0);
+                    $pdf->Cell(130,10, '           Checked By ', 0, 0);
+                    $pdf->Cell(195,10, '           Authorised Signature ', 0, 0);
+                    $pdf->Ln(7);
+                    $pdf->Cell(645,10,'Page '.$pdf->PageNo().' of {nb}'.$pdf->AliasNbPages().'',0,0,'C');
+                    $pdf->SetFont('Arial','B',11);
+                    $i = 0;
+                    $pdf->Ln(9);
+                }
+                elseif($i % 16 == 0 && $all->report_type->value == 'status_report' && ($all->portion == 'B' || $all->portion == 'A'))
+                {
+                    $pdf->SetY(170);
+                    $pdf->Cell(140,10, "_______________________", 0, 0);
+                    $pdf->Cell(130,10, "_______________________", 0, 0);
+                    $pdf->Cell(15,10, "____________________________", 0, 0);
+                    $pdf->Ln(5);
+                    $pdf->Cell(140,10, '           Prepared By ', 0, 0);
+                    $pdf->Cell(130,10, '           Checked By ', 0, 0);
+                    $pdf->Cell(195,10, '           Authorised Signature ', 0, 0);
+                    $pdf->Ln(7);
+                    $pdf->Cell(645,10,'Page '.$pdf->PageNo().' of {nb}'.$pdf->AliasNbPages().'',0,0,'C');
+                    $pdf->SetFont('Arial','B',11);
+                    $i = 0;
+                    $pdf->Ln(9);
+                }
+
+                if($i != 0 && $all->report_type->value == 'status_report')
+                {
+                    foreach($all->keys as $key)
                     {
-                        if($key->name == "vdrl_/_tpha" || $key->name == "hbsag" || $key->name == "anti_hcv" || $key->name == "sugar" || $key->name == "albumin" || $key->name == 'pregnancy_test_(females_only)' || $key->name == 'hiv_1,2')
+                        if($key->name != '#' && isset($arr[$key->name]))
                         {
-                            if($arr[$key->name] == 'negative/positive' || $arr[$key->name] == 'positive/negative' || $arr[$key->name] == 'positive/positive' || $arr[$key->name] == 'positive')
+                            if($key->name == "vdrl_/_tpha" || $key->name == "hbsag" || $key->name == "anti_hcv" || $key->name == "sugar" || $key->name == "albumin" || $key->name == 'pregnancy_test_(females_only)' || $key->name == 'hiv_1,2')
                             {
-                                $pdf->Cell($measure[$key->name],9,'+VE',1,0,'C');
-                            }
-                            elseif($arr[$key->name] == 'negative/negative' || $arr[$key->name] == 'negative')
-                            {
-                                $pdf->Cell($measure[$key->name],9,'-VE',1,0,'C');
-                            }
-                            else
-                            {
-                                $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? $arr[$key->name] : '-',1,0,'C');
-                            }
-                        }
-                        elseif($key->name == 'date' || $key->name == 'slip_issue_date' || $key->name == 'slip_expiry_date')
-                        {
-                            $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? date('d-m-Y',strtotime($arr[$key->name])) : '-',1,0,'C');
-                        }
-                        else
-                        {
-                            if(isset($arr[$key->name]) && isset($measure[$key->name]))
-                            {
-                                if($key->name == 'comments' || $key->name == 'comment')
+                                if($arr[$key->name] == 'negative/positive' || $arr[$key->name] == 'positive/negative' || $arr[$key->name] == 'positive/positive' || $arr[$key->name] == 'positive')
                                 {
-                                    if($pdf->GetStringWidth(trim($arr[$key->name]) ) > 36){
-                                        // $pdf->SetMargins(0,1);
-                                        $pdf->setFillColor(210,230,230);
-                                        $pdf->MultiCell($measure[$key->name],4,(isset($arr[$key->name])) ? trim($arr[$key->name]) : '-',1,'C',1);
-                                        // $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? substr(trim($arr[$key->name]), 0, 36) : '-',1,0,'C');
-                                    }
-                                    else
-                                    {
-                                        $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? trim($arr[$key->name]) : '-',1,'C');
-                                    }
-                                    $pdf->Ln(-9);
+                                    $pdf->Cell($measure[$key->name],9,'+VE',1,0,'C');
+                                }
+                                elseif($arr[$key->name] == 'negative/negative' || $arr[$key->name] == 'negative')
+                                {
+                                    $pdf->Cell($measure[$key->name],9,'-VE',1,0,'C');
                                 }
                                 else
                                 {
-                                    $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? trim($arr[$key->name]) : '-',1,0,'C');
+                                    $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? $arr[$key->name] : '-',1,0,'C');
                                 }
                             }
-                            elseif(isset($measure[$key->name]))
+                            elseif($key->name == 'date' || $key->name == 'slip_issue_date' || $key->name == 'slip_expiry_date')
                             {
-                                $pdf->Cell($measure[$key->name],9,'-',1,0,'C');
+                                $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? date('d-m-Y',strtotime($arr[$key->name])) : '-',1,0,'C');
                             }
-                        }
+                            else
+                            {
+                                if(isset($arr[$key->name]) && isset($measure[$key->name]))
+                                {
+                                    if($key->name == 'comments' || $key->name == 'comment')
+                                    {
+                                        if($pdf->GetStringWidth(trim($arr[$key->name]) ) > 36){
+                                            // $pdf->SetMargins(0,1);
+                                            $pdf->setFillColor(210,230,230);
+                                            $pdf->MultiCell($measure[$key->name],4,(isset($arr[$key->name])) ? trim($arr[$key->name]) : '-',1,'C',1);
+                                            // $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? substr(trim($arr[$key->name]), 0, 36) : '-',1,0,'C');
+                                        }
+                                        else
+                                        {
+                                            $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? trim($arr[$key->name]) : '-',1,'C');
+                                        }
+                                        $pdf->Ln(-9);
+                                    }
+                                    else
+                                    {
+                                        $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? trim($arr[$key->name]) : '-',1,0,'C');
+                                    }
+                                }
+                                elseif(isset($measure[$key->name]))
+                                {
+                                    $pdf->Cell($measure[$key->name],9,'-',1,0,'C');
+                                }
+                            }
 
+                        }
                     }
+                }
+                else
+                {
+                    foreach($all->keys as $key)
+                    {
+                        if($key->name != '#' && isset($arr[$key->name]))
+                        {
+                            if($key->name == "vdrl_/_tpha" || $key->name == "hbsag" || $key->name == "anti_hcv" || $key->name == "sugar" || $key->name == "albumin" || $key->name == 'pregnancy_test_(females_only)' || $key->name == 'hiv_1,2')
+                            {
+                                if($arr[$key->name] == 'negative/positive' || $arr[$key->name] == 'positive/negative' || $arr[$key->name] == 'positive/positive' || $arr[$key->name] == 'positive')
+                                {
+                                    $pdf->Cell($measure[$key->name],9,'+VE',1,0,'C');
+                                }
+                                elseif($arr[$key->name] == 'negative/negative' || $arr[$key->name] == 'negative')
+                                {
+                                    $pdf->Cell($measure[$key->name],9,'-VE',1,0,'C');
+                                }
+                                else
+                                {
+                                    $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? $arr[$key->name] : '-',1,0,'C');
+                                }
+                            }
+                            elseif($key->name == 'date' || $key->name == 'slip_issue_date' || $key->name == 'slip_expiry_date')
+                            {
+                                $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? date('d-m-Y',strtotime($arr[$key->name])) : '-',1,0,'C');
+                            }
+                            else
+                            {
+                                if(isset($arr[$key->name]) && isset($measure[$key->name]))
+                                {
+                                    if($key->name == 'comments' || $key->name == 'comment')
+                                    {
+                                        if($pdf->GetStringWidth(trim($arr[$key->name]) ) > 36){
+                                            // $pdf->SetMargins(0,1);
+                                            $pdf->setFillColor(210,230,230);
+                                            $pdf->MultiCell($measure[$key->name],4,(isset($arr[$key->name])) ? trim($arr[$key->name]) : '-',1,'C',1);
+                                            // $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? substr(trim($arr[$key->name]), 0, 36) : '-',1,0,'C');
+                                        }
+                                        else
+                                        {
+                                            $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? trim($arr[$key->name]) : '-',1,'C');
+                                        }
+                                        $pdf->Ln(-9);
+                                    }
+                                    else
+                                    {
+                                        $pdf->Cell($measure[$key->name],9,(isset($arr[$key->name])) ? trim($arr[$key->name]) : '-',1,0,'C');
+                                    }
+                                }
+                                elseif(isset($measure[$key->name]))
+                                {
+                                    $pdf->Cell($measure[$key->name],9,'-',1,0,'C');
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            $pdf->Cell($measure[$key->name],9,'-',1,0,'C');
+                        }
+                    }
+                }
+
+                if($i == 48 && $all->report_type->value == 'code_list_report')
+                {
+                    $i = 0;
                 }
 
                 if(($i % 10 == 0 && $pdf->PageNo() == 1) && $all->report_type->value == 'lab_report')
@@ -3319,61 +3571,7 @@ class ReportsController extends Controller
                         $pdf->SetFont('Arial','B',8);
                         $i = 0;
                     }
-                    
-                }
 
-                if(($i % 11 == 0 && $pdf->PageNo() == 1) && $all->report_type->value == 'status_report' && $all->portion == 'A-B')
-                {
-                        $pdf->Ln(30);
-                        $pdf->Cell(140,10, "_______________________", 0, 0);
-                        $pdf->Cell(130,10, "_______________________", 0, 0);
-                        $pdf->Cell(15,10, "____________________________", 0, 0);
-                        $pdf->Ln(5);
-                        $pdf->Cell(140,10, '           Prepared By ', 0, 0);
-                        $pdf->Cell(130,10, '           Checked By ', 0, 0);
-                        $pdf->Cell(195,10, '           Authorised Signature ', 0, 0);
-                        $i = 0;
-                }
-                elseif($i % 19 == 0 && $all->report_type->value == 'status_report' && $all->portion == 'A-B')
-                {
-                        $pdf->Ln(25);
-                        $pdf->Cell(140,10, "_______________________", 0, 0);
-                        $pdf->Cell(130,10, "_______________________", 0, 0);
-                        $pdf->Cell(15,10, "____________________________", 0, 0);
-                        $pdf->Ln(5);
-                        $pdf->Cell(140,10, '           Prepared By ', 0, 0);
-                        $pdf->Cell(130,10, '           Checked By ', 0, 0);
-                        $pdf->Cell(195,10, '           Authorised Signature ', 0, 0);
-                        $i = 0;
-                }
-                elseif(($i % 11 == 0 && $pdf->PageNo() == 1) && $all->report_type->value == 'status_report' && ($all->portion == 'B' || $all->portion == 'A'))
-                {
-                        $pdf->Ln(30);
-                        $pdf->Cell(140,10, "_______________________", 0, 0);
-                        $pdf->Cell(130,10, "_______________________", 0, 0);
-                        $pdf->Cell(15,10, "____________________________", 0, 0);
-                        $pdf->Ln(5);
-                        $pdf->Cell(140,10, '           Prepared By ', 0, 0);
-                        $pdf->Cell(130,10, '           Checked By ', 0, 0);
-                        $pdf->Cell(195,10, '           Authorised Signature ', 0, 0);
-                        $i = 0;
-                }
-                elseif($i % 19 == 0 && $all->report_type->value == 'status_report' && ($all->portion == 'B' || $all->portion == 'A'))
-                {
-                        $pdf->Ln(25);
-                        $pdf->Cell(140,10, "_______________________", 0, 0);
-                        $pdf->Cell(130,10, "_______________________", 0, 0);
-                        $pdf->Cell(15,10, "____________________________", 0, 0);
-                        $pdf->Ln(5);
-                        $pdf->Cell(140,10, '           Prepared By ', 0, 0);
-                        $pdf->Cell(130,10, '           Checked By ', 0, 0);
-                        $pdf->Cell(195,10, '           Authorised Signature ', 0, 0);
-                        $i = 0;
-                }
-
-                if($i == 45 || $i == 60)
-                {
-                    $i = 0;
                 }
             }
 
@@ -3390,9 +3588,10 @@ class ReportsController extends Controller
                     $pdf->SetFont('Arial','B',8);
                     $i = 0;
             }
-            elseif(($i <= 18 || $i <= 10) && $all->report_type->value == 'status_report')
+            elseif(($i <= 17 || $i <= 11) && $all->report_type->value == 'status_report' && $pdf->PageNo() != 1)
             {
-                $pdf->Ln(30);
+                $pdf->SetY(170);
+                // $pdf->Ln(20);
                 $pdf->Cell(140,10, "_______________________", 0, 0);
                 $pdf->Cell(130,10, "_______________________", 0, 0);
                 $pdf->Cell(15,10, "____________________________", 0, 0);
@@ -3400,6 +3599,9 @@ class ReportsController extends Controller
                 $pdf->Cell(140,10, '           Prepared By ', 0, 0);
                 $pdf->Cell(130,10, '           Checked By ', 0, 0);
                 $pdf->Cell(195,10, '           Authorised Signature ', 0, 0);
+                $pdf->Ln(7);
+                $pdf->Cell(645,10,'Page '.$pdf->PageNo().' of {nb}'.$pdf->AliasNbPages().'',0,0,'C');
+                $pdf->SetFont('Arial','B',11);
             }
 
             $filename = $all->report_type->value.'_export_' . time() . '.pdf';
@@ -3492,7 +3694,7 @@ class ReportsController extends Controller
         }
         elseif($type == 'status_report')
         {
-            $arr = array('date' => 20, "serial_#" => 20, "name" => 78, 's/d/w/o' => 70, 'pp_#' => 35, 'country' => 40, 'agency' => 45, 'status' => 22);
+            $arr = array('date' => 22, "serial_#" => 20, "name" => 78, 's/d/w/o' => 75, 'pp_#' => 24, 'country' => 49, 'agency' => 40, 'status' => 22);
         }
         elseif($type == 'cash_report')
         {

@@ -17,6 +17,10 @@ use App\Models\Country;
 use App\Models\Agency;
 use App\Models\Nationality;
 use App\Models\PlaceOfIssue;
+use App\Models\ReportIssue;
+use App\Models\XraySlips;
+use App\Models\SampleCollection;
+use App\Models\PassportVerification;
 
 use App\Models\Centres;
 
@@ -25,7 +29,7 @@ class ImportController extends Controller
     public function fetch_regs()
     {
         // Define the URL to be accessed
-        $url = "http://localhost:8080/old_mls/reliance/candidates.php";
+        $url = "http://localhost:81/old_mls/khaleej/candidates.php";
 
         // Initialize a cURL session
         $curl = curl_init($url);
@@ -89,7 +93,7 @@ class ImportController extends Controller
                             $new->slip_issue_date = (date('Y-m-d', strtotime($d['slip_issue_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_issue_date'])) : date('Y-m-d', strtotime('1970-01-01'));
                             $new->slip_expiry_date = (date('Y-m-d', strtotime($d['slip_expiry_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_expiry_date'])) : date('Y-m-d', strtotime('1970-01-01'));
                             $new->token_no = $d['token_no'];
-                            $new->center_id = '1';
+                            $new->center_id = '3';
                             $new->print_report_portion = $d['print_report_portion'];
                             $new->save();
                         }
@@ -121,7 +125,7 @@ class ImportController extends Controller
                             $new->slip_issue_date = (date('Y-m-d', strtotime($d['slip_issue_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_issue_date'])) : date('Y-m-d', strtotime('1970-01-01'));
                             $new->slip_expiry_date = (date('Y-m-d', strtotime($d['slip_expiry_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_expiry_date'])) : date('Y-m-d', strtotime('1970-01-01'));
                             $new->token_no = $d['token_no'];
-                            $new->center_id = '1';
+                            $new->center_id = '3';
                             $new->print_report_portion = $d['print_report_portion'];
                             $new->update();
                         }
@@ -163,7 +167,7 @@ class ImportController extends Controller
                         $new->slip_issue_date = (date('Y-m-d', strtotime($d['slip_issue_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_issue_date'])) : date('Y-m-d', strtotime('1970-01-01'));
                         $new->slip_expiry_date = (date('Y-m-d', strtotime($d['slip_expiry_date'])) != "-0001-11-30") ? date('Y-m-d', strtotime($d['slip_expiry_date'])) : date('Y-m-d', strtotime('1970-01-01'));
                         $new_2->token_no = $d['token_no'];
-                        $new_2->center_id = '6';
+                        $new_2->center_id = '3';
                         $new_2->print_report_portion = $d['print_report_portion'];
                         $new_2->save();
                     }
@@ -179,7 +183,7 @@ class ImportController extends Controller
     public function fetch_labs()
     {
         // Define the URL to be accessed
-        $url = "http://localhost:8080/old_mls/reliance/lab.php";
+        $url = "http://localhost:81/old_mls/khaleej/lab.php";
 
         // Initialize a cURL session
         $curl = curl_init($url);
@@ -208,7 +212,7 @@ class ImportController extends Controller
             foreach($data as $d)
             {
                 $new = new LabResult;
-                $new->centre_id = '1';
+                $new->centre_id = '3';
                 $new->reg_id = $d['reg_id'];
                 $new->barcode = $d['barcode'];
 
@@ -267,7 +271,7 @@ class ImportController extends Controller
     public function fetch_labsticker()
     {
         // Define the URL to be accessed
-        $url = "http://localhost:8080/old_mls/reliance/lab.php";
+        $url = "http://localhost:81/old_mls/khaleej/lab.php";
 
         // Initialize a cURL session
         $curl = curl_init($url);
@@ -296,11 +300,11 @@ class ImportController extends Controller
             foreach($data as $d)
             {
                 $new = new LabSticker;
-                $new->centre_id = '1';
+                $new->centre_id = '3';
                 $new->reg_id = $d['reg_id'];
                 $new->sticker_print_by = $d['sticker_print_by'];
 
-                $new->sticker_1_printed = $d['sticker_1_printed'];
+                // $new->sticker_1_printed = $d['sticker_1_printed'];
                 $new->sticker_value_1 = $d['sticker_value_1'];
                 $new->sticker_value_2 = $d['sticker_value_2'];
 
@@ -319,7 +323,8 @@ class ImportController extends Controller
     public function fetch_xrays()
     {
         // Define the URL to be accessed
-        $url = "http://localhost:8080/old_mls/reliance/xray.php";
+        // $url = "http://localhost:81/old_mls/khaleej/xray_verification.php";
+        $url = "http://localhost:81/old_mls/khaleej/xray.php";
 
         // Initialize a cURL session
         $curl = curl_init($url);
@@ -348,10 +353,24 @@ class ImportController extends Controller
             foreach($data as $d)
             {
                 $new = new XraySlips;
-                $new->centre_id = '1';
+                $new->centre_id = '3';
                 $new->reg_id = $d['reg_id'];
                 $new->slips = $d['xray_slips'];
                 $new->created_at = $d['created_at'];
+
+                // $new = new XrayVerification;
+                // $new->centre_id = '3';
+                // $new->reg_id = $d['reg_id'];
+                // $new->created_by = $d['created_by'];
+                // $new->created_at = $d['created_at'];
+
+                // $new = new XrayResult;
+                // $new->centre_id = '3';
+                // $new->reg_id = $d['reg_id'];
+                // $new->chest = $d['xray_chest'];
+                // $new->notes = $d['xray_notes'];
+                // $new->status = $d['xray_status'];
+                // $new->created_at = $d['created_on'];
 
                 $new->save();
             }
@@ -364,7 +383,7 @@ class ImportController extends Controller
     public function fetch_medicals()
     {
         // Define the URL to be accessed
-        $url = "http://localhost:8080/old_mls/reliance/medical.php";
+        $url = "http://localhost:81/old_mls/khaleej/medical.php";
 
         // Initialize a cURL session
         $curl = curl_init($url);
@@ -392,68 +411,74 @@ class ImportController extends Controller
 
             foreach($data as $d)
             {
-                $new = new Medical;
-                $new->centre_id = '1';
+                // $new = new Medical;
+                // $new->centre_id = '3';
+                // $new->reg_id = $d['reg_id'];
+                // $new->height = $d['height'];
+                // $new->weight = $d['weight'];
+                // $new->bmi = $d['bmi'];
+                // $new->pulse = $d['pulse'];
+                // $new->rr = $d['rr'];
+
+                // $new->visual_unaided_right_eye = $d['visual_unaided_rt_eye'];
+                // $new->visual_unaided_left_eye = $d['visual_unaided_left_eye'];
+                // $new->visual_aided_right_eye = $d['visual_aided_rt_eye'];
+                // $new->visual_aided_left_eye = $d['visual_aided_left_eye'];
+
+                // $new->distant_unaided_right_eye = $d['distant_unaided_rt_eye'];
+                // $new->distant_unaided_left_eye = $d['distant_unaided_left_eye'];
+                // $new->distant_aided_right_eye = $d['distant_aided_rt_eye'];
+                // $new->distant_aided_left_eye = $d['distant_aided_left_eye'];
+
+                // $new->near_unaided_right_eye = $d['near_unaided_rt_eye'];
+                // $new->near_unaided_left_eye = $d['near_unaided_left_eye'];
+                // $new->near_aided_right_eye = $d['near_aided_rt_eye'];
+                // $new->near_aided_left_eye = $d['near_aided_left_eye'];
+
+                // $new->color_vision = $d['color_vision'];
+                // $new->hearing_left_ear = $d['hearing_left_ear'];
+                // $new->hearing_right_ear = $d['hearing_rt_ear'];
+                // $new->appearance = $d['appearance'];
+
+                // $new->speech = $d['speech'];
+                // $new->behavior = $d['behavior'];
+                // $new->cognition = $d['cognition'];
+                // $new->orientation = $d['orientation'];
+
+                // $new->memory = $d['memory'];
+                // $new->concentration = $d['concentration'];
+                // $new->mood = $d['mood'];
+                // $new->thoughts = $d['thoughts'];
+
+                // $new->other = $d['other'];
+                // $new->general_appearance = $d['general_appearance'];
+                // $new->cardiovascular = $d['cardiovascular'];
+                // $new->respiratory = $d['respiratory'];
+
+                // $new->abdomen = $d['abdomen'];
+                // $new->hernia = $d['hernia'];
+                // $new->hydrocele = $d['hydrocele'];
+                // $new->extremities = $d['extremities'];
+
+                // $new->back = $d['back'];
+                // $new->skin = $d['skin'];
+                // $new->cns = $d['cns'];
+                // $new->deformities = $d['deformities'];
+
+                // $new->remarks = $d['remarks'];
+                // $new->bp = $d['bp'];
+                // $new->ent = $d['ent'];
+                // $new->mo_file = $d['mo_file'];
+
+                // $new->status = $d['medical_status'];
+                // $new->created_at = $d['created_at'];
+                // $new->created_by = $d['created_by'];
+
+                $new = new SampleCollection;
+                $new->centre_id = '3';
                 $new->reg_id = $d['reg_id'];
-                $new->height = $d['height'];
-                $new->weight = $d['weight'];
-                $new->bmi = $d['bmi'];
-                $new->pulse = $d['pulse'];
-                $new->rr = $d['rr'];
-
-                $new->visual_unaided_right_eye = $d['visual_unaided_rt_eye'];
-                $new->visual_unaided_left_eye = $d['visual_unaided_left_eye'];
-                $new->visual_aided_right_eye = $d['visual_aided_rt_eye'];
-                $new->visual_aided_left_eye = $d['visual_aided_left_eye'];
-
-                $new->distant_unaided_right_eye = $d['distant_unaided_rt_eye'];
-                $new->distant_unaided_left_eye = $d['distant_unaided_left_eye'];
-                $new->distant_aided_right_eye = $d['distant_aided_rt_eye'];
-                $new->distant_aided_left_eye = $d['distant_aided_left_eye'];
-
-                $new->near_unaided_right_eye = $d['near_unaided_rt_eye'];
-                $new->near_unaided_left_eye = $d['near_unaided_left_eye'];
-                $new->near_aided_right_eye = $d['near_aided_rt_eye'];
-                $new->near_aided_left_eye = $d['near_aided_left_eye'];
-
-                $new->color_vision = $d['color_vision'];
-                $new->hearing_left_ear = $d['hearing_left_ear'];
-                $new->hearing_right_ear = $d['hearing_rt_ear'];
-                $new->appearance = $d['appearance'];
-
-                $new->speech = $d['speech'];
-                $new->behavior = $d['behavior'];
-                $new->cognition = $d['cognition'];
-                $new->orientation = $d['orientation'];
-
-                $new->memory = $d['memory'];
-                $new->concentration = $d['concentration'];
-                $new->mood = $d['mood'];
-                $new->thoughts = $d['thoughts'];
-
-                $new->other = $d['other'];
-                $new->general_appearance = $d['general_appearance'];
-                $new->cardiovascular = $d['cardiovascular'];
-                $new->respiratory = $d['respiratory'];
-
-                $new->abdomen = $d['abdomen'];
-                $new->hernia = $d['hernia'];
-                $new->hydrocele = $d['hydrocele'];
-                $new->extremities = $d['extremities'];
-
-                $new->back = $d['back'];
-                $new->skin = $d['skin'];
-                $new->cns = $d['cns'];
-                $new->deformities = $d['deformities'];
-
-                $new->remarks = $d['remarks'];
-                $new->bp = $d['bp'];
-                $new->ent = $d['ent'];
-                $new->mo_file = $d['mo_file'];
-
-                $new->status = $d['medical_status'];
-                $new->created_at = $d['created_at'];
-                $new->created_by = $d['created_by'];
+                $new->notes = $d['collection_notes'];
+                $new->created_at = $d['created_on'];
 
                 $new->save();
             }
@@ -679,6 +704,68 @@ class ImportController extends Controller
             if(!$check)
             {
                 $update = XrayVerification::insert(array('centre_id' => $reg->centre_id, 'reg_id' => $reg->reg_id, 'created_at' => $reg->created_at));
+            }
+        }
+    }
+
+    public function fix_reg_ids()
+    {
+        $get_regs = Registrations::where('center_id','3')->where('old_img','!=',NULL)->get();
+
+        // foreach($get_regs as $reg)
+        // {
+        //     $update = Registrations::find($reg->id);
+        //     $update->reg_id = 47218+$update->reg_id;
+        //     $update->update();
+        // }
+
+        // foreach($get_regs as $reg)
+        // {
+        //     $now_id = $reg->reg_id - 47218;
+
+        //     $update = SampleCollection::where('reg_id',$now_id)->where('centre_id',3)->update(array('reg_id' => $now_id+47218));
+
+        //     $update2 = LabSticker::where('reg_id',$now_id)->where('centre_id',3)->update(array('reg_id' => $now_id+47218));
+
+        //     $update3 = LabResult::where('reg_id',$now_id)->where('centre_id',3)->update(array('reg_id' => $now_id+47218));
+
+        //     $update4 = Medical::where('reg_id',$now_id)->where('centre_id',3)->update(array('reg_id' => $now_id+47218));
+
+        //     $update5 = PassportVerification::where('reg_id',$now_id)->where('centre_id',3)->update(array('reg_id' => $now_id+47218));
+
+        //     $update6 = XrayResult::where('reg_id',$now_id)->where('centre_id',3)->update(array('reg_id' => $now_id+47218));
+
+        //     $update7 = XrayVerification::where('reg_id',$now_id)->where('centre_id',3)->update(array('reg_id' => $now_id+47218));
+
+        //     $update8 = XraySlips::where('reg_id',$now_id)->where('centre_id',3)->update(array('reg_id' => $now_id+47218));
+
+        //     $update9 = ReportIssue::where('reg_id',$now_id)->where('centre_id',3)->update(array('reg_id' => $now_id+47218));
+        // }
+
+        foreach($get_regs as $reg)
+        {
+            $get_candidate = Candidates::where('passport_no',$reg->old_img)->first();
+
+            if($get_candidate)
+            {
+                $update = Registrations::where('id',$reg->id)->update(array('candidate_id' => $get_candidate->id));
+            }
+        }
+
+    }
+
+    public function fix_finger()
+    {
+        $get_regs = Registrations::where('biometric_fingerprint','=','')->where('center_id','1')->get();
+
+        foreach($get_regs as $reg)
+        {
+            $check = Registrations::where('candidate_id',$reg->candidate_id)
+                                  ->where('biometric_fingerprint','!=','')
+                                  ->where('center_id',$reg->center_id)->first();
+            if(isset($check->biometric_fingerprint))
+            {
+                $update = Registrations::where('reg_id',$reg->reg_id)->update(array('biometric_fingerprint' => $check->biometric_fingerprint));
             }
         }
     }

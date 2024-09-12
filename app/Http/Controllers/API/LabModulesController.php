@@ -27,6 +27,7 @@ use App\Models\Medical;
 use App\Models\Centres;
 use App\Models\ReportIssue;
 use App\Models\ENO;
+use App\Models\Tokens;
 
 use Codedge\Fpdf\Fpdf\Fpdf;
 
@@ -166,7 +167,7 @@ class LabModulesController extends Controller
                         ENO::insert(array('centre_id' => $all->centre_id, 'reg_id' => $reg->reg_id));
 
                         $check = Registrations::select('candidate_id','candidates.passport_no','candidates.candidate_name',DB::raw('DATE_FORMAT(eno.created_at,"%d-%m-%Y") as eno_date'),'eno.screenshot','eno.eno', 'registrations.reg_id','registrations.serial_no','registrations.country','registrations.status')
-                                        ->join('candidates','candidates.id','registrations.candidate_id')            
+                                        ->join('candidates','candidates.id','registrations.candidate_id')
                                         ->join('eno','eno.reg_id','registrations.reg_id')
                                     ->where('center_id',$all->centre_id)
                                     ->where('candidates.passport_no',$all->barcode)
@@ -176,7 +177,7 @@ class LabModulesController extends Controller
                     }
                     else
                     {
-                        return redirect()->json(['registration' => []], 200);
+                        return response()->json(['registration' => []], 200);
                     }
                 }
             }
@@ -235,7 +236,7 @@ class LabModulesController extends Controller
                         }
                         else
                         {
-                            $REGID = $reg_id[1];
+                            $REGID = sprintf('%04d',$reg_id);
                         }
 
                         $random_string = $input[$rand_keys].$REGID.'-'.str_replace('-','',date('d-m-y',strtotime($check->reg_date)));
@@ -358,14 +359,14 @@ class LabModulesController extends Controller
 
         if($check)
         {
-
+            $cand = Candidates::find($check->candidate_id);
             $check->place_of_issue = PlaceOfIssue::select('name as value','name as label')->where('name','LIKE','%'.$check->place_of_issue.'%')->first();
             $check->country = Country::select('name as value','name as label')->where('name','LIKE','%'.$check->country.'%')->first();
             $check->agency = Agency::select('name as value','name as label')->where('name','LIKE','%'.$check->agency.'%')->first();
             $check->profession = Profession::select('name as value','name as label')->where('name','LIKE','%'.$check->profession.'%')->first();
 
-            $check->passport_image = Registrations::get_passport_image(Candidates::find($check->candidate_id), $check);
-            $check->candidate_image = Registrations::get_candidate_image(Candidates::find($check->candidate_id), $check);
+            $check->passport_image = Registrations::get_passport_image($cand, $check);
+            $check->candidate_image = Registrations::get_candidate_image($cand, $check);
 
             return response()->json(['registration' => $check], 200);
         }
@@ -615,7 +616,7 @@ class LabModulesController extends Controller
             $insert->malaria = $all->data->malaria;
             $insert->micro_filariae = $all->data->micro_filariae;
             $insert->status = ($all->data->hcv == 'positive' || $all->data->hiv == 'positive' || $all->data->hbsag == 'positive' || $all->data->vdrl == 'positive' || $all->data->tpha == 'positive') ? 'UNFIT' : 'FIT';
-            
+
             $status_changing = $this->status_change($check->reg_id, $all->centre_id);
 
             if($insert->update())
@@ -628,7 +629,7 @@ class LabModulesController extends Controller
             }
         }
 
-        
+
     }
 
     public function report_issue(request $request)
@@ -659,81 +660,117 @@ class LabModulesController extends Controller
     {
         $all = json_decode($request->getContent());
 
+        $time_now = date('Y-m-d H:i:s');
+
         $check = Candidates::where('passport_no',$all->data->passport_no)->first();
+
+        $check2 = Candidates::where('created_at',$time_now)->first();
+
         if(!$check)
         {
-            $new = new Candidates;
-            $new->passport_no = $all->data->passport_no;
-            $new->passport_issue_date = $all->data->passport_issue_date;
-            $new->passport_expiry_date = $all->data->passport_expiry_date;
-            $new->candidate_name = $all->data->candidate_name;
-            $new->gender = $all->data->gender;
-            $new->dob = $all->data->dob;
-            $new->save();
-            $candidate_id = $new->id;
-            $created = $new->created_at;
+            if($check2)
+            {
+                sleep(3);
+                $new = new Candidates;
+                $new->passport_no = $all->data->passport_no;
+                $new->passport_issue_date = $all->data->passport_issue_date;
+                $new->passport_expiry_date = $all->data->passport_expiry_date;
+                $new->candidate_name = $all->data->candidate_name;
+                $new->gender = $all->data->gender;
+                $new->dob = $all->data->dob;
+                $new->save();
+                $candidate_id = $new->id;
+                $created = $new->created_at;
+            }
+            else
+            {
+                $new = new Candidates;
+                $new->passport_no = $all->data->passport_no;
+                $new->passport_issue_date = $all->data->passport_issue_date;
+                $new->passport_expiry_date = $all->data->passport_expiry_date;
+                $new->candidate_name = $all->data->candidate_name;
+                $new->gender = $all->data->gender;
+                $new->dob = $all->data->dob;
+                $new->save();
+                $candidate_id = $new->id;
+                $created = $new->created_at;
+            }
         }
         else
         {
             $candidate_id = $check->id;
-            $created = $check->created_at;
+            $created = $check->updated_at;
         }
 
         $new_reg = Registrations::where('center_id',$all->centre_id)->orderBy('reg_id','DESC')->first();
+        $check2 = Registrations::where('center_id',$all->centre_id)
+                               ->where('serial_no',$all->data->serial_no)
+                               ->where('reg_date',date('Y-m-d', strtotime($all->data->reg_date)))
+                               ->orderBy('reg_id','DESC')->first();
 
-        $new2 = new Registrations;
-        $new2->reg_id = ($new_reg) ? $new_reg->reg_id+1 : 1;
-        $new2->candidate_id = $candidate_id;
-        $new2->center_id = $all->centre_id;
-        $new2->agency = (isset($all->data->agency->value)) ? $all->data->agency->value : NULL;
-        $new2->country = (isset($all->data->country->value)) ? $all->data->country->value : NULL;
-        $new2->profession = (isset($all->data->profession->value)) ? $all->data->profession->value : NULL;
-        $new2->cnic = $all->data->cnic;
-        $new2->place_of_issue = (isset($all->data->place_of_issue->value)) ? $all->data->place_of_issue->value : NULL;
-        $new2->reg_date = $all->data->reg_date;
-        $new2->barcode_no = $all->data->barcode;
-        $new2->serial_no = $all->data->serial_no;
-        $new2->relation_type = $all->data->relation_type;
-        $new2->relative_name = $all->data->relative_name;
-        $new2->slip_issue_date = $all->data->ref_slip_issue_date;
-        $new2->slip_expiry_date = $all->data->ref_slip_expiry_date;
-        $new2->phone_1 = $all->data->phone_1;
-        $new2->phone_2 = $all->data->phone_2;
-        $new2->nationality = $all->data->nationality;
-        $new2->marital_status = $all->data->marital_status;
-        $new2->biometric_fingerprint = $all->data->biometric_fingerprint;
-        $new2->fee_charged = $all->data->fees;
-        $new2->discount = $all->data->discount;
-        $new2->remarks = $all->data->remarks;
-        $new2->pregnancy_test = $all->data->pregnancy_test;
-        $new2->finger_type = $all->data->finger_type;
-        $new2->token_no = $all->data->token_no;
-        $new2->print_report_portion = 'A-B';
-        $new2->created_by = (isset($all->data->created_by)) ? $all->data->created_by : NULL;
+        $check3 = Registrations::where('center_id',$all->centre_id)
+                               ->where('reg_date',date('Y-m-d', strtotime($all->data->reg_date)))
+                               ->where('token_no',$all->data->token_no)
+                               ->orderBy('reg_id','DESC')->first();
 
-        // if($new2->save())
-        // {
-
-        if($all->candidate_image != NULL)
+        if(!$check2 && !$check3)
         {
-            // Get base64 image from request
-            $base64_image = $all->candidate_image;
 
-            // Extract image data
-            $image_parts = explode(";base64,", $base64_image);
+            $new2 = new Registrations;
+            $new2->reg_id = ($new_reg) ? $new_reg->reg_id+1 : 1;
+            $new2->candidate_id = $candidate_id;
+            $new2->center_id = $all->centre_id;
+            $new2->agency = (isset($all->data->agency->value)) ? $all->data->agency->value : NULL;
+            $new2->country = (isset($all->data->country->value)) ? $all->data->country->value : NULL;
+            $new2->profession = (isset($all->data->profession->value)) ? $all->data->profession->value : NULL;
+            $new2->cnic = $all->data->cnic;
+            $new2->place_of_issue = (isset($all->data->place_of_issue->value)) ? $all->data->place_of_issue->value : NULL;
+            $new2->reg_date = $all->data->reg_date;
+            $new2->barcode_no = $all->data->barcode;
+            $new2->serial_no = $all->data->serial_no;
+            $new2->relation_type = $all->data->relation_type;
+            $new2->relative_name = $all->data->relative_name;
+            $new2->slip_issue_date = $all->data->ref_slip_issue_date;
+            $new2->slip_expiry_date = $all->data->ref_slip_expiry_date;
+            $new2->phone_1 = $all->data->phone_1;
+            $new2->phone_2 = $all->data->phone_2;
+            $new2->nationality = $all->data->nationality;
+            $new2->marital_status = $all->data->marital_status;
+            $new2->biometric_fingerprint = $all->data->biometric_fingerprint;
+            $new2->fee_charged = $all->data->fees;
+            $new2->discount = $all->data->discount;
+            $new2->remarks = $all->data->remarks;
+            $new2->pregnancy_test = $all->data->pregnancy_test;
+            $new2->finger_type = $all->data->finger_type;
+            $new2->token_no = $all->data->token_no;
+            $new2->print_report_portion = 'A';
+            $new2->created_by = (isset($all->data->created_by)) ? $all->data->created_by : NULL;
+            $new2->created_at = $created;
+            $new2->updated_at = $created;
 
-            // Get the file extension
-            $image_type_aux = explode("image/", $image_parts[0]);
-            $image_type = $image_type_aux[1];
+            // if($new2->save())
+            // {
 
-            // Decode base64 string
-            $image_base64 = base64_decode($image_parts[1]);
+            if($all->candidate_image != NULL)
+            {
+                // Get base64 image from request
+                $base64_image = $all->candidate_image;
 
-            // Generate a unique filename
-            $image_name = strtotime($created) . '.' . $image_type;
+                // Extract image data
+                $image_parts = explode(";base64,", $base64_image);
 
-            Storage::disk('public')->put('candidate_image/'.$image_name, $image_base64);
-        }
+                // Get the file extension
+                $image_type_aux = explode("image/", $image_parts[0]);
+                $image_type = $image_type_aux[1];
+
+                // Decode base64 string
+                $image_base64 = base64_decode($image_parts[1]);
+
+                // Generate a unique filename
+                $image_name = strtotime($created) . '.' . $image_type;
+
+                Storage::disk('public')->put('candidate_image/'.$image_name, $image_base64);
+            }
 
             if($request->hasFile('passport_image'))
             {
@@ -754,23 +791,170 @@ class LabModulesController extends Controller
                         ->where('center_id',$all->centre_id)
                         ->where('process_id',1)
                         ->update(array('status' => 'Completed'));
+        }
+        elseif($check3 && !$check2)
+        {
+            $new_token_no = $this->new_token($all->centre_id);
+
+            $new2 = new Registrations;
+            $new2->reg_id = ($new_reg) ? $new_reg->reg_id+1 : 1;
+            $new2->candidate_id = $candidate_id;
+            $new2->center_id = $all->centre_id;
+            $new2->agency = (isset($all->data->agency->value)) ? $all->data->agency->value : NULL;
+            $new2->country = (isset($all->data->country->value)) ? $all->data->country->value : NULL;
+            $new2->profession = (isset($all->data->profession->value)) ? $all->data->profession->value : NULL;
+            $new2->cnic = $all->data->cnic;
+            $new2->place_of_issue = (isset($all->data->place_of_issue->value)) ? $all->data->place_of_issue->value : NULL;
+            $new2->reg_date = $all->data->reg_date;
+            $new2->barcode_no = $all->data->barcode;
+            $new2->serial_no = $all->data->serial_no;
+            $new2->relation_type = $all->data->relation_type;
+            $new2->relative_name = $all->data->relative_name;
+            $new2->slip_issue_date = $all->data->ref_slip_issue_date;
+            $new2->slip_expiry_date = $all->data->ref_slip_expiry_date;
+            $new2->phone_1 = $all->data->phone_1;
+            $new2->phone_2 = $all->data->phone_2;
+            $new2->nationality = $all->data->nationality;
+            $new2->marital_status = $all->data->marital_status;
+            $new2->biometric_fingerprint = $all->data->biometric_fingerprint;
+            $new2->fee_charged = $all->data->fees;
+            $new2->discount = $all->data->discount;
+            $new2->remarks = $all->data->remarks;
+            $new2->pregnancy_test = $all->data->pregnancy_test;
+            $new2->finger_type = $all->data->finger_type;
+            $new2->token_no = $new_token_no;
+            $new2->print_report_portion = 'A';
+            $new2->created_by = (isset($all->data->created_by)) ? $all->data->created_by : NULL;
+
+            // if($new2->save())
+            // {
+
+            if($all->candidate_image != NULL)
+            {
+                // Get base64 image from request
+                $base64_image = $all->candidate_image;
+
+                // Extract image data
+                $image_parts = explode(";base64,", $base64_image);
+
+                // Get the file extension
+                $image_type_aux = explode("image/", $image_parts[0]);
+                $image_type = $image_type_aux[1];
+
+                // Decode base64 string
+                $image_base64 = base64_decode($image_parts[1]);
+
+                // Generate a unique filename
+                $image_name = strtotime($created) . '.' . $image_type;
+
+                Storage::disk('public')->put('candidate_image/'.$image_name, $image_base64);
+            }
+
+            if($request->hasFile('passport_image'))
+            {
+                $image = $request->file('passport_image');
+                $imageName = strtotime($created).'.'.$image->getClientOriginalExtension();
+
+                $image->move(storage_path('app/public/candidate_passport'), $imageName);
+            }
+            elseif(is_string($all->passport_image) && $all->passport_image != NULL)
+            {
+                Storage::putFileAs('public/candidate_passport', $all->passport_image, strtotime($created).'.jpg');
+                File::delete($all->passport_image);
+            }
+
+            $new2->save();
+
+            QueueManager::where('token_no',$new_token_no)
+                        ->where('center_id',$all->centre_id)
+                        ->where('process_id',1)
+                        ->update(array('status' => 'Completed'));
+        }
 
             return response()->json(['message' => 'Registered'], 200);
+    }
+
+    function new_token($centre_id)
+    {
+        $centre = Centres::find($centre_id);
+
+        $new_token = rand(100, 1000);
+
+        $duplicate = true;
+
+        while($duplicate)
+        {
+            $check = Tokens::where('token_date',date('Y-m-d'))
+                           ->where('token_no',$new_token)
+                           ->where('center_id',$centre_id)
+                           ->where('token_type','Medical')
+                           ->first();
+
+            if(!isset($check->token_date))
+            {
+                $duplicate = false;
+            }
+            else
+            {
+                $new_token = rand(100, 1000);
+            }
+        }
+
+        $new = new Tokens;
+        $new->token_no = $new_token;
+        $new->token_date = date('Y-m-d');
+        $new->center_id = $centre_id;
+        $new->token_type = 'Medical';
+        $new->save();
+
+            $processes = DB::table('processes')->orderBy('process_seq','ASC')->get();
+            foreach($processes as $process)
+            {
+
+                $new2 = new QueueManager;
+                $new2->token_no = $new_token;
+                $new2->center_id = $centre_id;
+                $new2->process_id = $process->process_id;
+                $new2->process_date = date('Y-m-d');
+                $new2->save();
+            }
+
+        return $new_token;
     }
 
     public function update_registration(request $request)
     {
         $all = json_decode($request->getContent());
 
-        $new = Candidates::find($all->candidate->candidate_id);
-        $new->passport_no = $all->candidate->passport_no;
-        $new->passport_issue_date = $all->candidate->passport_issue_date;
-        $new->passport_expiry_date = $all->candidate->passport_expiry_date;
-        $new->candidate_name = $all->candidate->candidate_name;
-        $new->gender = $all->candidate->gender;
-        $new->dob = $all->candidate->dob;
-        $new->update();
-        $created = $new->created_at;
+        $time_now = date('Y-m-d H:i:s');
+
+        $check2 = Candidates::where('updated_at',$time_now)->first();
+
+        if($check2)
+        {
+            sleep(3);
+            $new = Candidates::find($all->candidate->candidate_id);
+            $new->passport_no = $all->candidate->passport_no;
+            $new->passport_issue_date = $all->candidate->passport_issue_date;
+            $new->passport_expiry_date = $all->candidate->passport_expiry_date;
+            $new->candidate_name = $all->candidate->candidate_name;
+            $new->gender = $all->candidate->gender;
+            $new->dob = $all->candidate->dob;
+            $new->update();
+            $created = $new->updated_at;
+        }
+        else
+        {
+            $new = Candidates::find($all->candidate->candidate_id);
+            $new->passport_no = $all->candidate->passport_no;
+            $new->passport_issue_date = $all->candidate->passport_issue_date;
+            $new->passport_expiry_date = $all->candidate->passport_expiry_date;
+            $new->candidate_name = $all->candidate->candidate_name;
+            $new->gender = $all->candidate->gender;
+            $new->dob = $all->candidate->dob;
+            $new->update();
+            $created = $new->updated_at;
+        }
 
         $new2 = Registrations::where('reg_id',$all->candidate->reg_id)
                              ->where('candidate_id',$all->candidate->candidate_id)
@@ -795,7 +979,8 @@ class LabModulesController extends Controller
                                             'discount' => $all->candidate->discount,
                                             'remarks' => $all->candidate->remarks,
                                             'pregnancy_test' => $all->candidate->pregnancy_test,
-                                            'print_report_portion' => 'A-B'
+                                            'print_report_portion' => 'A',
+                                            'updated_by' => $all->updated_by
                                         ));
 
         if($all->candidate_image != NULL)
@@ -837,6 +1022,7 @@ class LabModulesController extends Controller
         $check = Registrations::where('center_id',$all->centre_id)
                               ->where('serial_no',$all->serial_no)
                               ->where('reg_date',$all->date)
+                              ->where('candidate_id','!=',NULL)
                               ->first();
         if($check)
         {
@@ -1223,7 +1409,7 @@ class LabModulesController extends Controller
             if($check->lab_result != NULL && $check->medical != NULL && $check->xray_result != NULL && $check->reg_status != 'Pending')
             {
                 $check->print_report_portion = ($check->print_report_portion != 'B') ? 'A' : $check->print_report_portion;
-                if($check->lab_result->status == 'UNFIT' || $check->medical == 'UNFIT' || $check->xray_result == 'UNFIT')
+                if($check->lab_result->status == 'UNFIT' || $check->medical->status == 'UNFIT' || $check->xray_result->status == 'UNFIT')
                 {
                     $check->reg_status = 'UNFIT';
 
@@ -1250,9 +1436,18 @@ class LabModulesController extends Controller
                               ->update(array('status' => 'FIT','print_report_portion' => $check->print_report_portion));
                 }
             }
+            else
+            {
+                $check->reg_status = ($check->reg_status == 'Pending') ? 'Pending' : 'In Process';
+
+                Registrations::where('center_id',$all->centre_id)
+                            ->where('serial_no',$all->serial_no)
+                            ->where('reg_date',$all->reg_date)
+                            ->update(array('status' => $check->reg_status,'print_report_portion' => $check->print_report_portion));
+            }
             $check->history = Registrations::select('registrations.*')
                                            ->where('candidate_id',$check->candidate_id)
-                                           ->where('registrations.reg_id','!=',$check->reg_id)
+                                        //    ->where('registrations.reg_id','!=',$check->reg_id)
                                            ->where('center_id',$all->centre_id)
                                            ->orderBy('reg_date')
                                            ->get();
@@ -1360,31 +1555,36 @@ class LabModulesController extends Controller
                     $check->reg_status = 'UNFIT';
 
                     Registrations::where('center_id',$all->centre_id)
-                              ->where('serial_no',$check->serial_no)
-                              ->where('reg_date',$check->reg_date)
-                              ->update(array('status' => 'UNFIT','print_report_portion' => $check->print_report_portion));
+                            ->where('reg_id',$check->reg_id)
+                            ->update(array('status' => 'UNFIT','print_report_portion' => $check->print_report_portion));
                 }
                 elseif($check->lab_result->status == 'In Process' || $check->medical->status == 'In Process' || $check->xray_result->status == 'In Process')
                 {
                     $check->reg_status = 'In Process';
 
                     Registrations::where('center_id',$all->centre_id)
-                              ->where('serial_no',$check->serial_no)
-                              ->where('reg_date',$check->reg_date)
-                              ->update(array('status' => 'In Process','print_report_portion' => $check->print_report_portion));
+                            ->where('reg_id',$all->reg_id)
+                            ->update(array('status' => 'In Process','print_report_portion' => $check->print_report_portion));
                 }
-                else
+                elseif($check->lab_result->status == 'FIT' && $check->medical->status == 'FIT' && $check->xray_result->status == 'FIT')
                 {
                     $check->reg_status == 'FIT';
                     Registrations::where('center_id',$all->centre_id)
-                              ->where('serial_no',$check->serial_no)
-                              ->where('reg_date',$check->reg_date)
-                              ->update(array('status' => 'FIT','print_report_portion' => $check->print_report_portion));
+                            ->where('reg_id',$check->reg_id)
+                            ->update(array('status' => 'FIT','print_report_portion' => $check->print_report_portion));
                 }
+            }
+            else
+            {
+                $check->reg_status = ($check->reg_status == 'Pending') ? 'Pending' : 'In Process';
+
+                Registrations::where('center_id',$all->centre_id)
+                            ->where('reg_id',$check->reg_id)
+                            ->update(array('status' => $check->reg_status,'print_report_portion' => $check->print_report_portion));
             }
             $check->history = Registrations::select('registrations.*')
                                            ->where('candidate_id',$check->candidate_id)
-                                           ->where('registrations.reg_id','!=',$check->reg_id)
+                                        //    ->where('registrations.reg_id','!=',$check->reg_id)
                                            ->where('center_id',$all->centre_id)
                                            ->orderBy('reg_date')
                                            ->get();
@@ -1566,40 +1766,55 @@ class LabModulesController extends Controller
 
         $new_reg = Registrations::where('center_id',$all->centre_id)->orderBy('reg_id','DESC')->first();
 
-        $new2 = new Registrations;
-        $new2->reg_id = $new_reg->reg_id+1;
-        $new2->candidate_id = $candidate_id;
-        $new2->center_id = $all->centre_id;
-        $new2->agency = (isset($all->data->agency->value)) ? $all->data->agency->value : NULL;
-        $new2->country = (isset($all->data->country->value)) ? $all->data->country->value : NULL;
-        $new2->profession = (isset($all->data->profession->value)) ? $all->data->profession->value : NULL;
-        $new2->cnic = $all->data->cnic;
-        $new2->place_of_issue = (isset($all->data->place_of_issue->value)) ? $all->data->place_of_issue->value : NULL;
-        $new2->reg_date = $all->data->reg_date;
-        $new2->barcode_no = $all->barcode;
-        $new2->serial_no = $all->data->serial_no;
-        $new2->relation_type = $all->data->relation_type;
-        $new2->relative_name = $all->data->relative_name;
-        $new2->slip_issue_date = $all->data->slip_issue_date;
-        $new2->slip_expiry_date = $all->data->slip_expiry_date;
-        $new2->phone_1 = $all->data->phone_1;
-        $new2->phone_2 = $all->data->phone_2;
-        $new2->nationality = $all->data->nationality;
-        $new2->marital_status = $all->data->marital_status;
-        if($all->fingerprint != '' && $all->fingerprint != NULL)
+        $check2 = Registrations::where('center_id',$all->centre_id)
+                               ->where('serial_no',$all->data->serial_no)
+                               ->where('reg_date',$all->data->reg_date)
+                               ->orderBy('reg_id','DESC')->first();
+
+        $check3 = Registrations::where('center_id',$all->centre_id)
+                               ->where('token_no',$all->data->token_no)
+                               ->orderBy('reg_id','DESC')->first();
+
+        if($check2 == NULL && $check3 == NULL)
         {
-            $new2->biometric_fingerprint = $all->fingerprint;
-        }
-        $new2->fee_charged = $all->data->fee_charged;
-        $new2->discount = $all->data->discount;
-        $new2->remarks = $all->data->remarks;
-        $new2->pregnancy_test = $all->data->pregnancy_test;
-        $new2->finger_type = $all->data->finger_type;
-        $new2->token_no = $all->data->token_no;
-        $new2->created_by = (isset($all->created_by)) ? $all->created_by : NULL;
-        $new2->save();
-        // if($new2->save())
-        // {
+
+            $new2 = new Registrations;
+            $new2->reg_id = $new_reg->reg_id+1;
+            $new2->candidate_id = $candidate_id;
+            $new2->center_id = $all->centre_id;
+            $new2->agency = (isset($all->data->agency->value)) ? $all->data->agency->value : NULL;
+            $new2->country = (isset($all->data->country->value)) ? $all->data->country->value : NULL;
+            $new2->profession = (isset($all->data->profession->value)) ? $all->data->profession->value : NULL;
+            $new2->cnic = $all->data->cnic;
+            $new2->place_of_issue = (isset($all->data->place_of_issue->value)) ? $all->data->place_of_issue->value : NULL;
+            $new2->reg_date = $all->data->reg_date;
+            $new2->barcode_no = $all->barcode;
+            $new2->serial_no = $all->data->serial_no;
+            $new2->relation_type = $all->data->relation_type;
+            $new2->relative_name = $all->data->relative_name;
+            $new2->slip_issue_date = $all->data->slip_issue_date;
+            $new2->slip_expiry_date = $all->data->slip_expiry_date;
+            $new2->phone_1 = $all->data->phone_1;
+            $new2->phone_2 = $all->data->phone_2;
+            $new2->nationality = $all->data->nationality;
+            $new2->marital_status = $all->data->marital_status;
+            if($all->fingerprint != '' && $all->fingerprint != NULL)
+            {
+                $new2->biometric_fingerprint = $all->fingerprint;
+            }
+            else
+            {
+            $prev = Registrations::where('center_id',$all->centre_id)->where('candidate_id',$candidate_id)->first();
+            $new2->biometric_fingerprint = $prev->biometric_fingerprint;
+            }
+            $new2->fee_charged = $all->data->fee_charged;
+            $new2->discount = $all->data->discount;
+            $new2->remarks = $all->data->remarks;
+            $new2->pregnancy_test = $all->data->pregnancy_test;
+            $new2->finger_type = $all->data->finger_type;
+            $new2->token_no = $all->data->token_no;
+            $new2->created_by = (isset($all->created_by)) ? $all->created_by : NULL;
+            $new2->save();
 
             if($request->hasFile('candidate_image'))
             {
@@ -1621,6 +1836,70 @@ class LabModulesController extends Controller
                         ->where('center_id',$all->centre_id)
                         ->where('process_id',1)
                         ->update(array('status' => 'Completed'));
+        }
+        elseif($check3 != NULL && $check2 == NULL)
+        {
+            $new_token_no = $this->new_token($all->centre_id);
+
+            $new2 = new Registrations;
+            $new2->reg_id = $new_reg->reg_id+1;
+            $new2->candidate_id = $candidate_id;
+            $new2->center_id = $all->centre_id;
+            $new2->agency = (isset($all->data->agency->value)) ? $all->data->agency->value : NULL;
+            $new2->country = (isset($all->data->country->value)) ? $all->data->country->value : NULL;
+            $new2->profession = (isset($all->data->profession->value)) ? $all->data->profession->value : NULL;
+            $new2->cnic = $all->data->cnic;
+            $new2->place_of_issue = (isset($all->data->place_of_issue->value)) ? $all->data->place_of_issue->value : NULL;
+            $new2->reg_date = $all->data->reg_date;
+            $new2->barcode_no = $all->barcode;
+            $new2->serial_no = $all->data->serial_no;
+            $new2->relation_type = $all->data->relation_type;
+            $new2->relative_name = $all->data->relative_name;
+            $new2->slip_issue_date = $all->data->slip_issue_date;
+            $new2->slip_expiry_date = $all->data->slip_expiry_date;
+            $new2->phone_1 = $all->data->phone_1;
+            $new2->phone_2 = $all->data->phone_2;
+            $new2->nationality = $all->data->nationality;
+            $new2->marital_status = $all->data->marital_status;
+            if($all->fingerprint != '' && $all->fingerprint != NULL)
+            {
+                $new2->biometric_fingerprint = $all->fingerprint;
+            }
+            else
+            {
+            $prev = Registrations::where('center_id',$all->centre_id)->where('candidate_id',$candidate_id)->first();
+            $new2->biometric_fingerprint = $prev->biometric_fingerprint;
+            }
+            $new2->fee_charged = $all->data->fee_charged;
+            $new2->discount = $all->data->discount;
+            $new2->remarks = $all->data->remarks;
+            $new2->pregnancy_test = $all->data->pregnancy_test;
+            $new2->finger_type = $all->data->finger_type;
+            $new2->token_no = $new_token_no;
+            $new2->created_by = (isset($all->created_by)) ? $all->created_by : NULL;
+            $new2->save();
+
+            if($request->hasFile('candidate_image'))
+            {
+                $image = $request->file('candidate_image');
+                $imageName = strtotime($created).'.'.$image->getClientOriginalExtension();
+
+                $image->move(storage_path('app/public/candidate_image'), $imageName);
+            }
+
+            if($request->hasFile('passport_image'))
+            {
+                $image = $request->file('passport_image');
+                $imageName = strtotime($created).'.'.$image->getClientOriginalExtension();
+
+                $image->move(storage_path('app/public/candidate_passport'), $imageName);
+            }
+
+            QueueManager::where('token_no',$new_token_no)
+                        ->where('center_id',$all->centre_id)
+                        ->where('process_id',1)
+                        ->update(array('status' => 'Completed'));
+        }
 
             return response()->json(['message' => 'Registered'], 200);
     }
@@ -1755,9 +2034,9 @@ class LabModulesController extends Controller
 
             $pdf->SetFont('Arial','B',12);
             $pdf->Cell(160,7,'CANDIDATE INFORMATION',1,0,'C');
-            
+
             $assetUrl = Registrations::get_candidate_image(Candidates::find($reg->candidate_id), $reg);
-            
+
             $pdf->Cell(40,7,$pdf->Image($assetUrl,$pdf->GetX(),$pdf->GetY(),30.78,31),0,1,'L',false);
             $pdf->SetFont('Arial','',9);
             $pdf->Cell(16,6,'Name',1,0,'L');
@@ -2379,7 +2658,7 @@ class LabModulesController extends Controller
                                             ->orderBy('print_report_portion',"DESC")
                                             ->get();
 
-                
+
                                             foreach($data as $d)
                                             {
                                                 if($d->lab_status == 'UNFIT' || $d->xray_status == 'UNFIT' || $d->medical_status == 'UNFIT' && ($d->lab_status != 'In Process' && $d->xray_status != 'In Process' && $d->medical_status != 'In Process'))
@@ -2395,9 +2674,9 @@ class LabModulesController extends Controller
                                                 else
                                                 {
                                                     $status = 'In Process';
-                                                    $portion = ($d->print_report_portion != 'B') ? 'A-B' : $d->print_report_portion;
+                                                    $portion = ($d->print_report_portion != 'B') ? 'A' : $d->print_report_portion;
                                                 }
-                                                
+
                                                 $update = Registrations::where('reg_id',$d->reg_id)->update(array('status' => $status,'print_report_portion' => $portion));
                                             }
 
@@ -2430,9 +2709,9 @@ class LabModulesController extends Controller
             else
             {
                 $status = 'In Process';
-                $portion = ($data->print_report_portion != 'B') ? 'A-B' : $data->print_report_portion;
+                $portion = ($data->print_report_portion != 'B') ? 'A' : $data->print_report_portion;
             }
-            
+
             $update = Registrations::where('reg_id',$data->reg_id)->update(array('status' => $status,'print_report_portion' => $portion));
 
             return 'Updated Status';

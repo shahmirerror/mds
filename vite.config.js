@@ -4,9 +4,9 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
     // server: {
-    //     // host: '192.168.18.7', // Listen on all interfaces
-    //     // port: 5173,
-    //     // enabled: false
+    //     host: '0.0.0.0', // Listen on all interfaces
+    //     port: 5173,
+    //     enabled: false
     // },
     plugins: [
         laravel({

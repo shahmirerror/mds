@@ -220,7 +220,7 @@ export default function LabStickers(props) {
 
     const logAttempts = async (sticker_value) =>
     {
-        
+
         const requestData = {
             centre_id: props.auth.user.centre.centre_id,
             sticker_value: sticker_value,
@@ -251,11 +251,11 @@ export default function LabStickers(props) {
     const handlePrint = async (e, sticker2) => {
         const permissionValue = props?.auth?.user?.role_id == 3 ? parseInt(props?.auth?.modules?.[8]?.rights?.[3]?.permission_value) : 1;
         const elem = wrapper_ref.current;
-    
+
         for (let i = 0; i < permissionValue; i++) {
             // Generate canvas image from HTML content
             const canvas = await html2canvas(elem, { scale: 3 });
-    
+
             // Create an iframe to hold the printed content
             const iframe = document.createElement('iframe');
             iframe.name = 'printf';
@@ -263,19 +263,19 @@ export default function LabStickers(props) {
             iframe.height = 0;
             iframe.width = 0;
             document.body.appendChild(iframe);
-    
+
             // Convert canvas image to data URL
             const imgUrl = canvas.toDataURL({ format: 'jpeg', quality: '1.0' });
-    
+
             // Define the style for the label
             const style = `
                 position: absolute;
                 top: 0;
             `;
-    
+
             // Generate HTML content with the label image
             const url = `<img style="${style}" src="${imgUrl}"/>`;
-    
+
             // Write the HTML content to the iframe document
             const newWin = window.frames["printf"];
             newWin.document.write(`
@@ -345,7 +345,7 @@ export default function LabStickers(props) {
             <div className="page-body">
                 <div className="container-xl">
                     <div className="row row-cards mb-5">
-                        <div className="col-md-4">
+                        <div className="col-md-5">
                             <div className="row row-cards">
                                 <div className="col-12">
                                     <div className="card">
@@ -353,13 +353,96 @@ export default function LabStickers(props) {
                                         <div className="row g-3">
                                             <div className="col-12">
                                                 <div className="row g-3 align-items-center justify-content-center">
-                                                    <img src={"./../assets/static/photos/barcodeScanner.png"} style={{width : 200}}/>
+                                                    <img src={"./../assets/static/photos/barcodeScanner.png"} style={{width : 256}}/>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                        <div className="col-md-7">
+                            <div className="row row-cards">
+                                <div className="col-12">
+                                    <div className="card">
+                                        <div className="card-header">
+                                            <div className="col-md-12 flex align-items-center">
+                                                <div className='col-md-6' style={{float: 'left'}}>
+                                                    <h2>Candidate Information</h2>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="card-body">
+                                            <div className="row g-5 mb-3">
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Barcode</label>
+                                                        {props?.auth?.modules?.[8]?.rights?.[0]?.permission_name == 'barcode_search' && props?.auth?.modules?.[8]?.rights?.[0]?.status == true ?
+                                                        <input type="password" className="form-control" name="barcode" value={barcode} onChange={(e) => setBarcode(e.target.value)} onKeyDown={event => {
+                                                                                                                                                                                                    if (event.key === 'Enter') {
+                                                                                                                                                                                                        handleSearch(event)
+                                                                                                                                                                                                    }
+                                                                                                                                                                                                    }} />
+                                                                                                                                                                                                    :
+                                                                                                                                                                                                    <IconLock stroke={1} />
+                                                                                                                                                                                                }
+                                                    </div>
+                                                </div>
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Date</label>
+                                                        {props?.auth?.modules?.[8]?.rights?.[2]?.permission_name == 'date_search' && props?.auth?.modules?.[8]?.rights?.[2]?.status == true ?
+                                                        <input type="date" className="form-control" name="reg_date" value={date} onChange={(e) => setRegDate(e.target.value)} onKeyDown={event => {
+                                                                                                                                                                                                if (event.key === 'Enter') {
+                                                                                                                                                                                                    handleSearch(event)
+                                                                                                                                                                                                }
+                                                                                                                                                                                                }} />
+                                                                                                                                                                                                :
+                                                                                                                                                                                                <IconLock stroke={1} />
+                                                                                                                                                                                                }
+                                                    </div>
+                                                </div>
+                                                <div className="col-4">
+                                                    <div className="row g-3 align-items-center">
+                                                        <label className='form-label'>Serial Number</label>
+                                                        {props?.auth?.modules?.[8]?.rights?.[2]?.permission_name == 'date_search' && props?.auth?.modules?.[8]?.rights?.[2]?.status == true ?
+                                                        <input type="text" className="form-control" name="serial_no" value={serial_no} onChange={(e) => setSerialNo(e.target.value.toUpperCase())} onKeyDown={event => {
+                                                                                                                                                                                                                        if (event.key === 'Enter') {
+                                                                                                                                                                                                                            handleSearch(event)
+                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                        }} />
+                                                                                                                                                                                                                        :
+                                                                                                                                                                                                                        <IconLock stroke={1} /> }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="row g-5 mb-3">
+                                                <div className='col-md-12 flex justify-content-center'>
+                                                    <div className="col-4">
+                                                        <button className={'btn btn-md btn-outline-secondary'} disabled={searched ? false : true} onClick={handleReset}>Reset Form</button>
+                                                    </div>
+                                                    <div className="col-4">
+                                                    {props?.auth?.modules?.[8]?.rights?.[0]?.status == true || props?.auth?.modules?.[8]?.rights?.[2]?.status == true ?
+                                                        <button className={'btn btn-md btn-outline-info'} disabled={searched} onClick={handleSearch}>Search for Candidate</button>
+                                                        :
+                                                            <button className={'btn btn-md btn-outline-info'} disabled={searched} onClick={''}>
+                                                                <IconLock stroke={1} />
+                                                                Search for Candidate
+                                                            </button>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className='row row-cards'>
+                        <div className='col-md-5'>
+                            <div className="row row-cards">
                                 <div className="col-12">
                                     <div className="card">
                                     {candidate !== null && sticker2 != false ?
@@ -372,8 +455,9 @@ export default function LabStickers(props) {
                                             <div className="col-10">
                                                 <div className="row g-3">
                                                 <div id="barcodeSection" ref={wrapper_ref} style={{textAlign: 'center', marginLeft: '-19px', position: 'sticky'}}>
-                                                        <Barcode value={`${sticker2}`} displayValue={false} width={2}/>
-                                                        <span style={{fontWeight: 900}}>{sticker2}</span>
+                                                        <Barcode value={`${sticker2}`} displayValue={true} width={2} fontOptions={"bold"} />
+
+                                                        {/*<span style={{fontWeight: 900, fontSize: '17px'}}>{sticker2}</span>*/}
                                                     </div>
                                                 </div>
                                             </div>
@@ -423,83 +507,6 @@ export default function LabStickers(props) {
                                     <></>
                                     }
 
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-md-6">
-                            <div className="row row-cards">
-                                <div className="col-12">
-                                    <div className="card">
-                                        <div className="card-header">
-                                            <div className="col-md-12 flex align-items-center">
-                                                <div className='col-md-6' style={{float: 'left'}}>
-                                                    <h2>Candidate Information</h2>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="card-body">
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-4">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Barcode</label>
-                                                        {props?.auth?.modules?.[8]?.rights?.[0]?.permission_name == 'barcode_search' && props?.auth?.modules?.[8]?.rights?.[0]?.status == true ?
-                                                        <input type="password" className="form-control" name="barcode" value={barcode} onChange={(e) => setBarcode(e.target.value)} onKeyDown={event => {
-                                                                                                                                                                                                    if (event.key === 'Enter') {
-                                                                                                                                                                                                        handleSearch(event)
-                                                                                                                                                                                                    }
-                                                                                                                                                                                                    }} />
-                                                                                                                                                                                                    : 
-                                                                                                                                                                                                    <IconLock stroke={1} />
-                                                                                                                                                                                                }
-                                                    </div>
-                                                </div>
-                                                <div className="col-4">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Date</label>
-                                                        {props?.auth?.modules?.[8]?.rights?.[2]?.permission_name == 'date_search' && props?.auth?.modules?.[8]?.rights?.[2]?.status == true ?
-                                                        <input type="date" className="form-control" name="reg_date" value={date} onChange={(e) => setRegDate(e.target.value)} onKeyDown={event => {
-                                                                                                                                                                                                if (event.key === 'Enter') {
-                                                                                                                                                                                                    handleSearch(event)
-                                                                                                                                                                                                }
-                                                                                                                                                                                                }} />
-                                                                                                                                                                                                :
-                                                                                                                                                                                                <IconLock stroke={1} />
-                                                                                                                                                                                                }
-                                                    </div>
-                                                </div>
-                                                <div className="col-4">
-                                                    <div className="row g-3 align-items-center">
-                                                        <label className='form-label'>Serial Number</label>
-                                                        {props?.auth?.modules?.[8]?.rights?.[2]?.permission_name == 'date_search' && props?.auth?.modules?.[8]?.rights?.[2]?.status == true ?
-                                                        <input type="text" className="form-control" name="serial_no" value={serial_no} onChange={(e) => setSerialNo(e.target.value.toUpperCase())} onKeyDown={event => {
-                                                                                                                                                                                                                        if (event.key === 'Enter') {
-                                                                                                                                                                                                                            handleSearch(event)
-                                                                                                                                                                                                                        }
-                                                                                                                                                                                                                        }} />
-                                                                                                                                                                                                                        :
-                                                                                                                                                                                                                        <IconLock stroke={1} /> }
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="row g-5 mb-3">
-                                                <div className="col-2">
-                                                </div>
-                                                <div className="col-4">
-                                                    <button className={'btn btn-md btn-outline-secondary'} disabled={searched ? false : true} onClick={handleReset}>Reset Form</button>
-                                                </div>
-                                                <div className="col-4">
-                                                {props?.auth?.modules?.[8]?.rights?.[0]?.status == true || props?.auth?.modules?.[8]?.rights?.[2]?.status == true ?
-                                                    <button className={'btn btn-md btn-outline-info'} disabled={searched} onClick={handleSearch}>Search for Candidate</button>
-                                                    :
-                                                        <button className={'btn btn-md btn-outline-info'} disabled={searched} onClick={''}>
-                                                            <IconLock stroke={1} />
-                                                            Search for Candidate
-                                                        </button>
-                                                    }
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>

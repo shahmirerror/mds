@@ -470,7 +470,7 @@ export default function SampleCollection(props) {
 
     const logAttempts = async (sticker_value) =>
     {
-        
+
         const requestData = {
             centre_id: props.auth.user.centre.centre_id,
             sticker_value: sticker_value,
@@ -507,28 +507,28 @@ export default function SampleCollection(props) {
         iframe.height = 0;
         iframe.width = 0;
         document.body.appendChild(iframe);
-    
+
         const elem = wrapper_ref.current;
-    
+
         for (let i = 0; i < permissionValue; i++) {
             // Generate canvas image from HTML content
             const canvas = await html2canvas(elem, { scale: 2 });
-    
+
             // Convert canvas image to data URL
             const imgUrl = canvas.toDataURL({
                 format: 'png',
                 quality: '2.0',
             });
-    
+
             // Define the style for the label
             const style = `
                 position: absolute;
                 top: 0;
             `;
-    
+
             // Generate HTML content with the label image
             const url = `<img style="${style}" src="${imgUrl}"/>`;
-    
+
             // Write the HTML content to the iframe document
             const newWin = window.frames["printf"];
             newWin.document.write(`
@@ -666,7 +666,7 @@ export default function SampleCollection(props) {
                                         <div className="">
                                             <div className="col-12">
                                                 <div className="">
-                                                    <div id="barcodeSection" ref={wrapper_ref} style={{textAlign: 'center', marginLeft: '-19px', position: 'sticky'}}>
+                                                    <div id="barcodeSection" ref={wrapper_ref} style={{textAlign: 'center', display: 'inline-grid', position: 'sticky'}}>
                                                         <Barcode value={`${candidate?.reg_date}${candidate?.reg_id}`} displayValue={false} />
                                                         <span style={{fontWeight: 900}}>{candidate?.reg_date}</span>
                                                     </div>

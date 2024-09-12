@@ -777,7 +777,7 @@ export default function RegistrationRepeat(props) {
         const { name, value } = e.target;
         setCandidate(prevCandidate => ({
             ...prevCandidate,
-            [name]: name == 'marital_status' || name == 'pregnancy_check' ? value : value.toUpperCase()
+            [name]: name == 'marital_status' || name == 'pregnancy_check' || name == 'finger_type' ? value : value.toUpperCase()
         }));
     }
 

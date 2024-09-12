@@ -82,6 +82,7 @@ export default function Authenticated({ user, header, children }) {
             }
             const importedImage = await import(`./../../../storage/app/public/centres/logos/${newImageName}.${ext}`);
             setLogoSecondary(importedImage.default);
+            // console.log(importedImage.default);
         }
             const importedImage = await import(`@/../../assets/static/logo-mds.svg`);
             setLogoMain(importedImage.default);

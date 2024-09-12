@@ -21,8 +21,8 @@ class Registrations extends Model
         $assetUrl2 = @getimagesize(asset('storage/app/public/candidate_passport/'.strtotime($cand_obj->updated_at).'.jpg'));
         $assetUrl3 = @getimagesize(asset('storage/app/public/candidate_passport/'.strtotime($cand_obj->created_at).'.JPG'));
         $assetUrl4 = @getimagesize(asset('storage/app/public/candidate_passport/'.strtotime($cand_obj->created_at).'.jpg'));
-        $assetUrl5 = @getimagesize(asset('storage/app/public/candidate_passport/'.$reg_obj->old_img.'.JPG'));
-        $assetUrl6 = @getimagesize(asset('storage/app/public/candidate_passport/'.$reg_obj->old_img.'.jpg'));
+        $assetUrl5 = ($reg_obj->old_img != NULL && $reg_obj->old_img != '') ? @getimagesize(asset('storage/app/public/candidate_passport/'.$reg_obj->old_img.'.JPG')) : false;
+        $assetUrl6 = ($reg_obj->old_img != NULL && $reg_obj->old_img != '') ? @getimagesize(asset('storage/app/public/candidate_passport/'.$reg_obj->old_img.'.jpg')) : false;
 
         if($assetUrl5 != false)
         {
@@ -60,8 +60,8 @@ class Registrations extends Model
         $assetUrl2 = @getimagesize(asset('storage/app/public/candidate_image/'.strtotime($cand_obj->updated_at).'.png'));
         $assetUrl3 = @getimagesize(asset('storage/app/public/candidate_image/'.strtotime($cand_obj->created_at).'.PNG'));
         $assetUrl4 = @getimagesize(asset('storage/app/public/candidate_image/'.strtotime($cand_obj->created_at).'.png'));
-        $assetUrl5 = @getimagesize(asset('storage/app/public/candidate_image/'.$reg_obj->old_img.'.PNG'));
-        $assetUrl6 = @getimagesize(asset('storage/app/public/candidate_image/'.$reg_obj->old_img.'.png'));
+        $assetUrl5 = ($reg_obj->old_img != NULL && $reg_obj->old_img != '') ? @getimagesize(asset('storage/app/public/candidate_image/'.$reg_obj->old_img.'.PNG')) : false;
+        $assetUrl6 = ($reg_obj->old_img != NULL && $reg_obj->old_img != '') ? @getimagesize(asset('storage/app/public/candidate_image/'.$reg_obj->old_img.'.png')) : false;
 
         if($assetUrl5 != false)
         {
@@ -89,7 +89,7 @@ class Registrations extends Model
         }
         else
         {
-            return $reg_obj->old_img;
+            return $cand_obj->created_at;
         }
     }
 

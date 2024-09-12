@@ -239,7 +239,7 @@ export default function PassportVerification(props) {
                     let fpobject = JSON.parse(xmlhttp.responseText);
                     if(fpobject.ErrorCode == 0)
                     {
-                        if(fpobject.MatchingScore >= 100)
+                        if(fpobject.MatchingScore >= 80)
                         {
                             setSearched(true);
                             setCandidate(registration);

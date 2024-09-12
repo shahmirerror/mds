@@ -142,7 +142,7 @@ export default function Dashboard(props) {
                         {
                             setReportsInHand(result.result);
                         }
-                        else if(type == 'reports_in_hand')
+                        else if(type == 'reports_issued')
                         {
                             setReportsIssued(result.result);
                         }

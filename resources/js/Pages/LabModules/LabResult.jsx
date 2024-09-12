@@ -775,6 +775,9 @@ export default function LabResult(props) {
                                                         <label className='form-label'>OVA</label>
                                                         <select className="form-select" name="ova" value={data.ova} onChange={handleChange} >
                                                             <option value="--">- SELECT -</option>
+                                                            <option value="not seen">Not Seen</option>
+                                                            <option value="seen">Seen</option>
+                                                            <option value="ND">ND</option>
                                                             <option value="absent">Absent</option>
                                                             <option value="present">Present</option>
                                                         </select>
@@ -785,6 +788,9 @@ export default function LabResult(props) {
                                                         <label className='form-label'>Cyst</label>
                                                         <select className="form-select" name="cyst" value={data.cyst} onChange={handleChange} >
                                                             <option value="--">- SELECT -</option>
+                                                            <option value="not seen">Not Seen</option>
+                                                            <option value="seen">Seen</option>
+                                                            <option value="ND">ND</option>
                                                             <option value="absent">Absent</option>
                                                             <option value="present">Present</option>
                                                         </select>

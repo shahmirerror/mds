@@ -579,6 +579,49 @@ export default function MedicalExamination(props) {
         setSerialNo('');
         data.biometric_fingerprint = '';
         setToken('None');
+
+        data.height =  '';
+        data.weight =  '';
+        data.bmi =  '';
+        data.bp =  '120/80';
+        data.pulse =  '70';
+        data.rr =  '18';
+        data.distant_aided_right_eye =  '-';
+        data.distant_aided_left_eye =  '-';
+        data.distant_unaided_right_eye =  '6';
+        data.distant_unaided_left_eye =  '6';
+        data.near_aided_right_eye =  '-';
+        data.near_aided_left_eye =  '-';
+        data.near_unaided_right_eye =  '20';
+        data.near_unaided_left_eye =  '20';
+        data.color_vision =  '';
+        data.hearing_right_ear =  'normal';
+        data.hearing_left_ear =  'normal';
+        data.appearance =  'NAD';
+        data.speech =  'NAD';
+        data.behavior =  'NAD';
+        data.cognition =  'NAD';
+        data.orientation =  'NAD';
+        data.memory =  'NAD';
+        data.concentration =  'NAD';
+        data.mood =  'NAD';
+        data.thoughts =  'NAD';
+        data.other =  'NAD';
+        data.general_appearance =  'NAD';
+        data.cardiovascular =  'NAD';
+        data.respiratory =  'NAD';
+        data.abdomen =  'NAD';
+        data.hernia =  'NAD';
+        data.hydrocele =  'NAD';
+        data.extremities =  'NAD';
+        data.back =  'NAD';
+        data.skin =  'NAD';
+        data.cns =  'NAD';
+        data.deformities =  'NAD';
+        data.remarks =  'NAD';
+        data.ent =  'NAD';
+        data.mo_file = '';
+
     }
 
     const handleEdit = (medical) =>

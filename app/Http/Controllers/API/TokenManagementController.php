@@ -31,7 +31,7 @@ class TokenManagementController extends Controller
                            ->where('token_type',$all->token_type)
                            ->first();
 
-            if(!$check)
+            if(!isset($check->token_date))
             {
                 $duplicate = false;
             }

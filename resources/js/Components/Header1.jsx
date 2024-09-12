@@ -1,4 +1,5 @@
 
+import {useEffect} from 'react';
 import {useForm} from "@inertiajs/react";
 export default function Header1({user, logo}) {
     const {post} = useForm();
@@ -8,6 +9,10 @@ export default function Header1({user, logo}) {
 
         post(route('logout'));
     }
+
+    // useEffect(() => {
+    //     console.log(logo);
+    // }, []);
     return (
         <>
             <header className="navbar navbar-expand-md d-print-none">

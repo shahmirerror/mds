@@ -139,19 +139,25 @@ export default function TokenGeneration(props) {
                 pauseOnHover
                 theme="light"
                 />
-            <div className="page page-center" style={{backgroundImage: 'url(./assets/static/photos/mdsbackground.png)', height: '100vh', blur: "10%"}}>
+            <div className="page page-center" style={{backgroundImage: 'url("assets/backgrounds/small-icons.png")',
+                                                        backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundAttachment: 'fixed',
+    backgroundColor: 'royalblue',
+    minHeight: '100vh'}}>
                 <div className="p-6">
 
                     {centre == null ?
                     <>
-                        <div className="row g-4" id={'project_logo'}>
-                            <div className="col-lg">
-                                <div style={{maxWidth: "15rem"}}>
+                        <div className="row g-4" id={'project_logo'} style={{justifyContent:'center'}}>
+                            <div className="col-md-3">
+                                <div >
                                     <div className="text-center mb-4">
                                     <div className="card card-sm">
                                         <div className="card-body">
                                         <a href="." className="navbar-brand navbar-brand-autodark">
-                                            <img src="./assets/static/logomls.svg" height="50" alt="" /></a>
+                                            <img src="./assets/static/logomls.svg" height="100" alt="" /></a>
                                         </div>
                                     </div>
                                     </div>
@@ -180,31 +186,33 @@ export default function TokenGeneration(props) {
 
                     {centre !== null ?
                     <>
-                        <div className="row g-4" id={'centre_logo'}>
-                            <div className="col-lg">
-                                <div style={{maxWidth: "15rem"}}>
+                        <div className="row g-4" id={'centre_logo'} style={{justifyContent: 'center'}}>
+                            <div className="col-md-3">
+                                <div>
                                     <div className="text-center mb-4">
                                     <div className="card card-sm">
                                         <div className="card-body">
                                         <a href="#" className="navbar-brand navbar-brand-autodark">
-                                            <img src={`./storage/app/public/centres/logos/${centre?.image}`} height="50" alt="" /></a>
+                                            <img src={`./storage/app/public/centres/logos/${centre?.image}`} height="100" alt="" /></a>
                                         </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="row align-items-center g-4 mt-7" id={'choose_token'}>
-                            <div className="col-md-6 text-center">
-                                <button className="btn btn-lg" onClick={(e) => fetchToken(e, 'Medical')}>
-                                    <span className="mr-1"><IconCrosshair style={{width: "70px", height: "70px"}}/></span>
-                                    <span style={{fontSize: "xx-large"}}>{'Medical Registration'}</span>
+                        <div className="row align-items-center g-4" id={'choose_token_type'} style={{marginTop: '5rem', justifyContent: 'center'}}>
+                            <div className="col-md-12 text-center">
+                                <button className="btn btn-lg btn-primary" onClick={(e) => fetchToken(e, 'Medical')}>
+                                    <span className="mr-1"><IconCrosshair style={{width: "100px", height: "100px"}}/></span>
+                                    <span style={{fontSize: "100px"}}>{'Medical Registration'}</span>
                                 </button>
                             </div>
-                            <div className="col-md-6 text-center">
-                                <button className="btn btn-lg" onClick={(e) => fetchToken(e, 'Reporting')}>
-                                    <span><IconClipboardText style={{width: "70px", height: "70px"}}/></span>
-                                    <span style={{fontSize: "xx-large"}}>{'Report Collection'}</span>
+                        </div>
+                        <div className="row align-items-center g-4" id={'choose_token_type'} style={{marginTop: '5rem', justifyContent: 'center'}}>
+                            <div className="col-md-12 text-center">
+                                <button className="btn btn-lg btn-primary" onClick={(e) => fetchToken(e, 'Reporting')}>
+                                    <span><IconClipboardText style={{width: "100px", height: "100px"}}/></span>
+                                    <span style={{fontSize: "100px"}}>{'Report Collection'}</span>
                                 </button>
                             </div>
                         </div>
